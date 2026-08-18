@@ -10,6 +10,61 @@
 6. Select a main agent with `/agents` or `Ctrl+Option+A`, for example `Auto`.
 7. Ask the agent about the available tools and workflows.
 
+## Additional MCP servers
+
+Configure additional MCP servers in `~/.pi/agent/agent-suite/mcp-wrapper/config.json`. The following servers are recommended. The local executable paths in the source configuration are development-machine paths and must not be copied. Install each server by following its linked repository instructions, then configure the installed executable name or absolute path.
+
+- **Perplexity** — provides current web search and research through the Sonar API. Create a Perplexity API key and expose it to the Pi process as `PERPLEXITY_API_KEY`. The `npx -y server-perplexity-ask` command downloads and starts the server when needed.
+- **[Team MCP](https://github.com/n-r-w/team-mcp#installation)** — provides shared desks, topics, and messages for multi-agent coordination. Install it from a GitHub release, with `brew install n-r-w/homebrew-tap/team-mcp`, or from source as documented in the repository. Confirm that `team-mcp` is executable before enabling this entry. Configure `TEAM_MCP_MESSAGE_DIR` with a persistent absolute directory if collaboration data must survive operating-system temporary-directory cleanup.
+- **[Asteria](https://github.com/n-r-w/asteria#asteria-installation)** — provides symbolic code search through language servers. Install it from a GitHub release, with `brew install --cask n-r-w/homebrew-tap/asteria-mcp`, or from source as documented in the repository. Confirm that `asteria-mcp` is executable before enabling this entry. Asteria does not install language servers. Install the servers required for the languages you use and ensure their executables are in the `PATH` inherited by Pi. Asteria supports `gopls`, `typescript-language-server`, `marksman`, `basedpyright-langserver`, `clangd`, `phpactor`, and `rust-analyzer`; see [Language server installation](https://github.com/n-r-w/asteria#language-server-installation).
+
+Example `mcpServers` entries:
+
+```json
+{
+  "mcpServers": {
+    "websearch": {
+      "command": "npx",
+      "args": ["-y", "server-perplexity-ask"],
+      "onDemand": {
+        "name": "web-search-and-query",
+        "description": "Search the web and get answers to user questions"
+      }
+    },
+    "team": {
+      "type": "stdio",
+      "command": "team-mcp",
+      "env": {
+        "TEAM_MCP_MESSAGE_DIR": "/absolute/path/to/team-mcp-data"
+      },
+      "onDemand": {
+        "name": "team-collaboration-desk",
+        "description": "Common communication space between agents"
+      }
+    },
+    "asteria": {
+      "type": "stdio",
+      "command": "asteria-mcp",
+      "onDemand": {
+        "name": "asteria-symbolic-tools",
+        "description": "Symbolic code search through language servers"
+      }
+    }
+  }
+}
+```
+
+Use an absolute executable path in `command` when the executable is not in the `PATH` inherited by Pi. The MCP wrapper uses `command`, `env`, and other values literally; it does not expand `${VAR}` or `$env:VAR` placeholders.
+
+MCP server configuration registers tools, but each agent also has a tool allowlist. Add the generated MCP tool names to the `tools` field of every agent that must use them under `~/.pi/agent/agent-suite/agent-selection/agents`. For the server names in the example above, use:
+
+- `websearch_perplexity_ask` for Perplexity.
+- `team_*` for the main orchestrator. For subagents, prefer `team_topic_list`, `team_message_create`, `team_message_get`, `team_message_list`, and `team_save_message_to_file`; omitting desk and topic creation avoids coordination conflicts.
+- `asteria_*` for Asteria.
+- `activate_toolset` for agents that use any server configured with `onDemand`. Without this tool, the agent cannot activate the deferred MCP toolset.
+
+See the agent definitions in `agent/agent-suite/agent-selection/agents` for complete examples. Generated tool names depend on the MCP server key and tool name, so update the allowlists if you rename a server entry. Run `/mcp-refresh` after changing MCP server definitions to rebuild the tool catalog and reload Pi.
+
 ## Model alias recommendations
 
 Use models with reliable instruction following and tool calling for every agent alias. Keep comparable context-window sizes across the regular, complex, and critical tiers so that selecting a stronger tier does not reduce the amount of task context available.
