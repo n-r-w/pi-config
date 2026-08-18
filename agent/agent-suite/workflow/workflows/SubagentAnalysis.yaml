@@ -1,0 +1,163 @@
+description: Use for analytical or documentation tasks
+prompt: |-
+  Shared workflow goal: Perform analysis and produce evidence-backed conclusions autonomously.
+
+  Shared workflow rules:
+  1. Work autonomously. No user confirmation stages.
+  2. Follow KISS and YAGNI. Do not add content that does not support a conclusion, decision, or handoff.
+  3. Ground every conclusion in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
+  4. Stop immediately when new facts contradict plan or a blocker cannot be resolved without violating it.
+  5. Escalation: when a blocker requires user input, finish feasible work and report blocker in final report. Do not wait for user.
+
+stages:
+  - id: collect_facts
+    description: Collect facts without analysis
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Collect facts without analysis. Provide raw evidence base for subsequent analysis.
+
+      Subagents: if needed
+
+      Required work:
+      1. Identify relevant information sources.
+      2. Gather information: use appropriate subagents when needed.
+      3. Store raw facts and evidence without interpretation, conclusions, or recommendations.
+      4. Record source for each fact so it can be verified later.
+
+      Constraints: MUST NOT go deep into the problem. Only collect relevant RAW facts!
+    initial: true
+
+  - id: understand_problem
+    description: Understand problem, not solution
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Understand the problem being analyzed. NOT the way to solve it.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Study user request and collected facts.
+      2. Understand problem, audience, and scope boundaries.
+      3. Define open questions.
+      4. Sort out open questions: resolve what can be resolved from evidence, record the rest for escalation.
+
+      Constraints: MUST NOT discuss solution approaches or analysis methods. Only problem and domain understanding.
+
+  - id: create_analysis_plan
+    description: Create analysis plan
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Create analysis plan autonomously.
+
+      Subagents: if needed
+
+      Required work:
+      1. Draft analysis plan: questions to answer, methods, evidence sources, phases, verification criteria.
+      2. Ground plan in collected facts and problem understanding.
+      3. Apply KISS and YAGNI. Keep plan minimal.
+      4. When a blocker requiring user input is found, record it and plan around it.
+
+      Constraints: Plan defines HOW to analyze, not how to solve the problem.
+
+  - id: implement_analysis_plan
+    description: Execute analysis plan
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Execute approved analysis plan.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Execute each planned phase yourself. Do not delegate analysis to subagents.
+      2. Follow only approved plan and scope.
+      3. Collect and organize evidence produced by each phase.
+      4. When new evidence changes the plan, stop and return to planning.
+      5. When new evidence shows that problem understanding is wrong, return to understanding.
+
+  - id: verify_analysis
+    description: Verify analysis implementation
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Verify that analysis follows approved plan and conclusions are supported by evidence.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Verify every plan phase is completed.
+      2. Verify each conclusion is supported by collected evidence.
+      3. Check for gaps, contradictions, and unsupported assumptions.
+      4. When issues found in execution, return to execution.
+      5. When plan itself is flawed, return to planning.
+
+  - id: report_completion
+    description: Provide Final Report
+    model:
+      thinking: medium
+    triggers:
+      - type: local_knowledge_accumulation
+    prompt: |-
+      Goal: Provide final report
+
+      Subagents: forbidden
+
+      Provide final feedback in format:
+      1. Summary: brief overview of analysis done and conclusions
+      2. Findings: key findings
+      3. Evidence: supporting evidence for each conclusion
+      4. Conclusions
+      5. Open questions: anything user would need to confirm or revise
+      6. Assumptions and how they will be verified
+      7. Risks: any potential risks or issues that may arise
+      8. Blockers: issues that require user input or decisions. Escalate clearly.
+
+      If user requested changes, go back and rework
+    final: true
+
+transitions:
+  - from: collect_facts
+    to: understand_problem
+    type: advance
+  - from: understand_problem
+    to: create_analysis_plan
+    type: advance
+  - from: create_analysis_plan
+    to: implement_analysis_plan
+    type: advance
+  - from: implement_analysis_plan
+    to: verify_analysis
+    type: advance
+  - from: verify_analysis
+    to: report_completion
+    type: advance
+  - from: understand_problem
+    to: collect_facts
+    type: rework
+  - from: create_analysis_plan
+    to: understand_problem
+    type: rework
+  - from: implement_analysis_plan
+    to: create_analysis_plan
+    type: rework
+  - from: verify_analysis
+    to: implement_analysis_plan
+    type: rework
+  - from: report_completion
+    to: verify_analysis
+    type: rework
+  - from: implement_analysis_plan
+    to: understand_problem
+    type: rework
+  - from: verify_analysis
+    to: create_analysis_plan
+    type: rework
+  - from: report_completion
+    to: implement_analysis_plan
+    type: rework
+  - from: report_completion
+    to: collect_facts
+    type: rework

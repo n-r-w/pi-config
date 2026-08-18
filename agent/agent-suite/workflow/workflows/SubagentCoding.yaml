@@ -1,0 +1,212 @@
+description: Use for coding tasks
+prompt: |-
+  Shared workflow goal: Solve user's problem by writing code autonomously.
+
+  Shared workflow rules:
+  1. Work autonomously. No user confirmation stages.
+  2. Follow KISS and YAGNI. Do not add backward compatibility or fallback behavior without an explicit user requirement.
+  3. Do not silently choose a local workaround over a broader structural fix because workaround is faster, more local, or appears to remain within scope.
+  4. Ground decisions in evidence. Do not present an assumption as a fact.
+  5. Stop immediately when new facts contradict plan or a blocker cannot be resolved without violating it.
+  6. Escalation: when a blocker requires user input, finish feasible work and report blocker in final report. Do not wait for user.
+
+stages:
+  - id: collect_project_state
+    description: Collect Project State
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Collect project state with zero interaction and analyze.
+
+      Subagents: if needed
+
+      Collect current project state. Use appropriate subagents when needed. Collect issues for entire project, not only requested scope, to establish a baseline for detecting regressions:
+        1. Linting issues. Respect project-specific partial linting scopes such as `new-from-rev=origin/master` when configured
+        2. Testing issues
+        3. Build status
+        4. Test coverage
+    initial: true
+
+  - id: collect_facts
+    description: Collect facts
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Collect facts with zero interaction and analyze.
+
+      Subagents: if needed
+
+      Required work:
+      1. Identify relevant information sources
+      2. Gather Information: use appropriate subagents when needed
+
+      Constraints:
+      1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      2. NO code modifications.
+
+  - id: create_plan
+    description: Evaluate approaches and create plan
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Evaluate approaches and create plan autonomously.
+
+      Subagents: if needed
+
+      Planning rules:
+      1. Read relevant file contents before making decisions. Do not assume file contents.
+      2. Do not plan backward compatibility or fallback behavior without an explicit user requirement.
+      3. Analyze dependencies and potential effects on related components.
+      4. Identify open questions and uncertainties that require further research before planning.
+      5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
+      6. Include a final phase for independent verification.
+      7. Follow TDD when runtime behavior changes: RED before GREEN, followed by REFACTOR and cleanup.
+      8. Include cleanup of temporary code, workarounds, debugging artifacts, and other code slop introduced during implementation.
+
+      Subagents rules:
+      1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
+      2. Critically evaluate subagent's results, MUST NOT blindly trust them, as subagents can also make mistakes.
+
+      Plan breakdown:
+      1. Keep phases large enough to represent meaningful changes and small enough to remain manageable and understandable.
+      2. Define testing and verification for each phase.
+      3. When a phase cannot be tested independently, state why and define later phase that makes verification possible.
+
+      Required work:
+      1. Draft two or three possible approaches.
+      2. Evaluate each approach's complexity, maintainability, performance, risks, and trade-offs.
+      3. Use additional independent analyst perspectives when needed.
+      4. Select best approach from evidence.
+      5. Apply KISS and YAGNI. Revise approach when it contains unnecessary complexity.
+      6. Break selected approach into actionable phases.
+      7. TDD (RED-GREEN-REFACTOR) MUST be analyzed, justified, and explicitly documented in plan, even if it not required.
+      8. When a blocker requiring user input is found, record it and plan around it.
+
+      Constraints: NO code modifications.
+
+  - id: resolve_open_questions
+    description: Open Question Analysis
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Close all possible open questions
+
+      Subagents: if needed
+
+      Steps if open questions exist:
+      1. Categorize them by focus area, complexity, risk, and other dimensions that affect resolution.
+      2. Rank them by their effect on final result and associated risks.
+      3. Resolve factual questions through codebase, documentation, web resources, and other available evidence.
+      4. Do not replace missing answers with assumptions.
+      5. When a blocking question requires user input, do not wait. Record it for escalation in final report.
+
+      Constraints: NO code modifications.
+
+  - id: implement_plan
+    description: Implement and test plan
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Implement plan
+
+      Subagents: forbidden
+
+      Required work:
+      1. Execute each planned task yourself. Do not delegate implementation to subagents.
+      2. Execute only approved plan and scope.
+      3. When implementation reveals a structural problem or trade-off absent from plan, stop and return to planning.
+      4. Do not silently accept technical debt revealed after plan approval.
+      5. When approved plan contains an error or inefficient solution, stop and report it.
+      6. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor.
+      7. Do not include task, plan, or phase references in code comments.
+
+  - id: verify_implementation
+    description: Verify implementation
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Verify Implementation
+
+      Subagents: forbidden
+
+      Required work:
+      1. Run full test suite, linters and other project checks.
+      2. Confirm that implementation meets user request and approved plan.
+      3. Identify and address issues caused by implementation.
+      4. Identify temporary code, workarounds, debugging artifacts, and code slop introduced during implementation.
+      5. Return to implementation if issues are not resolved
+
+      Constraints: MUST NOT fix issues during this step, VERIFICATION ONLY.
+
+  - id: report_completion
+    description: Provide Final Report
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Provide final report
+
+      Subagents: forbidden
+
+      Provide final feedback in format:
+      1. Summary: brief overview of work done and results achieved
+      2. Design decisions: choices you made where spec was ambiguous
+      3. Deviations: places where you intentionally departed from spec, and why
+      4. Tradeoffs:  alternatives you considered and why you picked what you did
+      5. Open questions: anything user would need to confirm or revise
+      6. TODOs, FIXMEs, or technical debt introduced
+      7. Deprecations: features, functions, or components that were deprecated
+      8. Risks: any potential risks or issues that may arise
+      9. Blockers: issues that require user input or decisions. Escalate clearly.
+      10. Present Commit Message: present commit message for your changes in conventional commit format. Choose language based on project conventions. If no conventions exist, use English.
+
+      If user requested changes, go back and rework
+
+      Constraints: NO code modifications.
+    final: true
+
+transitions:
+  - from: collect_project_state
+    to: collect_facts
+    type: advance
+  - from: collect_facts
+    to: create_plan
+    type: advance
+  - from: create_plan
+    to: resolve_open_questions
+    type: advance
+  - from: resolve_open_questions
+    to: implement_plan
+    type: advance
+  - from: implement_plan
+    to: verify_implementation
+    type: advance
+  - from: verify_implementation
+    to: report_completion
+    type: advance
+  - from: collect_facts
+    to: collect_project_state
+    type: rework
+  - from: create_plan
+    to: collect_facts
+    type: rework
+  - from: resolve_open_questions
+    to: create_plan
+    type: rework
+  - from: implement_plan
+    to: resolve_open_questions
+    type: rework
+  - from: verify_implementation
+    to: implement_plan
+    type: rework
+  - from: report_completion
+    to: verify_implementation
+    type: rework
+  - from: implement_plan
+    to: create_plan
+    type: rework
+  - from: report_completion
+    to: implement_plan
+    type: rework
+  - from: report_completion
+    to: collect_project_state
+    type: rework

@@ -1,0 +1,27 @@
+{
+    "enabled": false,
+    "globalTokenLimit": 5000,
+    "localTokenLimit": 5000,
+    "primaryBranches": [
+        "main",
+        "master"
+    ],
+    "extraction": {
+        "model": {
+            "id": "extract",
+            "thinking": "medium"
+        }
+    },
+    "mergeLocal": {
+        "model": {
+            "id": "extract",
+            "thinking": "medium"
+        }
+    },
+    "mergeGlobal": {
+        "model": {
+            "id": "extract",
+            "thinking": "medium"
+        }
+    }
+}

@@ -1,0 +1,344 @@
+description: Use for coding tasks
+prompt: |-
+  Shared workflow goal: Solve user's problem by writing code.
+
+  Shared workflow rules:
+  1. Follow KISS and YAGNI. Do not add backward compatibility or fallback behavior without an explicit user requirement.
+  2. Do not silently choose a local workaround over a broader structural fix because workaround is faster, more local, or appears to remain within scope.
+  3. Stop immediately and report when new facts contradict approved plan or a blocker cannot be resolved without violating it.
+
+  User interview protocol:
+  1. Follow `<user_communication>`
+  2. Interview user relentlessly on every aspect until you reach a common understanding.
+  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture, trade-offs, or skipped phases.
+  4. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
+  5. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
+  6. Start with a root round covering problem and audience plus core behavior. Let answers determine next branch.
+  7. Ask 1-4 related questions per round. For each question, provide 2–4 concrete mutually exclusive options. Put recommended option first and label it `(Recommended)` only when there is evidence for a recommendation.
+  8. Prefix short question in each decision question with a specific header chip no longer than 12 characters.. Use an ASCII preview or option snippet when seeing choice makes decision easier.
+
+stages:
+  - id: collect_project_state
+    description: Collect Project State
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Collect project state with zero interaction and analyze.
+
+      Subagents rules:
+      1. Subagents are required
+      2. Your role delegation ONLY. ALL job MUST BE delegated to subagents.
+
+      Required work: Execute appropriate subagents to collect current project state. Collect issues for entire project, not only requested scope, to establish a baseline for detecting regressions:
+        1. Linting issues. Respect project-specific partial linting scopes such as `new-from-rev=origin/master` when configured
+        2. Testing issues
+        3. Build status
+        4. Test coverage
+    initial: true
+
+  - id: collect_facts
+    description: Collect facts
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Collect facts with zero interaction and analyze.
+
+      Subagents rules:
+      1. Subagents are required
+      2. Your role delegation ONLY. ALL job MUST BE delegated to subagents.
+      3. Exceptions: plans, specifications, and other design documents must be studied WITHOUT subagents.
+
+      Required work:
+      1. Identify relevant information sources
+      2. Gather Information: execute appropriate subagents to gather different evidence
+
+      Constraints:
+      1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      2. NO code modifications.
+
+  - id: align_problem
+    description: Align problem being solved with user's needs.
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Align problem being solved with user's needs.
+
+      Subagents rules: subagents forbidden
+
+      Required work:
+      1. Understand user's problem
+      2. Study provided materials, codebase, and documentation.
+      3. Define open questions.
+      4. Sort out open questions with user, do not leave them quietly without discussion.
+      5. Present how you understand task and which parts of the problem are being solved.
+      6. Ask clarifying questions when required for alignment.
+      7. Wait for explicit user confirmation that target outcome is understood correctly.
+
+      Constraints: NO code modifications.
+
+  - id: create_plan
+    description: Evaluate approaches and create plan
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Evaluate approaches and create plan
+
+      Subagents rules:
+      1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
+      2. Critically evaluate subagent's results, MUST NOT blindly trust them, as subagents can also make mistakes.
+
+      Planning rules:
+      1. Read relevant file contents before making decisions. Do not assume file contents.
+      2. Do not plan backward compatibility or fallback behavior without an explicit user requirement.
+      3. Analyze dependencies and potential effects on related components.
+      4. Identify open questions and uncertainties that require user input or further research before planning.
+      5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
+      6. Include a final phase for independent verification.
+      7. Follow TDD when runtime behavior changes: RED before GREEN, followed by REFACTOR and cleanup.
+      8. Include cleanup of temporary code, workarounds, debugging artifacts, and other code slop introduced during implementation.
+
+      Plan breakdown:
+      1. Keep phases large enough to represent meaningful changes and small enough to remain manageable and understandable.
+      2. Define testing and verification for each phase.
+      3. When a phase cannot be tested independently, state why and define later phase that makes verification possible.
+
+      Required work:
+      1. Draft two or three possible approaches.
+      2. Evaluate each approach's complexity, maintainability, performance, risks, and trade-offs.
+      3. Use additional independent analyst perspectives when needed.
+      4. Select best approach from evidence.
+      5. Apply KISS and YAGNI. Revise approach when it contains unnecessary complexity.
+      6. Break selected approach into actionable phases.
+      7. TDD (RED-GREEN-REFACTOR) MUST be analyzed, justified, and explicitly documented in plan, even if it not required.
+
+      Constraints: NO code modifications
+
+  - id: resolve_open_questions
+    description: Open Question Analysis
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Close all possible open questions
+
+      Subagents rules: use subagents if it helps
+
+      Steps if open questions exist:
+      1. Categorize them by focus area, complexity, risk, and other dimensions that affect resolution.
+      2. Rank them by their effect on final result and associated risks.
+      3. Resolve factual questions through codebase, documentation, web resources, and other available evidence.
+      4. Do not replace missing answers with assumptions.
+      5. Present unresolved questions that require user input. Do not proceed while a blocking question remains unresolved.
+
+  - id: confirm_plan
+    description: Plan Confirmation
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Get user confirmation of plan
+
+      Subagents rules: subagents forbidden
+
+      Required work:
+      1. Present problem and plan:
+        1) Present problem approved during `Align problem` stage and implementation plan.
+        2) Use concise, plain language and keep presentation within one screen when possible.
+        3) Explain every material trade-off. When an option introduces technical debt, state what becomes coupled, duplicated, obscured, harder to test, or harder to change later.
+      2. Obtain approval:
+        1) Wait for user to review plan and explicitly authorize implementation.
+        2) When user requests plan changes, return to Planning, revise plan, and present it again.
+        3) Do not start implementation before clear and explicit approval.
+        4) Approval requires an unambiguous statement such as "start implementation." Statements such as "we need to make it so that" or "the plan looks good" do not authorize implementation.
+        5) Approval in initial task request does not satisfy this stage.
+
+      Constraints: NO code modifications
+
+  - id: implement_plan
+    description: Implement plan
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Implement plan
+
+      Subagents rules:
+      1. Subagents are required
+      2. Your role is subagent's orchestration and verification
+      3. Critically evaluate subagent's verification results, MUST NOT blindly trust them, as subagents can also make mistakes.
+
+      Required work:
+      1. Choose most applicable subagent's to implement each planned task.
+      2. Execute only approved plan and scope.
+      3. When implementation reveals a structural problem or trade-off absent from plan, stop, update plan, and request user approval before continuing.
+      4. Do not silently accept technical debt revealed after plan approval.
+      5. When approved plan contains an error or inefficient solution, stop and report it.
+      6. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor.
+      7. Do not include task, plan, or phase references in code comments.
+
+  - id: verify_implementation
+    description: Verify implementation
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Verify Implementation
+
+      Subagents rules:
+      1. Subagents forbidden
+      2. If you need to fix implementation problems, return to implement_plan step
+
+      Required work:
+      1. Run full test suite, linters and other project checks.
+      2. Confirm that implementation meets user request and approved plan.
+      3. Identify and address issues caused by implementation.
+      4. Identify temporary code, workarounds, debugging artifacts, and code slop introduced during implementation.
+      5. Return to implementation if issues are not resolved
+
+      Constraints: MUST NOT fix issues during this step, VERIFICATION ONLY.
+
+  - id: acceptance_of_result
+    description: Acceptance of result by user
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Get user feedback on result of your work
+
+      Subagents rules: subagents forbidden
+
+      Required work:
+      1. Stop and present implementation results to user:
+          1) Full test suite, linters and other project checks results
+          2) Key changes you made
+          3) Any deviations from approved plan
+          4) Any decisions outside of approved plan
+      2. Wait for user feedback.
+      3. Advance to verification when user accepts results.
+      4. Return to implementation when user requests changes, then present updated results again.
+
+      Constraints: NO code modifications.
+
+  - id: deep_review
+    description: Deeply review implementation results
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Review implementation results for correctness, completeness, and quality
+
+      Subagents rules:
+      1. Subagents are required
+      2. Your role is subagent's orchestration and verification
+      3. Critically evaluate subagent's verification results, MUST NOT blindly trust them, as subagents can also make mistakes.
+
+      Choose appropriate review subagent(s):
+        1) Review subagent to verify that all user requirements and goals are met.
+        2) Subagent to examine edge cases, overengineering, and attempts to solve nonexistent or unlikely scenarios.
+        3) Subagent to identify safe simplification opportunities.
+        4) Subagent to identify code slop that can be removed.
+        5) Subagent to check that implementation introduced no new linting issues, testing issues, or build failures and did not reduce test coverage.
+
+      Constraints: NO code modifications.
+
+  - id: report_completion
+    description: Provide Final Report
+    triggers:
+      - type: local_knowledge_accumulation
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Provide final report
+
+      Subagents rules: subagents forbidden
+
+      Provide final feedback in format:
+      1. Summary: brief overview of work done and results achieved
+      2. Design decisions: choices you made where spec was ambiguous
+      3. Deviations: places where you intentionally departed from spec, and why
+      4. Tradeoffs:  alternatives you considered and why you picked what you did
+      5. Open questions: anything you'd want me to confirm or revise
+      6. TODOs, FIXMEs, or technical debt introduced
+      7. Deprecations: features, functions, or components that were deprecated
+      8. Risks: any potential risks or issues that may arise
+      9. Present Commit Message to User: present commit message for your changes in conventional commit format. Choose language based on project conventions. If no conventions exist, use English.
+
+      If user requested changes, go back and rework
+
+      Constraints: NO code modifications.
+    final: true
+
+transitions:
+  - from: collect_project_state
+    to: collect_facts
+    type: advance
+  - from: collect_facts
+    to: align_problem
+    type: advance
+  - from: align_problem
+    to: create_plan
+    type: advance
+  - from: create_plan
+    to: resolve_open_questions
+    type: advance
+  - from: resolve_open_questions
+    to: confirm_plan
+    type: advance
+  - from: confirm_plan
+    to: implement_plan
+    type: advance
+  - from: implement_plan
+    to: verify_implementation
+    type: advance
+  - from: verify_implementation
+    to: acceptance_of_result
+    type: advance
+  - from: acceptance_of_result
+    to: deep_review
+    type: advance
+  - from: deep_review
+    to: report_completion
+    type: advance
+
+  - from: collect_facts
+    to: collect_project_state
+    type: rework
+  - from: align_problem
+    to: collect_facts
+    type: rework
+  - from: create_plan
+    to: align_problem
+    type: rework
+  - from: resolve_open_questions
+    to: create_plan
+    type: rework
+  - from: confirm_plan
+    to: resolve_open_questions
+    type: rework
+  - from: implement_plan
+    to: confirm_plan
+    type: rework
+  - from: verify_implementation
+    to: implement_plan
+    type: rework
+  - from: acceptance_of_result
+    to: verify_implementation
+    type: rework
+  - from: deep_review
+    to: acceptance_of_result
+    type: rework
+  - from: report_completion
+    to: deep_review
+    type: rework
+  - from: confirm_plan
+    to: create_plan
+    type: rework
+  - from: implement_plan
+    to: create_plan
+    type: rework
+  - from: acceptance_of_result
+    to: implement_plan
+    type: rework
+  - from: deep_review
+    to: implement_plan
+    type: rework
+  - from: report_completion
+    to: implement_plan
+    type: rework
+  - from: report_completion
+    to: collect_project_state
+    type: rework

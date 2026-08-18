@@ -1,0 +1,28 @@
+{
+    "settings": {
+        "enabled": true,
+        "timeouts": {
+            "startupSeconds": 30,
+            "listToolsSeconds": 15,
+            "callSeconds": 120,
+            "maxTotalSeconds": 180
+        },
+        "widgetLineBudget": 3
+    },
+    "mcpServers": {
+        "fetch": {
+            "command": "uvx",
+            "args": [
+                "--with",
+                "mcp<2",
+                "mcp-server-fetch",
+                "--ignore-robots-txt",
+                "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            ],
+            "onDemand": {
+                "name": "web-fetch",
+                "description": "Retrieving web page content"
+            }
+        }
+    }
+}

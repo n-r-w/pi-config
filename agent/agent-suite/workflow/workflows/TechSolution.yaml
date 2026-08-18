@@ -1,0 +1,230 @@
+description: |-
+  Use for technical design before implementation of features, bug fixes, etc. Contains 3 phases: problem -> prd -> tech-solution. MUST NOT be used for coding/implementation itself.
+prompt: |-
+  Shared workflow goal: Produce a technical solution for a problem with minimal requirements and design work.
+
+  Shared rules:
+  1. Follow `brainstorming` skill and `<user_communication>` rules
+  2. Use `templates` and `anti-ambiguity` skills for artifacts.
+  3. Follow KISS and YAGNI. Add content only when it supports a decision, review, handoff, or material risk.
+  4. Ground claims in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
+  5. Treat Domain Glossary as terminology source of truth. Use its definitions in every artifact; define or update a term there before using a new or changed meaning elsewhere.
+  6. Complete content work before style or formatting polish.
+  7. Before completing each executed phase, apply `anti-ambiguity` skill and active `No Overspecification` rules to its output and affected artifacts.
+  8. Phase remains incomplete until its completion criteria and ambiguity review pass.
+
+  No Overspecification:
+  1. Keep output focused on what is essential for understanding and implementation.
+  2. Do not attempt to capture every edge case or implementation detail during design phase, because some assumptions will inevitably be wrong.
+  3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
+  4. Leave non-essential details to implementation phase.
+  5. KISS and YAGNI principles apply here as well.
+
+  Interview protocol:
+  1. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture, trade-offs, or skipped phases.
+  2. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
+  3. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
+  4. Start with a root round covering problem and audience plus core behavior. Let answers determine next branch.
+  5. Ask 1-4 related questions per round. For each question, provide 2–4 concrete mutually exclusive options. Put recommended option first and label it `(Recommended)` only when there is evidence for a recommendation.
+  6. Prefix short question in each decision question with a specific header chip no longer than 12 characters.. Use an ASCII preview or option snippet when seeing choice makes decision easier.
+
+  Output quality criteria:
+  1. Keep artifacts simple, self-contained, and free of unnecessary duplication.
+  2. Separate decisions from open questions.
+  3. Before phase completion, check every requirement in output against explicit user approval.
+
+  Constraints:
+  1. MUST NOT create or modify files without explicit user approval.
+  2. MUST NOT skip problem/prd/tech-solution phases without explicit user approval.
+
+stages:
+  - id: collect_facts
+    description: Collect facts
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Collect facts with zero interaction and analyze.
+
+      Subagents: required
+
+      Required work:
+      1. Identify relevant information sources
+      2. Gather Information: execute appropriate subagents to gather different evidence
+    initial: true
+
+  - id: define_problem
+    description: Create Problem Statement and Domain Glossary
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Understand user's problem
+
+      Subagents: forbidden
+
+      Output:
+        1. Problem Statement and Domain Glossary.
+        2. If user ask to save PRD to file, use {relevant name}_problem.md file name.
+
+      Required work:
+      1. Understand problem and audience.
+      2. Study provided materials, codebase, and documentation.
+      3. Define problem statement and domain glossary.
+      4. Record open questions.
+      5. Sort out open questions with user, do not leave them quietly without discussion.
+
+      Complete phase only when:
+      1. Problem statement and domain glossary are defined
+      2. No blocker remains
+      3. All open questions are discussed with the user.
+      4. Shared quality checks pass,
+      5. Problem statement and domain glossary have been presented, then explicitly approved by user in a separate decision question.
+
+      Constraints: At this stage, MUST NOT plan, discuss or define requirements, architecture, and technical solution. Only problem and domain area.
+
+  - id: problem_defined
+    description: Problem Statement and Domain Glossary defined
+    model:
+      thinking: medium
+    prompt: |-
+      Subagents: forbidden
+
+      If user asks to rework problem statement or domain glossary, return to `define_problem` stage.
+    final: true
+
+  - id: define_PRD
+    description: Create Critical Requirements
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Identify minimum set of critical requirements needed to solve problem
+
+      Output:
+        1. Light Product Requirements Document (Light PRD)
+        2. If user ask to save PRD to file, use {relevant name}_prd.md file name.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Identify minimum set of critical requirements needed to validate problem and solution.
+      2. Identify open questions.
+      3. Classify open questions as blockers or non-blockers:
+        1) Blockers must be resolved and converted to requirements
+        2) Non-blockers must be removed from Light PRD
+
+      Requirement approval protocol:
+      1. Final PRD must contain only requirements shown to and explicitly approved by user.
+      2. Do not invent or synthesize additional requirements. Discuss a proposed requirement with user before adding it.
+      3. When approval of any requirement is uncertain, omit it until explicit approval is obtained.
+
+      Complete this phase only when:
+      1. Critical requirements are defined
+      2. No blocker remains
+      3. Shared quality checks pass
+      4. Light PRD has been presented, then explicitly approved by user in a separate decision question
+
+      Constraints:
+        1. At this stage, MUST NOT discuss and define problem, domain glossary, and technical solution. Only requirements.
+        2. If problem statement or domain glossary is reworked, return to `define_problem` stage.
+        3. Strictly follow `No Overspecification` guidelines.
+
+  - id: PRD_defined
+    description: Light PRD defined
+    model:
+      thinking: medium
+    prompt: |-
+      Subagents: forbidden
+
+      If user asks to rework Light PRD, return to `define_PRD` stage.
+    final: true
+
+  - id: define_technical_solution
+    description: Create Technical Solution
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Create technical solution that meets critical requirements and solve problem
+
+      Subagents: forbidden
+
+      Output:
+        1. Technical Solution.
+        2. If user ask to save Technical Solution to file, use {relevant name}_solution.md file name.
+
+      Required work:
+      1. Define technical solution that meets critical requirements and is consistent with approved problem statement and domain glossary.
+
+      Complete this phase only when:
+      1. Technical solution is defined
+      2. No blocker remains
+      3. Shared quality checks pass
+      4. Technical solution has been presented, then explicitly approved by user in a separate decision question
+
+  - id: technical_solution_defined
+    description: Technical Solution defined
+    model:
+      thinking: medium
+    prompt: |-
+      Subagents: forbidden
+
+      If user asks to rework Technical Solution, return to `define_technical_solution` stage.
+    final: true
+
+transitions:
+  - from: collect_facts
+    to: define_problem
+    type: advance
+  - from: collect_facts
+    to: define_PRD
+    type: advance
+  - from: collect_facts
+    to: define_technical_solution
+    type: advance
+  - from: define_problem
+    to: problem_defined
+    type: advance
+  - from: define_problem
+    to: define_PRD
+    type: advance
+  - from: define_PRD
+    to: PRD_defined
+    type: advance
+  - from: define_PRD
+    to: define_technical_solution
+    type: advance
+  - from: define_technical_solution
+    to: technical_solution_defined
+    type: advance
+
+  - from: problem_defined
+    to: define_problem
+    type: rework
+  - from: define_PRD
+    to: collect_facts
+    type: rework
+  - from: PRD_defined
+    to: define_PRD
+    type: rework
+  - from: define_technical_solution
+    to: define_PRD
+    type: rework
+  - from: define_technical_solution
+    to: collect_facts
+    type: rework
+  - from: define_PRD
+    to: define_problem
+    type: rework
+  - from: PRD_defined
+    to: define_problem
+    type: rework
+  - from: define_technical_solution
+    to: define_problem
+    type: rework
+  - from: technical_solution_defined
+    to: define_technical_solution
+    type: rework
+  - from: technical_solution_defined
+    to: define_PRD
+    type: rework
+  - from: technical_solution_defined
+    to: define_problem
+    type: rework

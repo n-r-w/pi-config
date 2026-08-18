@@ -1,0 +1,244 @@
+description: Use for analyzing and merging/rebasing changes from different Git branches
+prompt: |-
+  Shared workflow goal: Perform merge/rebase while maintaining correct business logic.
+
+  Shared workflow rules:
+  1. Migrations from master have priority over migrations from current branch. When both branches contain same migration number, keep master migration number and assign next available number to current-branch migration.
+  2. Do not perform a commit, push, or merge operation without explicit user approval.
+  3. Do not modify code that was unchanged by merge without explicit user approval.
+
+stages:
+  - id: collect_facts
+    description: Collect facts
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Collect facts with zero interaction and analyze.
+
+      Subagents: required
+
+      Required work:
+      1. Identify branches to merge.
+      2. Gather Information: execute appropriate subagents to gather different evidence
+
+      Constraints: MUST NOT go deep into the problem. Only collect relevant RAW facts!
+    initial: true
+
+  - id: classify_changes
+    description: Classify conflicts and interacting changes
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Split affected code into right categories.
+
+      Subagents: required
+
+      Classify changes into:
+      1. Technical conflicts that do not affect code logic, such as import ordering or formatting differences.
+      2. Logical conflicts involving algorithms, business logic, or other behavior.
+      3. Changes that do not conflict textually but may break overall business logic when combined.
+
+      Support every classification with repository evidence.
+
+  - id: analyze_merge_request
+    description: Analyze merge request and affected branches
+    model:
+      id: analysis_regular
+    prompt: |-
+      1. Analyze user request.
+      2. Identify branches to merge.
+      3. Identify potential conflicts and affected code areas.
+      4. Resolve factual gaps from repository evidence. Do not replace missing answers with assumptions.
+
+  - id: align_problem
+    description: Align problem being solved with user's needs.
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Align problem being solved with user's needs.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Understand user's problem
+      2. Study provided materials, codebase, and documentation.
+      3. Define open questions.
+      4. Sort out open questions with user, do not leave them quietly without discussion.
+      5. Present how you understand task and which parts of the problem are being solved.
+      6. Ask clarifying questions when required for alignment.
+      7. Wait for explicit user confirmation that target outcome is understood correctly.
+
+  - id: create_plan
+    description: Evaluate approaches and create plan
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Evaluate approaches and create conflict resolution plan
+
+      Planning rules:
+      1. Read relevant file contents before making decisions. Do not assume file contents.
+      2. Do not plan backward compatibility or fallback behavior without an explicit user requirement.
+      3. Analyze dependencies and potential effects on related components.
+      4. Identify open questions and uncertainties that require user input or further research before planning.
+      5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
+      6. Include a final phase for independent verification.
+
+      Subagents rules:
+      1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
+      2. Critically evaluate subagent's results, MUST NOT blindly trust them, as subagents can also make mistakes.
+
+  - id: resolve_open_questions
+    description: Open Question Analysis
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Close all possible open questions
+
+      Subagents: if needed
+
+      Steps if open questions exist:
+      1. Categorize them by focus area, complexity, risk, and other dimensions that affect resolution.
+      2. Rank them by their effect on final result and associated risks.
+      3. Resolve factual questions through codebase, documentation, web resources, and other available evidence.
+      4. Do not replace missing answers with assumptions.
+      5. Present unresolved questions that require user input. Do not proceed while a blocking question remains unresolved.
+
+  - id: confirm_resolution_plan
+    description: Present conflict classification and obtain approval for resolution plan
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Get user confirmation of plan
+
+      Subagents: forbidden
+
+      Required work:
+      1. Present conflict classification and a plan for resolving each category.
+      2. Explain how plan preserves codebase's overall behavior and integrity.
+      3. Obtain explicit user approval for plan before resolving conflicts.
+      4. Obtain explicit user approval before any commit, push, or merge operation included in plan.
+      5. Return to conflict classification when user rejects classification or plan.
+
+  - id: resolve_conflicts
+    description: Resolve conflicts according to approved plan
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Resolve conflicts according to approved plan
+
+      Subagents: required
+
+      Required work:
+      1. Choose most applicable subagent's to implement each planned task.
+      2. Resolve technical conflicts first.
+      3. Resolve logical conflicts together with non-conflicting changes that may break overall business logic.
+      4. Apply migration priority rule from shared workflow rules.
+      5. Change only files and behavior covered by approved plan.
+      6. Do not perform a commit, push, or merge operation without explicit user approval.
+      7. Stop and return to classification when new evidence changes approved conflict model or resolution plan.
+
+  - id: validate_merge
+    description: Validate merged code and distinguish new failures from existing ones
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Validate that target business logic is not broken
+
+      Subagents: forbidden
+
+      Required work:
+      1. Ensure that merged code is functional and introduces no new errors.
+      2. Run tests, linting, and other project checks required for affected code.
+      3. Before fixing a failure found after merge, determine whether it was already present in either source branch.
+      4. Critically evaluate subagent's verification results, MUST NOT blindly trust them, as subagents can also make mistakes.
+      5. Do not modify code that was unchanged by merge without explicit user approval.
+      6. Return to conflict resolution when validation identifies a merge-caused issue.
+
+  - id: report_completion
+    description: Present validated result and commit message
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Provide final report
+
+      Subagents: forbidden
+
+      Required work:
+      1. Present resolved conflicts, validation evidence, remaining risks, and any unresolved issues.
+      2. Present a brief conventional commit message. Use project's language convention; use English when no convention exists.
+      3. Wait for user feedback. Return to conflict resolution when user requests changes.
+    final: true
+
+transitions:
+  - from: collect_facts
+    to: classify_changes
+    type: advance
+  - from: classify_changes
+    to: analyze_merge_request
+    type: advance
+  - from: analyze_merge_request
+    to: align_problem
+    type: advance
+  - from: align_problem
+    to: create_plan
+    type: advance
+  - from: create_plan
+    to: resolve_open_questions
+    type: advance
+  - from: resolve_open_questions
+    to: confirm_resolution_plan
+    type: advance
+  - from: confirm_resolution_plan
+    to: resolve_conflicts
+    type: advance
+  - from: resolve_conflicts
+    to: validate_merge
+    type: advance
+  - from: validate_merge
+    to: report_completion
+    type: advance
+  - from: analyze_merge_request
+    to: collect_facts
+    type: rework
+  - from: classify_changes
+    to: collect_facts
+    type: rework
+  - from: align_problem
+    to: classify_changes
+    type: rework
+  - from: create_plan
+    to: align_problem
+    type: rework
+  - from: resolve_open_questions
+    to: create_plan
+    type: rework
+  - from: confirm_resolution_plan
+    to: resolve_open_questions
+    type: rework
+  - from: resolve_conflicts
+    to: confirm_resolution_plan
+    type: rework
+  - from: validate_merge
+    to: resolve_conflicts
+    type: rework
+  - from: report_completion
+    to: validate_merge
+    type: rework
+  - from: confirm_resolution_plan
+    to: classify_changes
+    type: rework
+  - from: confirm_resolution_plan
+    to: create_plan
+    type: rework
+  - from: resolve_conflicts
+    to: classify_changes
+    type: rework
+  - from: resolve_conflicts
+    to: create_plan
+    type: rework
+  - from: report_completion
+    to: resolve_conflicts
+    type: rework
+  - from: report_completion
+    to: analyze_merge_request
+    type: rework

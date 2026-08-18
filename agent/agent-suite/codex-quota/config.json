@@ -1,0 +1,6 @@
+{
+  "enabled": false,
+  "refreshInterval": 60,
+  "retryAttempts": 10,
+  "retryInterval": 2
+}

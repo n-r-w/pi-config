@@ -1,0 +1,7 @@
+{
+    "enabled": true,
+    "model": {
+        "id": "subagent_query",
+        "thinking": "medium"
+    }
+}

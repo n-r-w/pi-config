@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "maxDepth": 2,
+  "query": {
+    "model": {
+      "id": "subagent_query",
+      "thinking": "medium"
+    }
+  }
+}

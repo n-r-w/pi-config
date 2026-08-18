@@ -1,0 +1,9 @@
+{
+    "enabled": true,
+    "showProvider": false,
+    "showModel": true,
+    "showThinkingLevel": true,
+    "showGitBranch": true,
+    "showAdditionalStatusLine": true,
+    "showApiCost": false
+}

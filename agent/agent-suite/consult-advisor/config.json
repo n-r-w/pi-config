@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "model": {
+    "id": "analysis_critical",
+    "thinking": "high"
+  }
+}

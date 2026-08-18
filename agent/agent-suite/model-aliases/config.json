@@ -1,0 +1,38 @@
+{
+    "coding_regular": {
+        "id": "openai-codex/gpt-5.6-luna"
+    },
+    "coding_complex": {
+        "id": "openai-codex/gpt-5.6-terra"
+    },
+    "coding_critical": {
+        "id": "openai-codex/gpt-5.6-sol"
+    },
+    "analysis_regular": {
+        "id": "openai-codex/gpt-5.6-terra"
+    },
+    "analysis_complex": {
+        "id": "openai-codex/gpt-5.6-sol"
+    },
+    "analysis_critical": {
+        "id": "openai-codex/gpt-5.6-sol"
+    },
+    "analysis_user": {
+        "id": "openai-codex/gpt-5.6-sol"
+    },
+    "regular_user": {
+        "id": "openai-codex/gpt-5.6-sol"
+    },
+    "simple_user": {
+        "id": "openai-codex/gpt-5.6-luna"
+    },
+    "summary": {
+        "id": "openai-codex/gpt-5.6-luna"
+    },
+    "extract": {
+        "id": "openai-codex/gpt-5.6-luna"
+    },
+    "subagent_query": {
+        "id": "openai-codex/gpt-5.6-luna"
+    }
+}

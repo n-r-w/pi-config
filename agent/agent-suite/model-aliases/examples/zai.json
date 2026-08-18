@@ -1,0 +1,38 @@
+{
+    "coding_regular": {
+        "id": "zai/glm-4.7"
+    },
+    "coding_complex": {
+        "id": "zai/glm-5.2"
+    },
+    "coding_critical": {
+        "id": "zai/glm-5.3"
+    },
+    "analysis_regular": {
+        "id": "zai/glm-4.7"
+    },
+    "analysis_complex": {
+        "id": "zai/glm-5.2"
+    },
+    "analysis_critical": {
+        "id": "zai/glm-5.3"
+    },
+    "analysis_user": {
+        "id": "zai/glm-5.3"
+    },
+    "regular_user": {
+        "id": "zai/glm-5.3"
+    },
+    "simple_user": {
+        "id": "zai/glm-4.7"
+    },
+    "summary": {
+        "id": "zai/glm-4.7"
+    },
+    "extract": {
+        "id": "zai/glm-5.2"
+    },
+    "subagent_query": {
+        "id": "zai/glm-5.2"
+    }
+}

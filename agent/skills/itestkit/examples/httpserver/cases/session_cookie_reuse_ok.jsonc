@@ -1,0 +1,47 @@
+{
+  "name": "session cookie reuse",
+  "steps": [
+    // Step 1: login stores Set-Cookie in the per-case CookieJar.
+    {
+      "id": "login",
+      "kind": "action",
+      "handler": "CallHTTP",
+      "request": {
+        "method": "POST",
+        "path": "/login",
+        "headers": { "Content-Type": "application/json" },
+        "body": {
+          "email": "admin@example.test",
+          "password": "correct-password"
+        }
+      }
+    },
+    // Step 2: use_cookies attaches cookies stored by the previous response.
+    {
+      "id": "me",
+      "kind": "action",
+      "handler": "CallHTTP",
+      "request": {
+        "method": "GET",
+        "path": "/me",
+        "use_cookies": true,
+        "capture_headers": ["Set-Cookie"]
+      }
+    }
+  ],
+  "assert": {
+    "code": "OK",
+    "response_from_step": "me",
+    "response": {
+      "status": 200,
+      "headers": {
+        "Set-Cookie": []
+      },
+      "body": {
+        "user_id": "user-1",
+        "email": "admin@example.test",
+        "authenticated": true
+      }
+    }
+  }
+}

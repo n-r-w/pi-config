@@ -1,0 +1,96 @@
+description: Use for critical analysis by a subagent without direct user-alignment stages
+prompt: |-
+  1. Evaluate proposed solution against its end goal, global context, and verified codebase evidence.
+  2. Use SubAgentExtractor only for fact extraction.
+  3. Classify findings as Misconceptions, Ambiguities, Overengineering, or Overspecification.
+  4. Use consult_advisor for a second opinion before finalizing critique.
+stages:
+  - id: analyze_solution
+    description: Analyze proposed solution and context
+    prompt: |-
+      1. Identify proposed solution, boundaries, intended behavior, and supplied evidence.
+      2. Separate verified facts from assumptions and unresolved questions.
+    initial: true
+
+  - id: determine_goal
+    description: Determine end goal and target outcome
+    prompt: |-
+      1. Determine problem being solved, end goal, and target outcome.
+      2. Identify hidden assumptions or constraints that materially change evaluation.
+
+  - id: inspect_codebase
+    description: Evaluate solution against real codebase
+    prompt: |-
+      1. Inspect relevant code, architecture, behavior, constraints, and project conventions.
+      2. Identify claims or designs that lack sufficient code understanding.
+      3. Verify that local changes fit global strategy.
+
+  - id: identify_findings
+    description: Identify material issues and improvement opportunities
+    prompt: |-
+      1. Identify errors, missing information, unnecessary complexity, premature detail, risks, and maintainability problems.
+      2. Reject unsupported scenarios and temporary workarounds.
+      3. Support each finding with evidence and a realistic occurrence scenario.
+
+  - id: classify_findings
+    description: Classify and deduplicate findings
+    prompt: |-
+      Classify every finding into exactly one category:
+      1. Misconceptions: errors in expectations, requirements, task understanding, logic, architecture, or established facts.
+      2. Ambiguities: missing, incomplete, or materially unclear information or requirements.
+      3. Overengineering: unnecessary complexity or abstractions, including solutions for unlikely or nonexistent scenarios.
+      4. Overspecification: details that can be deferred without reducing required clarity or functionality.
+
+      Keep categories separate and remove duplicate findings.
+
+  - id: verify_results
+    description: Verify findings and obtain a second opinion
+    prompt: |-
+      1. Verify every finding against code or another primary source.
+      2. Assess realism and likelihood of every reported scenario.
+      3. Use consult_advisor for a second opinion.
+      4. Return to codebase inspection when verification identifies a material gap or error.
+
+  - id: report_critique
+    description: Deliver structured critical analysis
+    triggers:
+      - type: local_knowledge_accumulation
+    prompt: |-
+      Use this structure:
+      1. Brief summary of solution, goal, and context.
+      2. Separate sections for Misconceptions, Ambiguities, Overengineering, and Overspecification.
+      3. For each finding include: ID and summary; location; issue; impact; occurrence scenario; realism and probability; recommendation; verification method.
+      4. Include every category even when it has no findings.
+      5. Deliver result through active collaboration channel.
+      6. Return to codebase inspection when parent feedback requires material changes.
+    final: true
+
+transitions:
+  - from: analyze_solution
+    to: determine_goal
+    type: advance
+  - from: determine_goal
+    to: inspect_codebase
+    type: advance
+  - from: inspect_codebase
+    to: identify_findings
+    type: advance
+  - from: identify_findings
+    to: classify_findings
+    type: advance
+  - from: classify_findings
+    to: verify_results
+    type: advance
+  - from: verify_results
+    to: report_critique
+    type: advance
+
+  - from: verify_results
+    to: inspect_codebase
+    type: rework
+  - from: report_critique
+    to: inspect_codebase
+    type: rework
+  - from: report_critique
+    to: analyze_solution
+    type: rework

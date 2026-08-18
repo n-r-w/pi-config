@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "projectionRemainingTokensL1": 70000,
+  "minToolResultTokensL1": 4000,
+  "projectionRemainingTokensL2": 50000,
+  "minToolResultTokensL2": 3000,
+  "projectionRemainingTokensL3": 30000,
+  "minToolResultTokensL3": 2000,
+  "keepRecentTurns": 10,
+  "keepRecentTurnsPercent": 0.05,
+  "summary": {
+    "enabled": true,
+    "model": {
+      "id": "summary",
+      "thinking": "low"
+    },
+    "maxConcurrency": 4,
+    "retryCount": 5,
+    "retryDelayMs": 5000
+  }
+}

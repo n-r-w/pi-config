@@ -1,0 +1,31 @@
+{
+  "enabled": true,
+  "llm1": {
+    "model": {
+      "id": "analysis_critical",
+      "thinking": "high"
+    }
+  },
+  "llm2": {
+    "model": {
+      "id": "analysis_critical",
+      "thinking": "high"
+    }
+  },
+  "participantIterationLimit": 10,
+  "finalAnswerParticipant": "llm2",
+  "responseDefectRetries": 5,
+  "tools": [
+    "read",
+    "grep",
+    "bash",
+    "find",
+    "ls",
+    "fetch_fetch",
+    "perplexity_perplexity_ask",
+    "asteria_*",
+    "team_topic_list",
+    "team_message_get",
+    "team_message_list"
+  ]
+}

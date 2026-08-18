@@ -1,0 +1,4 @@
+/agent/outdated
+.DS_Store
+/agent/agent-suite/agent-selection/state
+/agent/agent-suite/mcp-wrapper/cache.json

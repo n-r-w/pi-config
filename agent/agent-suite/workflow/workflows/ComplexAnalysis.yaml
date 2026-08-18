@@ -1,0 +1,170 @@
+description: Use for complex analytical tasks that require structured fact collection and evidence-backed conclusions. NOT for simple and direct tasks.
+prompt: |-
+  Shared workflow goal: Perform analysis and produce evidence-backed conclusions.
+
+  Shared workflow rules:
+  1. Follow KISS and YAGNI. Do not add content that does not support a conclusion, decision, or handoff.
+  2. Ground every conclusion in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
+  3. Stop immediately and report when new facts contradict approved plan or a blocker cannot be resolved without violating it.
+
+  User interview protocol:
+  1. Follow <user_communication>.
+  2. Interview user relentlessly on every aspect until you reach a common understanding.
+  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, or conclusions.
+  4. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
+  5. Cover these dimensions when they affect requested output: problem and audience; scope boundaries; edge cases and failures.
+  6. Start with a root round covering problem and audience. Let answers determine next branch.
+  7. Ask 1-4 related questions per round. For each question, provide 2–4 concrete mutually exclusive options. Put recommended option first and label it `(Recommended)` only when there is evidence for a recommendation.
+  8. Prefix short question in each decision question with a specific header chip no longer than 12 characters.
+
+stages:
+  - id: collect_facts
+    description: Collect facts without analysis
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Collect facts without analysis. Provide raw evidence base for subsequent analysis.
+
+      Subagents: required
+
+      Required work:
+      1. Identify relevant information sources.
+      2. Gather information: execute appropriate subagents to gather different evidence.
+      3. Store raw facts and evidence without interpretation, conclusions, or recommendations.
+      4. Record source for each fact so it can be verified later.
+
+      Constraints: MUST NOT go deep into the problem. Only collect relevant RAW facts!
+    initial: true
+
+  - id: understand_problem
+    description: Understand problem, not solution
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Understand the problem being analyzed. NOT the way to solve it.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Study user request and collected facts.
+      2. Understand problem, audience, and scope boundaries.
+      3. Define open questions.
+      4. Sort out open questions with user, do not leave them quietly without discussion.
+      5. Present how you understand the problem and which parts are being analyzed.
+      6. Wait for explicit user confirmation that problem understanding is correct.
+
+      Constraints: MUST NOT discuss solution approaches or analysis methods. Only problem and domain understanding.
+
+  - id: confirm_analysis_plan
+    description: Agree analysis plan
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Get user approval of analysis plan.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Draft analysis plan: questions to answer, methods, evidence sources, phases, verification criteria.
+      2. Present plan in concise plain language.
+      3. Explain every material trade-off.
+      4. Wait for explicit user approval before starting analysis.
+      5. When user requests plan changes, revise plan and present it again.
+      6. When plan reveals that problem understanding is wrong, return to understanding.
+
+      Constraints: Plan defines HOW to analyze, not how to solve the problem. Approval requires an unambiguous statement from user.
+
+  - id: implement_analysis_plan
+    description: Execute analysis plan
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Execute approved analysis plan.
+
+      Subagents: required
+
+      Required work:
+      1. Execute each planned phase using appropriate subagents.
+      2. Follow only approved plan and scope.
+      3. Critically evaluate subagent results. MUST NOT blindly trust them, as subagents can also make mistakes.
+      4. Collect and organize evidence produced by each phase.
+      5. When new evidence changes the plan, stop, update plan, and request user approval.
+      6. When new evidence shows that problem understanding is wrong, return to understanding.
+
+  - id: verify_analysis
+    description: Verify analysis implementation
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Verify that analysis follows approved plan and conclusions are supported by evidence.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Verify every plan phase is completed.
+      2. Verify each conclusion is supported by collected evidence.
+      3. Check for gaps, contradictions, and unsupported assumptions.
+      4. When issues found in execution, return to execution.
+      5. When plan itself is flawed, update plan and request approval.
+
+  - id: confirm_results
+    description: Agree results with user
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Get user feedback on analysis results.
+
+      Subagents: forbidden
+
+      Required work:
+      1. Present analysis results: Summary; Findings; Evidence; Conclusions; Open questions; Assumptions and how they will be verified; Risks.
+      2. Wait for user feedback.
+      3. Discuss results with user.
+      4. When user requests changes, return to execution.
+      5. When user accepts results, complete.
+    final: true
+
+transitions:
+  - from: collect_facts
+    to: understand_problem
+    type: advance
+  - from: understand_problem
+    to: confirm_analysis_plan
+    type: advance
+  - from: confirm_analysis_plan
+    to: implement_analysis_plan
+    type: advance
+  - from: implement_analysis_plan
+    to: verify_analysis
+    type: advance
+  - from: verify_analysis
+    to: confirm_results
+    type: advance
+
+  - from: understand_problem
+    to: collect_facts
+    type: rework
+  - from: confirm_analysis_plan
+    to: understand_problem
+    type: rework
+  - from: implement_analysis_plan
+    to: confirm_analysis_plan
+    type: rework
+  - from: verify_analysis
+    to: implement_analysis_plan
+    type: rework
+  - from: confirm_results
+    to: verify_analysis
+    type: rework
+  - from: implement_analysis_plan
+    to: understand_problem
+    type: rework
+  - from: verify_analysis
+    to: confirm_analysis_plan
+    type: rework
+  - from: confirm_results
+    to: implement_analysis_plan
+    type: rework
+  - from: confirm_results
+    to: collect_facts
+    type: rework
