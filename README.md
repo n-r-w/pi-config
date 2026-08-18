@@ -4,7 +4,7 @@
 
 1. Install [pi agent](https://pi.dev/)
 2. Copy the contents of this repository's `agent` directory to `~/.pi/agent`.
-3. Configure `~/.pi/agent/agent-suite/model-aliases/config.json` for the models you use. By default, the configuration uses `openai-codex/gpt-5.6-xxx` models. See [Model alias recommendations](#model-alias-recommendations).
+3. Configure `~/.pi/agent/agent-suite/model-aliases/config.json` for the models you use. By default, the configuration uses `openai-codex/gpt-5.6-xxx` models. The `agent/agent-suite/model-aliases/examples/zai.json` file provides an example configuration for a GLM Coding Plan subscription (requires ZAI_API_KEY env var). See [Model alias recommendations](#model-alias-recommendations).
 4. Install [pi-agent-suite](https://github.com/n-r-w/pi-agent-suite) by running `pi install npm:pi-agent-suite`.
 5. Run `pi`.
 6. Select a main agent with `/agents` or `Ctrl+Option+A`, for example `Auto`.
