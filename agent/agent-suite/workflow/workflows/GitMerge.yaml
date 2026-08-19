@@ -18,8 +18,8 @@ stages:
       Subagents: required
 
       Required work:
-      1. Identify branches to merge.
-      2. Gather Information: execute appropriate subagents to gather different evidence
+      1. Independently (without subagents) determine branches to merge.
+      2. Use subagents to collect information about changes in branches, conflicts, etc.
 
       Constraints: MUST NOT go deep into the problem. Only collect relevant RAW facts!
     initial: true

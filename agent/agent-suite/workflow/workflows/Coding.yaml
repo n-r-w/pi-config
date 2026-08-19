@@ -44,9 +44,8 @@ stages:
       Goal: Collect facts with zero interaction and analyze.
 
       Subagents rules:
-      1. Subagents are required
-      2. Your role delegation ONLY. ALL job MUST BE delegated to subagents.
-      3. Exceptions: plans, specifications, and other design documents must be studied WITHOUT subagents.
+      1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
+      2. Use subagents to collect additional information on codebase or logically related non-primary resources.
 
       Required work:
       1. Identify relevant information sources

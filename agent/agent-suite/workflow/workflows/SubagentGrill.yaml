@@ -1,7 +1,7 @@
 description: Use for critical analysis by a subagent without direct user-alignment stages
 prompt: |-
   1. Evaluate proposed solution against its end goal, global context, and verified codebase evidence.
-  2. Use SubAgentExtractor only for fact extraction.
+  2. Use SubAgentExtractor only for fact extraction and YandexExtractor only for Yandex source extraction.
   3. Classify findings as Misconceptions, Ambiguities, Overengineering, or Overspecification.
   4. Use consult_advisor for a second opinion before finalizing critique.
 stages:

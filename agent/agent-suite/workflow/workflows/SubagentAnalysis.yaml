@@ -17,7 +17,9 @@ stages:
     prompt: |-
       Goal: Collect facts without analysis. Provide raw evidence base for subsequent analysis.
 
-      Subagents: if needed
+      Subagents rules:
+      1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
+      2. Use subagents to collect additional information on codebase or logically related non-primary resources.
 
       Required work:
       1. Identify relevant information sources.
