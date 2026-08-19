@@ -23,7 +23,7 @@ stages:
     model:
       thinking: low
     prompt: |-
-      Goal: Collect project state with zero interaction and analyze.
+      Goal: Establish project baseline for regression detection.
 
       Subagents rules:
       1. Subagents are required
@@ -41,7 +41,7 @@ stages:
     model:
       thinking: low
     prompt: |-
-      Goal: Collect facts with zero interaction and analyze.
+      Goal: Build evidence base for problem and requirements alignment.
 
       Subagents rules:
       1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
@@ -50,6 +50,9 @@ stages:
       Required work:
       1. Identify relevant information sources
       2. Gather Information: execute appropriate subagents to gather different evidence
+
+      Rework rules:
+      1. Return to `collect_project_state` when collected evidence shows project baseline is incomplete or stale.
 
       Constraints:
       1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
@@ -60,18 +63,52 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Align problem being solved with user's needs.
+      Goal: Establish shared understanding of problem and target outcome.
 
       Subagents rules: subagents forbidden
 
       Required work:
       1. Understand user's problem
-      2. Study provided materials, codebase, and documentation.
-      3. Define open questions.
-      4. Sort out open questions with user, do not leave them quietly without discussion.
-      5. Present how you understand task and which parts of the problem are being solved.
-      6. Ask clarifying questions when required for alignment.
-      7. Wait for explicit user confirmation that target outcome is understood correctly.
+      2. Study provided materials, codebase, and documentation
+      3. Define open questions
+      4. Sort out open questions with user, do not leave them quietly without discussion
+      5. Present how you understand task and which parts of problem are being solved
+      6. Ask clarifying questions when required for alignment
+      7. Wait for explicit user confirmation that target outcome is understood correctly
+
+      Rework rules:
+      1. Return to `collect_facts` when alignment requires missing repository or domain evidence.
+
+      Constraints: NO code modifications.
+
+  - id: align_requirements
+    description: Align requirements with user's needs
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Establish minimum critical requirements for solving problem.
+
+      Subagents rules:
+      1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
+      2. Critically evaluate subagent's results, MUST NOT blindly trust them, as subagents can also make mistakes.
+
+      Required work:
+      1. Identify minimum set of critical requirements needed to solve problem
+      2. Identify open questions.
+      3. Classify open questions as blockers or non-blockers:
+        1) Blockers must be resolved and converted to requirements
+        2) Non-blockers must be removed from requirements
+
+      Rework rules:
+      1. Return to `align_problem` when requirements reveal misunderstood problem or target outcome.
+      2. Return to `collect_facts` when evidence is insufficient to define or classify critical requirements.
+
+      No Overspecification:
+      1. Keep output focused on what is essential for understanding and implementation.
+      2. Do not attempt to capture every edge case or implementation detail during design phase, because some assumptions will inevitably be wrong.
+      3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
+      4. Leave non-essential details to implementation phase.
+      5. KISS and YAGNI principles apply here as well.
 
       Constraints: NO code modifications.
 
@@ -80,7 +117,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Evaluate approaches and create plan
+      Goal: Produce evidence-based actionable implementation plan.
 
       Subagents rules:
       1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
@@ -92,14 +129,22 @@ stages:
       3. Analyze dependencies and potential effects on related components.
       4. Identify open questions and uncertainties that require user input or further research before planning.
       5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
-      6. Include a final phase for independent verification.
-      7. Follow TDD when runtime behavior changes: RED before GREEN, followed by REFACTOR and cleanup.
-      8. Include cleanup of temporary code, workarounds, debugging artifacts, and other code slop introduced during implementation.
 
-      Plan breakdown:
-      1. Keep phases large enough to represent meaningful changes and small enough to remain manageable and understandable.
-      2. Define testing and verification for each phase.
-      3. When a phase cannot be tested independently, state why and define later phase that makes verification possible.
+      Rework rules:
+      1. Return to `align_requirements` when approach evaluation reveals missing or incorrect critical requirements.
+      2. Return to `align_problem` when approach evaluation reveals misunderstood problem or target outcome.
+      3. Return to `collect_facts` when evidence is insufficient to evaluate approaches or dependencies.
+
+      Break work into vertical slices:
+      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) — vertical, NOT a horizontal slice of one layer
+      2. A completed slice is demoable or verifiable on its own
+      3. Each slice is sized to fit in a single fresh context window
+      4. Any prefactoring should be done first
+      5. Follow TDD principles if possible: RED -> GREEN -> REFACTOR. Slices should preserve testability whenever practical.
+      6. Keep slices meaningful, testable, and easy to review. Avoid slices that are so small they add process overhead or so large they hide risk.
+      7. Combine setup and verification work when separating them would leave system in a hard-to-test or misleading intermediate state.
+      8. Include final cleanup step that removes temporary code, workarounds, debugging artifacts, and other implementation residue.
+      9. Critical risk: trying to make every slices testable can easily lead to inventing unnecessary logic and tests that will not provide real value when looking at task as a whole.
 
       Required work:
       1. Draft two or three possible approaches.
@@ -107,7 +152,7 @@ stages:
       3. Use additional independent analyst perspectives when needed.
       4. Select best approach from evidence.
       5. Apply KISS and YAGNI. Revise approach when it contains unnecessary complexity.
-      6. Break selected approach into actionable phases.
+      6. Break selected approach into actionable slices.
       7. TDD (RED-GREEN-REFACTOR) MUST be analyzed, justified, and explicitly documented in plan, even if it not required.
 
       Constraints: NO code modifications
@@ -117,7 +162,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Close all possible open questions
+      Goal: Reach planning state with no unresolved blocking questions.
 
       Subagents rules: use subagents if it helps
 
@@ -128,26 +173,32 @@ stages:
       4. Do not replace missing answers with assumptions.
       5. Present unresolved questions that require user input. Do not proceed while a blocking question remains unresolved.
 
+      Rework rules:
+      1. Return to `create_plan` when resolved answers require plan revision.
+
   - id: confirm_plan
     description: Plan Confirmation
     model:
       thinking: high
     prompt: |-
-      Goal: Get user confirmation of plan
+      Goal: Obtain explicitly approved implementation plan.
 
       Subagents rules: subagents forbidden
 
       Required work:
       1. Present problem and plan:
-        1) Present problem approved during `Align problem` stage and implementation plan.
-        2) Use concise, plain language and keep presentation within one screen when possible.
-        3) Explain every material trade-off. When an option introduces technical debt, state what becomes coupled, duplicated, obscured, harder to test, or harder to change later.
+        1) Present problem approved during `Align problem` stage and implementation plan
+        2) Use concise, plain language and keep presentation within one screen when possible
+        3) Explain every material trade-off. When an option introduces technical debt, state what becomes coupled, duplicated, obscured, harder to test, or harder to change later
       2. Obtain approval:
-        1) Wait for user to review plan and explicitly authorize implementation.
-        2) When user requests plan changes, return to Planning, revise plan, and present it again.
-        3) Do not start implementation before clear and explicit approval.
-        4) Approval requires an unambiguous statement such as "start implementation." Statements such as "we need to make it so that" or "the plan looks good" do not authorize implementation.
-        5) Approval in initial task request does not satisfy this stage.
+        1) Wait for user to review plan and explicitly authorize implementation
+        2) Do not start implementation before clear and explicit approval
+        3) Approval requires an unambiguous statement such as "start implementation." Statements such as "we need to make it so that" or "the plan looks good" do not authorize implementation
+        4) Approval in initial task request does not satisfy this stage
+
+      Rework rules:
+      1. Return to `create_plan` when user requests plan changes. Revise plan and present it again.
+      2. Return to `resolve_open_questions` when plan review reveals unresolved blocking question.
 
       Constraints: NO code modifications
 
@@ -156,39 +207,44 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Implement plan
+      Goal: Produce implementation matching approved plan.
 
       Subagents rules:
       1. Subagents are required
       2. Your role is subagent's orchestration and verification
-      3. Critically evaluate subagent's verification results, MUST NOT blindly trust them, as subagents can also make mistakes.
+      3. Execute one imdependent subagent per planned slice
+      4. Critically evaluate subagent's verification results, MUST NOT blindly trust them, as subagents can also make mistakes
 
       Required work:
-      1. Choose most applicable subagent's to implement each planned task.
-      2. Execute only approved plan and scope.
-      3. When implementation reveals a structural problem or trade-off absent from plan, stop, update plan, and request user approval before continuing.
-      4. Do not silently accept technical debt revealed after plan approval.
-      5. When approved plan contains an error or inefficient solution, stop and report it.
-      6. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor.
-      7. Do not include task, plan, or phase references in code comments.
+      1. Choose most applicable subagent's to implement each planned task
+      2. Execute only approved plan and scope
+      3. Do not silently accept technical debt revealed after plan approval
+      4. When approved plan contains an error or inefficient solution, stop and report it
+      5. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor
+      6. Do not include task, plan, or phase/slice references in code comments
+
+      Rework rules:
+      1. Return to `create_plan` when implementation reveals structural problem or trade-off absent from plan.
+      2. Return to `confirm_plan` when implementation can continue only after renewed approval of updated plan.
 
   - id: verify_implementation
     description: Verify implementation
     model:
       thinking: medium
     prompt: |-
-      Goal: Verify Implementation
+      Goal: Establish evidence that implementation matches user request and approved plan without regressions or residue.
 
       Subagents rules:
       1. Subagents forbidden
-      2. If you need to fix implementation problems, return to implement_plan step
 
       Required work:
       1. Run full test suite, linters and other project checks.
       2. Confirm that implementation meets user request and approved plan.
       3. Identify and address issues caused by implementation.
       4. Identify temporary code, workarounds, debugging artifacts, and code slop introduced during implementation.
-      5. Return to implementation if issues are not resolved
+
+      Rework rules:
+      1. Return to `implement_plan` when implementation problems or unresolved issues require changes.
 
       Constraints: MUST NOT fix issues during this step, VERIFICATION ONLY.
 
@@ -197,7 +253,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Get user feedback on result of your work
+      Goal: Obtain user acceptance of implementation result.
 
       Subagents rules: subagents forbidden
 
@@ -208,8 +264,11 @@ stages:
           3) Any deviations from approved plan
           4) Any decisions outside of approved plan
       2. Wait for user feedback.
-      3. Advance to verification when user accepts results.
-      4. Return to implementation when user requests changes, then present updated results again.
+      3. Complete stage when user accepts results.
+
+      Rework rules:
+      1. Return to `verify_implementation` when user requests renewed verification without implementation changes.
+      2. Return to `implement_plan` when user requests implementation changes, then present updated results again.
 
       Constraints: NO code modifications.
 
@@ -218,7 +277,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Review implementation results for correctness, completeness, and quality
+      Goal: Establish independent evidence of implementation correctness, completeness, quality, and regression safety.
 
       Subagents rules:
       1. Subagents are required
@@ -232,6 +291,10 @@ stages:
         4) Subagent to identify code slop that can be removed.
         5) Subagent to check that implementation introduced no new linting issues, testing issues, or build failures and did not reduce test coverage.
 
+      Rework rules:
+      1. Return to `acceptance_of_result` when review changes result information that requires renewed user acceptance.
+      2. Return to `implement_plan` when review finds implementation defect or required cleanup.
+
       Constraints: NO code modifications.
 
   - id: report_completion
@@ -241,7 +304,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Provide final report
+      Goal: Provide complete final record of delivered result.
 
       Subagents rules: subagents forbidden
 
@@ -256,7 +319,10 @@ stages:
       8. Risks: any potential risks or issues that may arise
       9. Present Commit Message to User: present commit message for your changes in conventional commit format. Choose language based on project conventions. If no conventions exist, use English.
 
-      If user requested changes, go back and rework
+      Rework rules:
+      1. Return to `deep_review` when final report reveals incomplete review evidence.
+      2. Return to `implement_plan` when user requests implementation changes.
+      3. Return to `collect_project_state` when work must restart with refreshed project baseline.
 
       Constraints: NO code modifications.
     final: true
@@ -269,6 +335,9 @@ transitions:
     to: align_problem
     type: advance
   - from: align_problem
+    to: align_requirements
+    type: advance
+  - from: align_requirements
     to: create_plan
     type: advance
   - from: create_plan
@@ -299,8 +368,20 @@ transitions:
   - from: align_problem
     to: collect_facts
     type: rework
+  - from: align_requirements
+    to: align_problem
+    type: rework
+  - from: align_requirements
+    to: collect_facts
+    type: rework
+  - from: create_plan
+    to: align_requirements
+    type: rework
   - from: create_plan
     to: align_problem
+    type: rework
+  - from: create_plan
+    to: collect_facts
     type: rework
   - from: resolve_open_questions
     to: create_plan

@@ -16,7 +16,7 @@ stages:
     model:
       thinking: low
     prompt: |-
-      Goal: Collect project state with zero interaction and analyze.
+      Goal: Establish project baseline for regression detection.
 
       Subagents: if needed
 
@@ -32,15 +32,16 @@ stages:
     model:
       thinking: low
     prompt: |-
-      Goal: Collect facts with zero interaction and analyze.
+      Goal: Build evidence base for implementation planning.
 
-      Subagents rules:
-      1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
-      2. Use subagents to collect additional information on codebase or logically related non-primary resources.
+      Subagents: if needed
 
       Required work:
       1. Identify relevant information sources
       2. Gather Information: use appropriate subagents when needed
+
+      Rework rules:
+      1. Return to `collect_project_state` when collected evidence shows project baseline is incomplete or stale.
 
       Constraints:
       1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
@@ -51,7 +52,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Evaluate approaches and create plan autonomously.
+      Goal: Produce minimal evidence-based actionable implementation plan.
 
       Subagents: if needed
 
@@ -61,18 +62,16 @@ stages:
       3. Analyze dependencies and potential effects on related components.
       4. Identify open questions and uncertainties that require further research before planning.
       5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
-      6. Include a final phase for independent verification.
-      7. Follow TDD when runtime behavior changes: RED before GREEN, followed by REFACTOR and cleanup.
-      8. Include cleanup of temporary code, workarounds, debugging artifacts, and other code slop introduced during implementation.
 
-      Subagents rules:
-      1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
-      2. Critically evaluate subagent's results, MUST NOT blindly trust them, as subagents can also make mistakes.
-
-      Plan breakdown:
-      1. Keep phases large enough to represent meaningful changes and small enough to remain manageable and understandable.
-      2. Define testing and verification for each phase.
-      3. When a phase cannot be tested independently, state why and define later phase that makes verification possible.
+      Break work into vertical slices:
+      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) — vertical, NOT a horizontal slice of one layer
+      2. A completed slice is demoable or verifiable on its own
+      3. Any prefactoring should be done first
+      4. Follow TDD principles if possible: RED -> GREEN -> REFACTOR. Slices should preserve testability whenever practical.
+      5 Keep slices meaningful, testable, and easy to review. Avoid slices that are so small they add process overhead or so large they hide risk.
+      6. Combine setup and verification work when separating them would leave system in a hard-to-test or misleading intermediate state.
+      7. Include final cleanup step that removes temporary code, workarounds, debugging artifacts, and other implementation residue.
+      8. Critical risk: trying to make every slices testable can easily lead to inventing unnecessary logic and tests that will not provide real value when looking at task as a whole.
 
       Required work:
       1. Draft two or three possible approaches.
@@ -80,9 +79,12 @@ stages:
       3. Use additional independent analyst perspectives when needed.
       4. Select best approach from evidence.
       5. Apply KISS and YAGNI. Revise approach when it contains unnecessary complexity.
-      6. Break selected approach into actionable phases.
+      6. Break selected approach into actionable slices.
       7. TDD (RED-GREEN-REFACTOR) MUST be analyzed, justified, and explicitly documented in plan, even if it not required.
       8. When a blocker requiring user input is found, record it and plan around it.
+
+      Rework rules:
+      1. Return to `collect_facts` when evidence is insufficient to evaluate approaches or dependencies.
 
       Constraints: NO code modifications.
 
@@ -91,7 +93,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Close all possible open questions
+      Goal: Reach implementation-ready state with no unresolved answerable blockers.
 
       Subagents: if needed
 
@@ -102,6 +104,9 @@ stages:
       4. Do not replace missing answers with assumptions.
       5. When a blocking question requires user input, do not wait. Record it for escalation in final report.
 
+      Rework rules:
+      1. Return to `create_plan` when resolved answers require plan revision.
+
       Constraints: NO code modifications.
 
   - id: implement_plan
@@ -109,25 +114,28 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Implement plan
+      Goal: Produce implementation matching planned scope and behavior.
 
       Subagents: forbidden
 
       Required work:
-      1. Execute each planned task yourself. Do not delegate implementation to subagents.
+      1. Execute each planned task yourself.
       2. Execute only approved plan and scope.
-      3. When implementation reveals a structural problem or trade-off absent from plan, stop and return to planning.
-      4. Do not silently accept technical debt revealed after plan approval.
-      5. When approved plan contains an error or inefficient solution, stop and report it.
-      6. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor.
-      7. Do not include task, plan, or phase references in code comments.
+      3. Do not silently accept technical debt revealed after plan approval.
+      4. When approved plan contains an error or inefficient solution, stop and report it.
+      5. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor.
+      6. Do not include task, plan, or phase/slice references in code comments.
+
+      Rework rules:
+      1. Return to `create_plan` when implementation reveals structural problem or trade-off absent from plan.
+      2. Return to `resolve_open_questions` when implementation reveals unresolved factual blocker that can be investigated autonomously.
 
   - id: verify_implementation
     description: Verify implementation
     model:
       thinking: medium
     prompt: |-
-      Goal: Verify Implementation
+      Goal: Establish evidence that implementation matches user request and plan without regressions or residue.
 
       Subagents: forbidden
 
@@ -136,7 +144,9 @@ stages:
       2. Confirm that implementation meets user request and approved plan.
       3. Identify and address issues caused by implementation.
       4. Identify temporary code, workarounds, debugging artifacts, and code slop introduced during implementation.
-      5. Return to implementation if issues are not resolved
+
+      Rework rules:
+      1. Return to `implement_plan` when issues remain unresolved.
 
       Constraints: MUST NOT fix issues during this step, VERIFICATION ONLY.
 
@@ -145,7 +155,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Provide final report
+      Goal: Provide complete final record of delivered result, evidence, risks, and blockers.
 
       Subagents: forbidden
 
@@ -161,7 +171,10 @@ stages:
       9. Blockers: issues that require user input or decisions. Escalate clearly.
       10. Present Commit Message: present commit message for your changes in conventional commit format. Choose language based on project conventions. If no conventions exist, use English.
 
-      If user requested changes, go back and rework
+      Rework rules:
+      1. Return to `verify_implementation` when final review reveals verification gap without implementation changes.
+      2. Return to `implement_plan` when final review reveals implementation defect or required cleanup.
+      3. Return to `collect_project_state` when final review requires refreshed project baseline.
 
       Constraints: NO code modifications.
     final: true

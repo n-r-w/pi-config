@@ -43,7 +43,7 @@ stages:
     model:
       thinking: low
     prompt: |-
-      Goal: Collect facts with zero interaction and analyze.
+      Goal: Build evidence base for problem definition and technical design.
 
       Subagents rules:
       1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
@@ -59,7 +59,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Understand user's problem
+      Goal: Obtain approved Problem Statement and Domain Glossary with no unresolved blockers.
 
       Subagents: forbidden
 
@@ -73,6 +73,9 @@ stages:
       3. Define problem statement and domain glossary.
       4. Record open questions.
       5. Sort out open questions with user, do not leave them quietly without discussion.
+
+      Rework rules:
+      1. Return to `collect_facts` when missing evidence blocks problem or terminology definition.
 
       Complete phase only when:
       1. Problem statement and domain glossary are defined
@@ -88,9 +91,12 @@ stages:
     model:
       thinking: medium
     prompt: |-
+      Goal: Problem Statement and Domain Glossary remain approved and ready for requirements design.
+
       Subagents: forbidden
 
-      If user asks to rework problem statement or domain glossary, return to `define_problem` stage.
+      Rework rules:
+      1. Return to `define_problem` when user asks to rework Problem Statement or Domain Glossary.
     final: true
 
   - id: define_PRD
@@ -98,7 +104,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Identify minimum set of critical requirements needed to solve problem
+      Goal: Obtain approved Light PRD containing minimum critical requirements for solving problem.
 
       Output:
         1. Light Product Requirements Document (Light PRD)
@@ -124,19 +130,26 @@ stages:
       3. Shared quality checks pass
       4. Light PRD has been presented, then explicitly approved by user in a separate decision question
 
+      Rework rules:
+      1. Return to `collect_facts` when missing evidence blocks requirement definition.
+      2. Return to `define_problem` when requirement work reveals incorrect or reworked Problem Statement or Domain Glossary.
+
       Constraints:
         1. At this stage, MUST NOT discuss and define problem, domain glossary, and technical solution. Only requirements.
-        2. If problem statement or domain glossary is reworked, return to `define_problem` stage.
-        3. Strictly follow `No Overspecification` guidelines.
+        2. Strictly follow `No Overspecification` guidelines.
 
   - id: PRD_defined
     description: Light PRD defined
     model:
       thinking: medium
     prompt: |-
+      Goal: Light PRD remains approved and ready for technical design.
+
       Subagents: forbidden
 
-      If user asks to rework Light PRD, return to `define_PRD` stage.
+      Rework rules:
+      1. Return to `define_PRD` when user asks to rework Light PRD.
+      2. Return to `define_problem` when feedback changes approved Problem Statement or Domain Glossary.
     final: true
 
   - id: define_technical_solution
@@ -144,7 +157,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Create technical solution that meets critical requirements and solve problem
+      Goal: Obtain approved Technical Solution that meets critical requirements and solves problem.
 
       Subagents: forbidden
 
@@ -154,6 +167,11 @@ stages:
 
       Required work:
       1. Define technical solution that meets critical requirements and is consistent with approved problem statement and domain glossary.
+
+      Rework rules:
+      1. Return to `define_PRD` when solution design reveals missing, ambiguous, or unsatisfied critical requirement.
+      2. Return to `collect_facts` when technical decision lacks required evidence.
+      3. Return to `define_problem` when solution design reveals incorrect Problem Statement or Domain Glossary.
 
       Complete this phase only when:
       1. Technical solution is defined
@@ -166,9 +184,14 @@ stages:
     model:
       thinking: medium
     prompt: |-
+      Goal: Technical Solution remains approved and ready for implementation handoff.
+
       Subagents: forbidden
 
-      If user asks to rework Technical Solution, return to `define_technical_solution` stage.
+      Rework rules:
+      1. Return to `define_technical_solution` when user asks to rework Technical Solution.
+      2. Return to `define_PRD` when feedback changes approved critical requirements.
+      3. Return to `define_problem` when feedback changes approved Problem Statement or Domain Glossary.
     final: true
 
 transitions:
@@ -197,6 +220,9 @@ transitions:
     to: technical_solution_defined
     type: advance
 
+  - from: define_problem
+    to: collect_facts
+    type: rework
   - from: problem_defined
     to: define_problem
     type: rework

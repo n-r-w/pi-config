@@ -15,7 +15,7 @@ stages:
     model:
       thinking: low
     prompt: |-
-      Goal: Collect facts without analysis. Provide raw evidence base for subsequent analysis.
+      Goal: Build traceable raw evidence base for subsequent analysis.
 
       Subagents rules:
       1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
@@ -35,7 +35,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Understand the problem being analyzed. NOT the way to solve it.
+      Goal: Establish evidence-backed understanding of problem, audience, and scope boundaries.
 
       Subagents: forbidden
 
@@ -45,6 +45,9 @@ stages:
       3. Define open questions.
       4. Sort out open questions: resolve what can be resolved from evidence, record the rest for escalation.
 
+      Rework rules:
+      1. Return to `collect_facts` when problem understanding requires missing evidence.
+
       Constraints: MUST NOT discuss solution approaches or analysis methods. Only problem and domain understanding.
 
   - id: create_analysis_plan
@@ -52,7 +55,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Create analysis plan autonomously.
+      Goal: Produce minimal evidence-based analysis plan with explicit verification criteria.
 
       Subagents: if needed
 
@@ -62,6 +65,9 @@ stages:
       3. Apply KISS and YAGNI. Keep plan minimal.
       4. When a blocker requiring user input is found, record it and plan around it.
 
+      Rework rules:
+      1. Return to `understand_problem` when planning reveals misunderstood problem or scope.
+
       Constraints: Plan defines HOW to analyze, not how to solve the problem.
 
   - id: implement_analysis_plan
@@ -69,7 +75,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Execute approved analysis plan.
+      Goal: Produce organized evidence and conclusions according to analysis plan.
 
       Subagents: forbidden
 
@@ -77,15 +83,17 @@ stages:
       1. Execute each planned phase yourself. Do not delegate analysis to subagents.
       2. Follow only approved plan and scope.
       3. Collect and organize evidence produced by each phase.
-      4. When new evidence changes the plan, stop and return to planning.
-      5. When new evidence shows that problem understanding is wrong, return to understanding.
+
+      Rework rules:
+      1. Return to `create_analysis_plan` when new evidence changes plan.
+      2. Return to `understand_problem` when new evidence shows incorrect problem understanding.
 
   - id: verify_analysis
     description: Verify analysis implementation
     model:
       thinking: medium
     prompt: |-
-      Goal: Verify that analysis follows approved plan and conclusions are supported by evidence.
+      Goal: Establish evidence of analysis completeness, plan conformance, and conclusion support.
 
       Subagents: forbidden
 
@@ -93,8 +101,10 @@ stages:
       1. Verify every plan phase is completed.
       2. Verify each conclusion is supported by collected evidence.
       3. Check for gaps, contradictions, and unsupported assumptions.
-      4. When issues found in execution, return to execution.
-      5. When plan itself is flawed, return to planning.
+
+      Rework rules:
+      1. Return to `implement_analysis_plan` when execution has unresolved issues.
+      2. Return to `create_analysis_plan` when plan is flawed.
 
   - id: report_completion
     description: Provide Final Report
@@ -103,7 +113,7 @@ stages:
     triggers:
       - type: local_knowledge_accumulation
     prompt: |-
-      Goal: Provide final report
+      Goal: Provide complete final record of analysis results, evidence, risks, and blockers.
 
       Subagents: forbidden
 
@@ -117,7 +127,10 @@ stages:
       7. Risks: any potential risks or issues that may arise
       8. Blockers: issues that require user input or decisions. Escalate clearly.
 
-      If user requested changes, go back and rework
+      Rework rules:
+      1. Return to `verify_analysis` when final review reveals unsupported conclusion or verification gap.
+      2. Return to `implement_analysis_plan` when requested changes require additional analysis execution.
+      3. Return to `collect_facts` when requested changes require missing source evidence.
     final: true
 
 transitions:

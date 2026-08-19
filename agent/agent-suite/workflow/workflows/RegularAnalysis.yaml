@@ -12,7 +12,7 @@ stages:
   - id: define_scope
     description: Define inspection scope
     prompt: |-
-      Goal: Defined inspection scope with permitted areas and excluded artifacts
+      Goal: Establish explicit inspection scope with permitted and excluded artifacts.
 
       Required work:
       1. Determine files, changes, modules, or repository areas.
@@ -23,43 +23,55 @@ stages:
   - id: load_rules
     description: Load inspection rules
     prompt: |-
-      Goal: Loaded rules and defined criteria for valid finding
+      Goal: Establish applicable inspection rules and criteria for valid findings.
 
       Required work:
       1. Load every relevant skill and project rules.
       2. Identify patterns, invariants, and exclusions that define a valid finding.
 
+      Rework rules:
+      1. Return to `define_scope` when loaded rules show inspection scope is invalid or incomplete.
+
   - id: inspect_artifacts
     description: Inspect code and technical artifacts
     prompt: |-
-      Goal: Evidence base with candidate findings and source locations
+      Goal: Build evidence base of candidate findings with source locations.
 
       Required work:
       1. Inspect permitted scope systematically.
       2. Record evidence and source locations for candidate findings.
 
+      Rework rules:
+      1. Return to `load_rules` when inspected artifacts require additional project or domain rules.
+
   - id: verify_findings
     description: Verify findings are valid and material
     prompt: |-
-      Goal: Validated list of material findings ready for report
+      Goal: Produce evidence-backed set of material in-scope findings.
 
       Required work:
       1. Verify each candidate against project behavior, rules, and context.
       2. Remove duplicate, speculative, insignificant, or out-of-scope findings.
-      3. Return to inspection when evidence is incomplete.
+
+      Rework rules:
+      1. Return to `inspect_artifacts` when evidence is incomplete.
 
   - id: report_findings
     description: Deliver findings using required format
     triggers:
       - type: local_knowledge_accumulation
     prompt: |-
-      Goal: Delivered report with permitted findings, evidence, impact, and recommendations
+      Goal: Deliver required report with findings, evidence, impact, and recommendations.
 
       Required work:
       1. Report only findings permitted by scope rules.
       2. Include required source locations, evidence, impact, and recommendations.
       3. Deliver result through required channel.
-      4. Return to inspection when parent feedback requires additional analysis.
+
+      Rework rules:
+      1. Return to `inspect_artifacts` when parent feedback requires additional analysis.
+      2. Return to `verify_findings` when feedback requires revalidation without additional inspection.
+      3. Return to `define_scope` when feedback changes permitted inspection scope.
     final: true
 
 transitions:

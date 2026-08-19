@@ -23,7 +23,7 @@ stages:
     model:
       thinking: low
     prompt: |-
-      Goal: Collect facts without analysis. Provide raw evidence base for subsequent analysis.
+      Goal: Build traceable raw evidence base for subsequent analysis.
 
       Subagents rules:
       1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
@@ -43,7 +43,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Understand the problem being analyzed. NOT the way to solve it.
+      Goal: Establish shared understanding of problem, audience, and scope boundaries.
 
       Subagents: forbidden
 
@@ -55,6 +55,9 @@ stages:
       5. Present how you understand the problem and which parts are being analyzed.
       6. Wait for explicit user confirmation that problem understanding is correct.
 
+      Rework rules:
+      1. Return to `collect_facts` when problem understanding requires missing evidence.
+
       Constraints: MUST NOT discuss solution approaches or analysis methods. Only problem and domain understanding.
 
   - id: confirm_analysis_plan
@@ -62,7 +65,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Get user approval of analysis plan.
+      Goal: Obtain explicitly approved analysis plan.
 
       Subagents: forbidden
 
@@ -72,7 +75,9 @@ stages:
       3. Explain every material trade-off.
       4. Wait for explicit user approval before starting analysis.
       5. When user requests plan changes, revise plan and present it again.
-      6. When plan reveals that problem understanding is wrong, return to understanding.
+
+      Rework rules:
+      1. Return to `understand_problem` when plan reveals incorrect problem understanding.
 
       Constraints: Plan defines HOW to analyze, not how to solve the problem. Approval requires an unambiguous statement from user.
 
@@ -81,7 +86,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Execute approved analysis plan.
+      Goal: Produce organized evidence and findings according to approved analysis plan.
 
       Subagents: required
 
@@ -90,15 +95,17 @@ stages:
       2. Follow only approved plan and scope.
       3. Critically evaluate subagent results. MUST NOT blindly trust them, as subagents can also make mistakes.
       4. Collect and organize evidence produced by each phase.
-      5. When new evidence changes the plan, stop, update plan, and request user approval.
-      6. When new evidence shows that problem understanding is wrong, return to understanding.
+
+      Rework rules:
+      1. Return to `confirm_analysis_plan` when new evidence requires plan revision and renewed approval.
+      2. Return to `understand_problem` when new evidence shows incorrect problem understanding.
 
   - id: verify_analysis
     description: Verify analysis implementation
     model:
       thinking: medium
     prompt: |-
-      Goal: Verify that analysis follows approved plan and conclusions are supported by evidence.
+      Goal: Establish evidence of analysis completeness, plan conformance, and conclusion support.
 
       Subagents: forbidden
 
@@ -106,15 +113,17 @@ stages:
       1. Verify every plan phase is completed.
       2. Verify each conclusion is supported by collected evidence.
       3. Check for gaps, contradictions, and unsupported assumptions.
-      4. When issues found in execution, return to execution.
-      5. When plan itself is flawed, update plan and request approval.
+
+      Rework rules:
+      1. Return to `implement_analysis_plan` when execution has unresolved issues.
+      2. Return to `confirm_analysis_plan` when plan is flawed and requires revision and renewed approval.
 
   - id: confirm_results
     description: Agree results with user
     model:
       thinking: high
     prompt: |-
-      Goal: Get user feedback on analysis results.
+      Goal: Obtain user acceptance of analysis results.
 
       Subagents: forbidden
 
@@ -122,8 +131,12 @@ stages:
       1. Present analysis results: Summary; Findings; Evidence; Conclusions; Open questions; Assumptions and how they will be verified; Risks.
       2. Wait for user feedback.
       3. Discuss results with user.
-      4. When user requests changes, return to execution.
-      5. When user accepts results, complete.
+      4. When user accepts results, complete.
+
+      Rework rules:
+      1. Return to `implement_analysis_plan` when user requests analysis changes.
+      2. Return to `verify_analysis` when feedback requires renewed validation without additional analysis execution.
+      3. Return to `collect_facts` when feedback reveals missing source evidence.
     final: true
 
 transitions:

@@ -8,6 +8,8 @@ stages:
   - id: analyze_solution
     description: Analyze proposed solution and context
     prompt: |-
+      Goal: Establish evidence-backed model of proposed solution, boundaries, intended behavior, and assumptions.
+
       1. Identify proposed solution, boundaries, intended behavior, and supplied evidence.
       2. Separate verified facts from assumptions and unresolved questions.
     initial: true
@@ -15,26 +17,43 @@ stages:
   - id: determine_goal
     description: Determine end goal and target outcome
     prompt: |-
+      Goal: Establish end goal, target outcome, and material constraints.
+
       1. Determine problem being solved, end goal, and target outcome.
       2. Identify hidden assumptions or constraints that materially change evaluation.
+
+      Rework rules:
+      1. Return to `analyze_solution` when available context is insufficient to determine goal.
 
   - id: inspect_codebase
     description: Evaluate solution against real codebase
     prompt: |-
+      Goal: Build codebase evidence for evaluating solution fit.
+
       1. Inspect relevant code, architecture, behavior, constraints, and project conventions.
       2. Identify claims or designs that lack sufficient code understanding.
       3. Verify that local changes fit global strategy.
 
+      Rework rules:
+      1. Return to `analyze_solution` when codebase evidence contradicts understood solution or its boundaries.
+
   - id: identify_findings
     description: Identify material issues and improvement opportunities
     prompt: |-
+      Goal: Produce evidence-backed set of material critique findings.
+
       1. Identify errors, missing information, unnecessary complexity, premature detail, risks, and maintainability problems.
       2. Reject unsupported scenarios and temporary workarounds.
       3. Support each finding with evidence and a realistic occurrence scenario.
 
+      Rework rules:
+      1. Return to `inspect_codebase` when a candidate finding lacks sufficient evidence.
+
   - id: classify_findings
     description: Classify and deduplicate findings
     prompt: |-
+      Goal: Produce deduplicated findings classified into required categories.
+
       Classify every finding into exactly one category:
       1. Misconceptions: errors in expectations, requirements, task understanding, logic, architecture, or established facts.
       2. Ambiguities: missing, incomplete, or materially unclear information or requirements.
@@ -43,26 +62,38 @@ stages:
 
       Keep categories separate and remove duplicate findings.
 
+      Rework rules:
+      1. Return to `identify_findings` when a finding cannot be assigned to exactly one category without revision.
+
   - id: verify_results
     description: Verify findings and obtain a second opinion
     prompt: |-
+      Goal: Establish primary-source support, realism, and independent second opinion for every finding.
+
       1. Verify every finding against code or another primary source.
       2. Assess realism and likelihood of every reported scenario.
       3. Use consult_advisor for a second opinion.
-      4. Return to codebase inspection when verification identifies a material gap or error.
+
+      Rework rules:
+      1. Return to `inspect_codebase` when verification identifies a material gap or error.
 
   - id: report_critique
     description: Deliver structured critical analysis
     triggers:
       - type: local_knowledge_accumulation
     prompt: |-
+      Goal: Deliver structured evidence-backed critique through active collaboration channel.
+
       Use this structure:
       1. Brief summary of solution, goal, and context.
       2. Separate sections for Misconceptions, Ambiguities, Overengineering, and Overspecification.
       3. For each finding include: ID and summary; location; issue; impact; occurrence scenario; realism and probability; recommendation; verification method.
       4. Include every category even when it has no findings.
       5. Deliver result through active collaboration channel.
-      6. Return to codebase inspection when parent feedback requires material changes.
+
+      Rework rules:
+      1. Return to `inspect_codebase` when parent feedback requires material changes.
+      2. Return to `analyze_solution` when parent feedback changes proposed solution, context, or evaluation boundaries.
     final: true
 
 transitions:
@@ -85,6 +116,18 @@ transitions:
     to: report_critique
     type: advance
 
+  - from: determine_goal
+    to: analyze_solution
+    type: rework
+  - from: inspect_codebase
+    to: analyze_solution
+    type: rework
+  - from: identify_findings
+    to: inspect_codebase
+    type: rework
+  - from: classify_findings
+    to: identify_findings
+    type: rework
   - from: verify_results
     to: inspect_codebase
     type: rework

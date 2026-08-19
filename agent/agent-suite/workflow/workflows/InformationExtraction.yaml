@@ -8,6 +8,8 @@ stages:
   - id: define_target
     description: Define requested extraction result
     prompt: |-
+      Goal: Establish unambiguous extraction target, scope, destination, and output shape.
+
       1. Identify exact information requested, required scope, output destination, and output shape.
       2. Identify exclusions and interpretation limits imposed by active extractor.
       3. Record unresolved ambiguities that can change extraction target.
@@ -15,31 +17,50 @@ stages:
   - id: identify_sources
     description: Identify relevant source locations
     prompt: |-
+      Goal: Establish bounded source set sufficient for requested extraction.
+
       1. Identify direct and indirect sources that may contain requested information.
       2. Select sources using active extractor's source-specific rules and tools.
       3. Avoid sources outside requested scope.
+
+      Rework rules:
+      1. Return to `define_target` when available sources reveal ambiguous or unattainable extraction target.
   - id: retrieve_content
     description: Retrieve requested source content
     prompt: |-
+      Goal: Build traceable collection of requested source content.
+
       1. Use targeted tools or commands to retrieve required content.
       2. Preserve source references, identifiers, values, and evidence.
       3. Process documents, attachments, and images according to active extractor's rules.
       4. Store temporary resources only in global temporary directory.
+
+      Rework rules:
+      1. Return to `identify_sources` when selected sources are unavailable or insufficient.
   - id: verify_extraction
     description: Verify relevance and completeness
     prompt: |-
+      Goal: Establish extraction relevance, completeness, and source integrity.
+
       1. Verify that extracted content directly addresses request.
       2. Remove unsupported, duplicate, empty, or out-of-scope content according to active extractor rules.
       3. Identify missing information, retrieval errors, and unresolved source gaps.
-      4. Return to source identification when additional sources are required.
+
+      Rework rules:
+      1. Return to `identify_sources` when additional sources are required.
   - id: compile_result
     description: Compile and deliver extraction result
     prompt: |-
+      Goal: Deliver extraction result in required shape with preserved evidence.
+
       1. Compile result using active extractor's required structure and level of detail.
       2. Preserve required evidence and source references.
       3. Include only permitted interpretation, decisions, and open questions.
       4. Deliver result through requested output or active collaboration channel.
-      5. Return to content retrieval when feedback identifies missing source material.
+
+      Rework rules:
+      1. Return to `retrieve_content` when feedback identifies missing source material.
+      2. Return to `define_target` when feedback changes extraction scope, destination, or output shape.
     final: true
 transitions:
   - from: define_target
@@ -55,6 +76,12 @@ transitions:
     to: compile_result
     type: advance
 
+  - from: identify_sources
+    to: define_target
+    type: rework
+  - from: retrieve_content
+    to: identify_sources
+    type: rework
   - from: verify_extraction
     to: identify_sources
     type: rework

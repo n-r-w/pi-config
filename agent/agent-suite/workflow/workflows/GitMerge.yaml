@@ -13,7 +13,7 @@ stages:
     model:
       thinking: low
     prompt: |-
-      Goal: Collect facts with zero interaction and analyze.
+      Goal: Build raw evidence base for merge analysis.
 
       Subagents: required
 
@@ -29,7 +29,7 @@ stages:
     model:
       thinking: medium
     prompt: |-
-      Goal: Split affected code into right categories.
+      Goal: Establish evidence-backed classification of conflicts and interacting changes.
 
       Subagents: required
 
@@ -40,22 +40,30 @@ stages:
 
       Support every classification with repository evidence.
 
+      Rework rules:
+      1. Return to `collect_facts` when evidence is insufficient to classify affected changes.
+
   - id: analyze_merge_request
     description: Analyze merge request and affected branches
     model:
       id: analysis_regular
     prompt: |-
+      Goal: Establish complete merge scope, affected branches, conflict areas, and factual gaps.
+
       1. Analyze user request.
       2. Identify branches to merge.
       3. Identify potential conflicts and affected code areas.
       4. Resolve factual gaps from repository evidence. Do not replace missing answers with assumptions.
+
+      Rework rules:
+      1. Return to `collect_facts` when branch, conflict, or affected-area evidence is incomplete.
 
   - id: align_problem
     description: Align problem being solved with user's needs.
     model:
       thinking: medium
     prompt: |-
-      Goal: Align problem being solved with user's needs.
+      Goal: Establish shared understanding of merge problem and target outcome.
 
       Subagents: forbidden
 
@@ -68,12 +76,15 @@ stages:
       6. Ask clarifying questions when required for alignment.
       7. Wait for explicit user confirmation that target outcome is understood correctly.
 
+      Rework rules:
+      1. Return to `classify_changes` when alignment changes merge scope or invalidates conflict classification.
+
   - id: create_plan
     description: Evaluate approaches and create plan
     model:
       thinking: high
     prompt: |-
-      Goal: Evaluate approaches and create conflict resolution plan
+      Goal: Produce evidence-based conflict resolution plan that preserves combined business logic.
 
       Planning rules:
       1. Read relevant file contents before making decisions. Do not assume file contents.
@@ -82,6 +93,9 @@ stages:
       4. Identify open questions and uncertainties that require user input or further research before planning.
       5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
       6. Include a final phase for independent verification.
+
+      Rework rules:
+      1. Return to `align_problem` when planning reveals misunderstood merge problem or target outcome.
 
       Subagents rules:
       1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
@@ -92,7 +106,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Close all possible open questions
+      Goal: Reach planning state with no unresolved blocking questions.
 
       Subagents: if needed
 
@@ -103,12 +117,15 @@ stages:
       4. Do not replace missing answers with assumptions.
       5. Present unresolved questions that require user input. Do not proceed while a blocking question remains unresolved.
 
+      Rework rules:
+      1. Return to `create_plan` when resolved answers require conflict resolution plan revision.
+
   - id: confirm_resolution_plan
     description: Present conflict classification and obtain approval for resolution plan
     model:
       thinking: medium
     prompt: |-
-      Goal: Get user confirmation of plan
+      Goal: Obtain approved conflict resolution plan with required Git operation authorizations.
 
       Subagents: forbidden
 
@@ -117,14 +134,18 @@ stages:
       2. Explain how plan preserves codebase's overall behavior and integrity.
       3. Obtain explicit user approval for plan before resolving conflicts.
       4. Obtain explicit user approval before any commit, push, or merge operation included in plan.
-      5. Return to conflict classification when user rejects classification or plan.
+
+      Rework rules:
+      1. Return to `classify_changes` when user rejects conflict classification.
+      2. Return to `create_plan` when user rejects conflict resolution plan.
+      3. Return to `resolve_open_questions` when plan review reveals unresolved blocking question.
 
   - id: resolve_conflicts
     description: Resolve conflicts according to approved plan
     model:
       thinking: medium
     prompt: |-
-      Goal: Resolve conflicts according to approved plan
+      Goal: Produce conflict-resolved working tree matching approved plan.
 
       Subagents: required
 
@@ -135,14 +156,18 @@ stages:
       4. Apply migration priority rule from shared workflow rules.
       5. Change only files and behavior covered by approved plan.
       6. Do not perform a commit, push, or merge operation without explicit user approval.
-      7. Stop and return to classification when new evidence changes approved conflict model or resolution plan.
+
+      Rework rules:
+      1. Return to `classify_changes` when new evidence changes approved conflict model.
+      2. Return to `create_plan` when new evidence invalidates conflict resolution plan.
+      3. Return to `confirm_resolution_plan` when resolution requires renewed user approval.
 
   - id: validate_merge
     description: Validate merged code and distinguish new failures from existing ones
     model:
       thinking: medium
     prompt: |-
-      Goal: Validate that target business logic is not broken
+      Goal: Establish evidence that merged code preserves target business logic and introduces no new failures.
 
       Subagents: forbidden
 
@@ -152,21 +177,28 @@ stages:
       3. Before fixing a failure found after merge, determine whether it was already present in either source branch.
       4. Critically evaluate subagent's verification results, MUST NOT blindly trust them, as subagents can also make mistakes.
       5. Do not modify code that was unchanged by merge without explicit user approval.
-      6. Return to conflict resolution when validation identifies a merge-caused issue.
+
+      Rework rules:
+      1. Return to `resolve_conflicts` when validation identifies a merge-caused issue.
 
   - id: report_completion
     description: Present validated result and commit message
     model:
       thinking: medium
     prompt: |-
-      Goal: Provide final report
+      Goal: Provide complete final record of validated merge result.
 
       Subagents: forbidden
 
       Required work:
       1. Present resolved conflicts, validation evidence, remaining risks, and any unresolved issues.
       2. Present a brief conventional commit message. Use project's language convention; use English when no convention exists.
-      3. Wait for user feedback. Return to conflict resolution when user requests changes.
+      3. Wait for user feedback.
+
+      Rework rules:
+      1. Return to `resolve_conflicts` when user requests changes.
+      2. Return to `validate_merge` when feedback requires renewed validation without conflict changes.
+      3. Return to `analyze_merge_request` when feedback changes branches or merge scope.
     final: true
 
 transitions:
