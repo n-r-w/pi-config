@@ -6,6 +6,7 @@ prompt: |-
   1. Follow KISS and YAGNI. Do not add backward compatibility or fallback behavior without an explicit user requirement.
   2. Do not silently choose a local workaround over a broader structural fix because workaround is faster, more local, or appears to remain within scope.
   3. Stop immediately and report when new facts contradict approved plan or a blocker cannot be resolved without violating it.
+  4. MUST strictly follow `<user_communication>` rules
 
   User interview protocol:
   1. Follow `<user_communication>`

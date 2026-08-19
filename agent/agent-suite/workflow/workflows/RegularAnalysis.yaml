@@ -8,6 +8,8 @@ prompt: |-
   1. Do not modify inspected files.
   2. Inspect only permitted scope.
   3. Support every reported finding or recommendation with inspected evidence.
+  4. MUST strictly follow `<user_communication>` rules
+  
 stages:
   - id: define_scope
     description: Define inspection scope

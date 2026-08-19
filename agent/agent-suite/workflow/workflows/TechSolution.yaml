@@ -1,5 +1,5 @@
 description: |-
-  Use for technical design before implementation of features, bug fixes, etc. Contains 3 phases: problem -> prd -> tech-solution. MUST NOT be used for coding/implementation itself.
+  Use for technical design before implementation of features, bug fixes, etc. Contains 4 phases: problem -> prd -> tech-solution -> dry-run. MUST NOT be used for coding/implementation itself.
 prompt: |-
   Shared workflow goal: Produce a technical solution for a problem with minimal requirements and design work.
 
@@ -12,6 +12,7 @@ prompt: |-
   6. Complete content work before style or formatting polish.
   7. Before completing each executed phase, apply `anti-ambiguity` skill and `No Overspecification` rules to its output and affected artifacts.
   8. Phase remains incomplete until its completion criteria and ambiguity review pass.
+  9. MUST strictly follow `<user_communication>` rules
 
   No Overspecification:
   1. Keep output focused on what is essential for understanding and implementation.
@@ -179,6 +180,59 @@ stages:
       3. Shared quality checks pass
       4. Technical solution has been presented, then explicitly approved by user in a separate decision question
 
+  - id: dry_run
+    description: Identify requirements and Technical Solution deficiencies
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Critical Requirements and Technical Solution deficiencies are identified before implementation handoff.
+
+      Subagents: if needed
+
+      Output:
+      1. When no blocker is found, report only that requirements and Technical Solution are ready for implementation.
+      2. When blocker is found, return automatically to appropriate rework stage.
+      3. Do not present implementation plan to user.
+
+      Planning rules:
+      1. Read relevant file contents before making decisions. Do not assume file contents.
+      2. Build full plan with meaningful vertical slices, dependencies, execution order, tests, and verification.
+      3. Analyze TDD applicability. Document RED-GREEN-REFACTOR sequence or justify why TDD provides no value.
+      4. Resolve factual questions through codebase, documentation, and other available evidence.
+      5. Make implementation decisions autonomously when evidence or project conventions provide one justified choice.
+      6. Make implementation decisions autonomously when viable choices do not materially differ in scope, behavior, architecture, external contracts, trade-offs, or technical debt.
+      7. Treat multiple viable branches as blocker when evidence cannot select one and choice affects scope, behavior, architecture, external contracts, material trade-offs, or technical debt. Do not request resolution during dry run.
+      8. Do not convert implementation fact or constraint into critical requirement when it follows from approved artifacts, existing code, or project conventions.
+      9. Leave details that do not affect plan to implementation stage.
+      10. Stop research when evidence is sufficient to complete plan and evaluate implementation readiness.
+
+      Required work:
+      1. Map Technical Solution to existing code and project structure.
+      2. Evaluate implementation approaches where unresolved choice affects plan.
+      3. Build full actionable implementation plan.
+      4. Identify blockers that require artifact revision or user decision.
+      5. Revise plan after autonomously resolving factual questions and local implementation choices.
+      6. Use implementation plan only as internal validation artifact.
+
+      Rework rules:
+      1. Return to `collect_facts` when missing or stale evidence prevents completion of implementation plan.
+      2. Return to `define_problem` when planning invalidates approved Problem Statement or Domain Glossary.
+      3. Return to `define_PRD` when planning reveals missing, ambiguous, or unsatisfied critical requirement.
+      4. Return to `define_technical_solution` when planning reveals structural problem, material trade-off, or technical decision absent from Technical Solution.
+
+      Complete this phase only when:
+      1. Full actionable implementation plan is complete.
+      2. Facts required by plan are established.
+      3. Evidence-based and local implementation decisions are resolved autonomously.
+      4. No unresolved branch requires user decision or approved artifact revision.
+      5. Details that do not affect plan remain delegated to implementation stage.
+      6. Shared quality checks pass.
+      7. Successful result has been reported without presenting implementation plan.
+
+      Constraints:
+      1. MUST NOT modify code, tests, dependencies, or configuration.
+      2. Strictly follow `No Overspecification` guidelines.
+
   - id: technical_solution_defined
     description: Technical Solution defined
     model:
@@ -217,6 +271,9 @@ transitions:
     to: define_technical_solution
     type: advance
   - from: define_technical_solution
+    to: dry_run
+    type: advance
+  - from: dry_run
     to: technical_solution_defined
     type: advance
 
@@ -246,6 +303,18 @@ transitions:
     type: rework
   - from: define_technical_solution
     to: define_problem
+    type: rework
+  - from: dry_run
+    to: collect_facts
+    type: rework
+  - from: dry_run
+    to: define_problem
+    type: rework
+  - from: dry_run
+    to: define_PRD
+    type: rework
+  - from: dry_run
+    to: define_technical_solution
     type: rework
   - from: technical_solution_defined
     to: define_technical_solution

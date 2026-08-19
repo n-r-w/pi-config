@@ -6,6 +6,7 @@ prompt: |-
   1. Follow KISS and YAGNI. Do not add content that does not support a conclusion, decision, or handoff.
   2. Ground every conclusion in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
   3. Stop immediately and report when new facts contradict approved plan or a blocker cannot be resolved without violating it.
+  4. MUST strictly follow `<user_communication>` rules
 
   User interview protocol:
   1. Follow <user_communication>.

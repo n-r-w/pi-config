@@ -57,4 +57,6 @@ Rules:
     2. If there is no suitable prefix, create a custom one.
     3. IDs MUST be unique across document.
     4. If when editing document it is necessary to change order of items, you MUST keep their IDs. New items MUST receive IDs with an additional suffix so as not to break existing numbering. E.g.: there are `ID-1`, `ID-2`; you need to add new item between them -> new item receives an ID with an additional suffix `ID-1.1`
+
+MUST NOT blindly assign IDs to every list item. IDs are ONLY needed for significant elements.
 </id_guideline>

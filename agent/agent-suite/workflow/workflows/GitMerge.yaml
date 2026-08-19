@@ -6,6 +6,7 @@ prompt: |-
   1. Migrations from master have priority over migrations from current branch. When both branches contain same migration number, keep master migration number and assign next available number to current-branch migration.
   2. Do not perform a commit, push, or merge operation without explicit user approval.
   3. Do not modify code that was unchanged by merge without explicit user approval.
+  4. MUST strictly follow `<user_communication>` rules
 
 stages:
   - id: collect_facts
