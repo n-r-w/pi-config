@@ -1,6 +1,6 @@
 ---
 name: postgresql-golang
-description: Postgresql golang guidelines and best practices. Use BEFORE ANY activity related to Postgresql in go code (analysis, review, planning, implementation, etc.). If this standard is loaded, `coding-rules` MUST also be loaded.
+description: Postgresql golang guidelines and best practices. Use BEFORE ANY activity related to Postgresql in go code (analysis, review, planning, implementation, etc.).
 ---
 
 <postgresql_go name="Postgresql Golang Guidelines and Best Practices">
