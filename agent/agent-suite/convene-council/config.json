@@ -21,11 +21,6 @@
     "bash",
     "find",
     "ls",
-    "fetch_fetch",
-    "perplexity_perplexity_ask",
-    "asteria_*",
-    "team_topic_list",
-    "team_message_get",
-    "team_message_list"
+    "fetch_fetch"
   ]
 }

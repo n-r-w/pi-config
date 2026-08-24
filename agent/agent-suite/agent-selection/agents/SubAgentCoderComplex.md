@@ -1,12 +1,12 @@
 ---
-description: Coding agent for complex coding tasks. Not for research, spec/PRD, architecture, planning, documentation, or any non-coding work. Moderate cost and speed.
+description: Makes cross-component code, test, or configuration changes requiring significant design decisions. Not for read-only work or baseline collection. Moderate cost and speed.
 type: subagent
 model:
   id: coding_complex
   thinking: medium
-tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch", "workflow_*", "describe_image", "activate_toolset"]
+tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch",          "workflow_*", "describe_image", "activate_toolset"]
 agents: [
-  "SubAgentExtractor",
+  "SubAgentExtractor"
   ]
 workflows: ["SubagentCoding"]
 ---

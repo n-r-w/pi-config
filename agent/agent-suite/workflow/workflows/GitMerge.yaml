@@ -2,7 +2,7 @@ description: Use for analyzing and merging/rebasing changes from different Git b
 prompt: |-
   Shared workflow goal: Perform merge/rebase while maintaining correct business logic.
 
-  Shared workflow rules:
+  Shared rules:
   1. Migrations from master have priority over migrations from current branch. When both branches contain same migration number, keep master migration number and assign next available number to current-branch migration.
   2. Do not perform a commit, push, or merge operation without explicit user approval.
   3. Do not modify code that was unchanged by merge without explicit user approval.
@@ -16,13 +16,16 @@ stages:
     prompt: |-
       Goal: Build raw evidence base for merge analysis.
 
-      Subagents: required
+      Subagents: Use appropriate subagents when complexity or uncertainty is high.
 
-      Required work:
+      Actions:
       1. Independently (without subagents) determine branches to merge.
-      2. Use subagents to collect information about changes in branches, conflicts, etc.
+      2. Collect information about changes in branches, conflicts, etc.
 
-      Constraints: MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      Constraints:
+      1. MUST NOT go deep into the problem.
+      2. MUST NOT discuss problems, solutions, etc.
+      3. Only collect relevant RAW facts!
     initial: true
 
   - id: classify_changes
@@ -32,7 +35,7 @@ stages:
     prompt: |-
       Goal: Establish evidence-backed classification of conflicts and interacting changes.
 
-      Subagents: required
+      Subagents: forbidden
 
       Classify changes into:
       1. Technical conflicts that do not affect code logic, such as import ordering or formatting differences.
@@ -44,20 +47,7 @@ stages:
       Rework rules:
       1. Return to `collect_facts` when evidence is insufficient to classify affected changes.
 
-  - id: analyze_merge_request
-    description: Analyze merge request and affected branches
-    model:
-      id: analysis_regular
-    prompt: |-
-      Goal: Establish complete merge scope, affected branches, conflict areas, and factual gaps.
-
-      1. Analyze user request.
-      2. Identify branches to merge.
-      3. Identify potential conflicts and affected code areas.
-      4. Resolve factual gaps from repository evidence. Do not replace missing answers with assumptions.
-
-      Rework rules:
-      1. Return to `collect_facts` when branch, conflict, or affected-area evidence is incomplete.
+      Constraints: MUST NOT discuss problems, solutions, etc.
 
   - id: align_problem
     description: Align problem being solved with user's needs.
@@ -68,7 +58,7 @@ stages:
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Understand user's problem
       2. Study provided materials, codebase, and documentation.
       3. Define open questions.
@@ -130,7 +120,7 @@ stages:
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Present conflict classification and a plan for resolving each category.
       2. Explain how plan preserves codebase's overall behavior and integrity.
       3. Obtain explicit user approval for plan before resolving conflicts.
@@ -150,13 +140,16 @@ stages:
 
       Subagents: required
 
-      Required work:
+      Actions:
       1. Choose most applicable subagent's to implement each planned task.
       2. Resolve technical conflicts first.
       3. Resolve logical conflicts together with non-conflicting changes that may break overall business logic.
-      4. Apply migration priority rule from shared workflow rules.
+      4. Apply migration priority rule from Shared rules.
       5. Change only files and behavior covered by approved plan.
       6. Do not perform a commit, push, or merge operation without explicit user approval.
+      7. Treat task, ticket, phase, stage, slice, plan, and agent labels as workflow metadata. MUST NOT put them in code artifacts unless required domain or external-contract terms.
+      8. Before validation or any approved commit, inspect changed code and remove leaked workflow metadata. Name artifacts after domain behavior.
+      9. Finally, run full test suite, linters and other project checks.
 
       Rework rules:
       1. Return to `classify_changes` when new evidence changes approved conflict model.
@@ -172,12 +165,13 @@ stages:
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Ensure that merged code is functional and introduces no new errors.
-      2. Run tests, linting, and other project checks required for affected code.
+      2. Run full test suite, linters and other project checks, if their weren't run in `resolve_conflicts`.
       3. Before fixing a failure found after merge, determine whether it was already present in either source branch.
       4. Critically evaluate subagent's verification results, MUST NOT blindly trust them, as subagents can also make mistakes.
       5. Do not modify code that was unchanged by merge without explicit user approval.
+      6. Confirm merged code contains no workflow metadata unless required by domain behavior or external contract.
 
       Rework rules:
       1. Return to `resolve_conflicts` when validation identifies a merge-caused issue.
@@ -191,7 +185,7 @@ stages:
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Present resolved conflicts, validation evidence, remaining risks, and any unresolved issues.
       2. Present a brief conventional commit message. Use project's language convention; use English when no convention exists.
       3. Wait for user feedback.
@@ -199,7 +193,8 @@ stages:
       Rework rules:
       1. Return to `resolve_conflicts` when user requests changes.
       2. Return to `validate_merge` when feedback requires renewed validation without conflict changes.
-      3. Return to `analyze_merge_request` when feedback changes branches or merge scope.
+      3. Return to `classify_changes` when feedback changes branches or merge scope.
+      4. Return to `collect_facts` when feedback reveals missing or stale branch evidence needed to reclassify changes.
     final: true
 
 transitions:
@@ -207,9 +202,6 @@ transitions:
     to: classify_changes
     type: advance
   - from: classify_changes
-    to: analyze_merge_request
-    type: advance
-  - from: analyze_merge_request
     to: align_problem
     type: advance
   - from: align_problem
@@ -230,9 +222,6 @@ transitions:
   - from: validate_merge
     to: report_completion
     type: advance
-  - from: analyze_merge_request
-    to: collect_facts
-    type: rework
   - from: classify_changes
     to: collect_facts
     type: rework
@@ -273,5 +262,8 @@ transitions:
     to: resolve_conflicts
     type: rework
   - from: report_completion
-    to: analyze_merge_request
+    to: classify_changes
+    type: rework
+  - from: report_completion
+    to: collect_facts
     type: rework

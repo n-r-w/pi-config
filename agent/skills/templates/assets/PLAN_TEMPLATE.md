@@ -15,8 +15,8 @@
     6) Include a final independent verification phase.
     7) Include a final cleanup phase that removes temporary code, workarounds, debugging artifacts, and other implementation residue.
     8) Critical risk: trying to make every phase testable can easily lead to inventing unnecessary logic and tests that will not provide real value when looking at task as a whole. You MUST analyze EACH item in `Exit criteria` section from this point of view and eliminate excessive verification requirements, or combine phases to avoid such situations. MUST provide justification in `Decomposition Justification` section.
-    9) Break work into vertical slices:
-      - Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) — vertical, NOT a horizontal slice of one layer
+    9) MUST break work into vertical slices:
+      - Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests): vertical, NOT a horizontal slice of one layer
       - A completed slice is demoable or verifiable on its own
       - Each slice is sized to fit in a single fresh context window
       - Any prefactoring should be done first

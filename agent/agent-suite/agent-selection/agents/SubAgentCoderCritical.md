@@ -1,12 +1,12 @@
 ---
-description: Agent for Critical-level and high-risky coding tasks. Not for research, spec/PRD, architecture, planning, documentation, or any non-coding work. High cost and slower speed.
+description: Makes high-risk code, test, or configuration changes where errors have severe impact. Not for read-only work or baseline collection. High cost and slow.
 type: subagent
 model:
   id: coding_critical
   thinking: medium
-tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch", "workflow_*", "describe_image", "activate_toolset"]
+tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch",          "workflow_*", "describe_image", "activate_toolset"]
 agents: [
-  "SubAgentExtractor",
+  "SubAgentExtractor"
   ]
 workflows: ["SubagentCoding"]
 ---

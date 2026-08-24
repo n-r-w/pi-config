@@ -15,10 +15,10 @@ tools: [
   "fetch_fetch",
   "describe_image",
   "subagent_*",
-  "activate_toolset",
+  "activate_toolset"
 ]
 agents: [
-  "SubAgentExtractor",
+  "SubAgentExtractor"
 ]
 workflows: []
 ---

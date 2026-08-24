@@ -1,13 +1,11 @@
 ---
-description: Makes routine code, test, or configuration changes with bounded design decisions. Not for read-only work or baseline collection. Very low cost and fast.
+description: Makes small, obvious code, test, or configuration changes without design decisions. Not for read-only work or baseline collection. Free.
 type: subagent
 model:
-  id: coding_regular
+  id: coding_simple
   thinking: medium
-tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch",          "workflow_*", "describe_image", "activate_toolset"]
-agents: [
-  "SubAgentExtractor"
-  ]
+tools: ["consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls",       "workflow_*", "describe_image", "activate_toolset"]
+agents: []
 workflows: ["SubagentCoding"]
 ---
 

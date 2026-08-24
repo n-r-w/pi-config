@@ -1,6 +1,6 @@
 ---
 name: templates
-description: 'Documentation templates: Ticket, Change Request, Algorithm, Specification, Architecture, Plan, Review, Research/Analysis/Investigation/Brainstorming, Information Extraction, and other. MUST read and follow BEFORE writing any type of documentation, otherwise you output will be REJECTED IMMEDIATELY.'
+description: 'Documentation templates: Ticket, Change Request, Algorithm, Specification, Architecture, Plan, Review, Research/Analysis/Investigation/Brainstorming, Information Extraction, and other. MUST read and follow BEFORE writing any type of documentation. Use this skill for artifacts, NOT FOR COMMUNICATION'
 ---
 
 <templates>

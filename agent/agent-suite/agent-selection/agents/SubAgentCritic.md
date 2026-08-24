@@ -4,9 +4,9 @@ type: subagent
 model:
   id: analysis_critical
   thinking: high
-tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch", "workflow_*", "describe_image", "activate_toolset"]
+tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch",          "workflow_*", "describe_image", "activate_toolset"]
 agents: [
-  "SubAgentExtractor",
+  "SubAgentExtractor"
   ]
 workflows: ["SubagentGrill"]
 ---
@@ -27,14 +27,6 @@ workflows: ["SubagentGrill"]
   7. **NO Overspecification:** Strictly follow `<overspecification_risk>` guidelines.
   8. **Only Verified Solutions**: Before presenting results to user, ensure they are verified against code, not guesses or unverified information.
 </iron_law>
-
-<overspecification_risk critical=true>
-  1. Keep output focused on what is essential for understanding and implementation.
-  2. Do not attempt to capture every edge case or implementation detail during design phase, because some assumptions will inevitably be wrong.
-  3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
-  4. Leave non-essential details to implementation phase.
-  5. KISS and YAGNI principles apply here as well.
-</overspecification_risk>
 
 <rules>
   MUST follow `SubagentGrill` workflow or use `workflow_create` tool when no predefined workflow fits or task requires combination of them.

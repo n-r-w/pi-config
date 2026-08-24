@@ -1,10 +1,10 @@
 ---
-description: Extract raw or summary data from various sources (codebase, web, github/gitlab, terminal, etc.) with high accuracy and speed. MUST NOT be used for any tasks that require analysis, review, synthesis, decision-making, or any form of interpretation. CRITICAL - MUST NOT be used for any extraction that involves business logic (e.g. requirements, specifications, etc.), because it can lead to loss of critical information. Agent is strictly for raw and simple data extraction purposes only. Extremely low cost and fast agent. MUST create new session for each information extraction, unless it is refinement of existing search.
+description: Collects facts from sources and commands, including baseline lint, test, and build checks. No analysis, judgment, review, or implementation. Lowest cost and fastest.
 type: subagent
 model:
   id: extract
-  thinking: low
-tools: ["read", "bash", "grep", "find", "ls", "fetch_fetch", "workflow_*", "describe_image", "activate_toolset"]
+  thinking: medium
+tools: ["read", "bash", "grep", "find", "ls", "fetch_fetch",         "workflow_*", "describe_image", "activate_toolset"]
 workflows: ["InformationExtraction"]
 ---
 

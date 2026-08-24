@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review standards and best practices. Use EXACTLY BEFORE performing any kind of review (code review, review of implementation plan, etc.). DON'T need to read it BEFORE delegating review to subagents, as they will have access to it.
+description: Review standards and best practices. Use EXACTLY BEFORE performing any kind of review (code review, review of implementation plan, etc.). MUST NOT read it BEFORE delegating review to subagents, as they will have access to it.
 ---
 
 <review_standards>

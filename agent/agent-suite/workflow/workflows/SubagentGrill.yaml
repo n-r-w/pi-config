@@ -1,9 +1,12 @@
 description: Use for critical analysis by a subagent without direct user-alignment stages
 prompt: |-
-  1. Evaluate proposed solution against its end goal, global context, and verified codebase evidence.
-  2. Use SubAgentExtractor only for fact extraction and YandexExtractor only for Yandex source extraction.
-  3. Classify findings as Misconceptions, Ambiguities, Overengineering, or Overspecification.
-  4. Use consult_advisor for a second opinion before finalizing critique.
+  Shared rules:
+  1. Keep output focused on what is essential for understanding and implementation.
+  2. Do not attempt to capture every edge case or implementation detail during design phase, because some assumptions will inevitably be wrong.
+  3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
+  4. Leave non-essential details to implementation phase.
+  5. KISS and YAGNI principles apply here as well.
+
 stages:
   - id: analyze_solution
     description: Analyze proposed solution and context
@@ -72,7 +75,8 @@ stages:
 
       1. Verify every finding against code or another primary source.
       2. Assess realism and likelihood of every reported scenario.
-      3. Use consult_advisor for a second opinion.
+      3. Evaluate proposed solution against its end goal, global context, and verified codebase evidence.
+      4. Use consult_advisor for a second opinion.
 
       Rework rules:
       1. Return to `inspect_codebase` when verification identifies a material gap or error.

@@ -1,0 +1,202 @@
+description: Use for generating ideas and fostering creativity
+prompt: |-
+  Big picture principles:
+  1. Focus on the goal, not the details. Always evaluate your actions from the perspective of the end goal.
+  2. Present the user with the big picture first, and only delve into details if they want to.
+  3. CRITICAL: Remember that despite the need to focus on the goal and the big picture, you MUST study the details, as without understanding the details it is impossible to develop quality ideas and solutions.
+
+  Shared rules:
+  1. MUST strictly follow `<user_communication>` rules
+  2. Use `templates` skill for artifacts, not for communication
+  3. Ground claims in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact
+
+  User interview protocol:
+  1. Follow `<user_communication>`
+  2. Resolve questions that materially affect requested outcome until user and agent have confirmed shared understanding of problem, audience, core behavior, and scope.
+  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture or trade-offs.
+  4. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
+  5. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
+  6. When problem, audience, or core behavior is unclear, start with a root round covering missing parts. Let answers determine next branch.
+  7. Ask 1-4 related questions per round. Format decision questions according to `<user_communication>`
+  8. Use an ASCII preview or option snippet when seeing choice makes decision easier.
+
+stages:
+  - id: understand_problem
+    description: Understand problem, not solution
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Problem, audience, scope boundaries, and unresolved questions are defined and backed by evidence.
+
+      Subagents: forbidden
+
+      Actions:
+      1. Study user request and collected facts.
+      2. Understand problem, audience, and scope boundaries.
+      3. Define open questions.
+      4. Sort out open questions: resolve what can be resolved from evidence, record the rest for escalation.
+
+      Constraints: MUST NOT discuss solution approaches or analysis methods. Only problem and domain understanding.
+
+    initial: true
+
+  - id: idea_generation
+    description: Generate a diverse set of ideas based on the user's prompt or problem statement
+    model:
+      thinking: xhigh
+    prompt: |-
+      Goal: Diverse solution set covers conventional and unconventional approaches with potential value.
+
+      Subagents:
+      1. Use subagents if needed
+      2. Explore different ideas simultaneously, maximizing efficiency and breadth of solutions
+
+      Actions:
+      1. Generate a diverse set of ideas based on the user's prompt or problem statement
+      2. Do not limit idea generation with strict boundaries. Allow yourself and subagents to explore even the boldest and most unconventional ideas if they have any potential value for solving the problem.
+
+      Rework rules:
+      1. Return to `understand_problem` when idea generation reveals missing or contradictory information about problem, audience, core behavior, or scope.
+
+  - id: idea_evaluation
+    description: Evaluate each potential solution
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Each solution has evidence-backed assessment of feasibility, efficiency, maintainability, alignment, risks, and mitigations.
+
+      Subagents: if needed
+
+      Actions:
+      1. Evaluate each potential solution sequentially, considering factors such as feasibility, efficiency, maintainability, and alignment with best practices.
+      2. For each solution, identify potential challenges or drawbacks and how they might be mitigated.
+      3. Be CRITICAL and objective in the evaluation process.
+
+      Rework rules:
+      1. Return to `idea_generation` when candidate set lacks viable or materially distinct approaches.
+      2. Return to `understand_problem` when evaluation invalidates an assumption about problem, audience, core behavior, or scope.
+
+  - id: dropping_overengineering
+    description: Detect overengineering and suggest simpler solutions
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Solution set excludes unjustified complexity and includes simpler viable alternatives.
+
+      Subagents: forbidden
+
+      Actions:
+      1) Detect overengineering and suggest simpler solutions that are more aligned with real-world scenarios and maintainability.
+      2) Follow KISS (Keep It Simple, Stupid) and YAGNI (You Aren't Gonna Need It) principles to avoid unnecessary complexity.
+
+      Rework rules:
+      1. Return to `idea_generation` when removing unjustified complexity leaves no viable solution or requires a new simpler approach.
+
+  - id: ranking_ideas
+    description: Rank the ideas
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Ideas are ordered by impact, feasibility, goal alignment, and short-term and long-term implications.
+
+      Subagents: forbidden
+
+      Actions:
+      1. Rank the ideas based on their potential impact, feasibility, and alignment with the user's goals.
+      2. Consider both short-term and long-term implications of each idea.
+
+      Rework rules:
+      1. Return to `idea_evaluation` when solutions lack comparable evidence for impact, feasibility, or goal alignment.
+
+  - id: synthesis_and_reporting
+    description: Summarize the generated ideas
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: User has concise decision-ready comparison, recommendations, and next steps.
+
+      Subagents: forbidden
+
+      Actions:
+      1. Summarize the generated ideas and their evaluations in a clear and concise manner
+      2. Highlight the most promising solutions and provide recommendations for next steps.
+      3. Ensure the report is CLEAR, CONCISE, and well-structured for easy understanding by the user.
+      4. Provide the user with ideas in descending order of their value and potential.
+
+      Rework rules:
+      1. Return to `ranking_ideas` when ranking does not support final recommendations.
+
+  - id: user_interaction
+    description: Engage with the user to gather feedback
+    model:
+      thinking: high
+    prompt: |-
+      Goal: User feedback is captured, and recommendations reflect approved preferences and constraints.
+
+      Subagents: forbidden
+
+      Actions:
+      1. Engage with the user to gather feedback on the presented ideas and their evaluations.
+      2. Adjust the recommendations based on the user's input and preferences.
+
+      Rework rules:
+      1. Return to `understand_problem` when user feedback changes problem, audience, core behavior, or scope.
+      2. Return to `idea_generation` when user requests new approaches or rejects candidate set.
+      3. Return to `idea_evaluation` when user feedback changes evaluation criteria or challenges solution assessment.
+      4. Return to `dropping_overengineering` when user feedback identifies unjustified complexity.
+      5. Return to `ranking_ideas` when user feedback changes priorities without changing candidate solutions.
+
+    final: true
+transitions:
+  - from: understand_problem
+    to: idea_generation
+    type: advance
+  - from: idea_generation
+    to: idea_evaluation
+    type: advance
+  - from: idea_evaluation
+    to: dropping_overengineering
+    type: advance
+  - from: dropping_overengineering
+    to: ranking_ideas
+    type: advance
+  - from: ranking_ideas
+    to: synthesis_and_reporting
+    type: advance
+  - from: synthesis_and_reporting
+    to: user_interaction
+    type: advance
+
+  - from: idea_generation
+    to: understand_problem
+    type: rework
+  - from: idea_evaluation
+    to: idea_generation
+    type: rework
+  - from: idea_evaluation
+    to: understand_problem
+    type: rework
+  - from: dropping_overengineering
+    to: idea_generation
+    type: rework
+  - from: ranking_ideas
+    to: idea_evaluation
+    type: rework
+  - from: synthesis_and_reporting
+    to: ranking_ideas
+    type: rework
+  - from: user_interaction
+    to: understand_problem
+    type: rework
+  - from: user_interaction
+    to: idea_generation
+    type: rework
+  - from: user_interaction
+    to: idea_evaluation
+    type: rework
+  - from: user_interaction
+    to: dropping_overengineering
+    type: rework
+  - from: user_interaction
+    to: ranking_ideas
+    type: rework

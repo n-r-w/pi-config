@@ -4,19 +4,35 @@ prompt: |-
 
   Subagents: allowed ONLY by direct user request
 
-  Shared workflow rules:
+  Shared rules:
   1. Do not modify inspected files.
   2. Inspect only permitted scope.
   3. Support every reported finding or recommendation with inspected evidence.
-  4. MUST strictly follow `<user_communication>` rules
-  
+
+  User interview protocol:
+  1. Follow `<user_communication>`
+  2. Resolve questions that materially affect requested outcome until user and agent have confirmed shared understanding of problem, audience, core behavior, and scope.
+  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture or trade-offs.
+  4. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
+  5. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
+  6. When problem, audience, or core behavior is unclear, start with a root round covering missing parts. Let answers determine next branch.
+  7. Ask 1-4 related questions per round. Format decision questions according to `<user_communication>`
+  8. Use an ASCII preview or option snippet when seeing choice makes decision easier.
+
+  No Overspecification:
+  1. Keep output focused on what is essential for understanding and implementation.
+  2. Do not attempt to capture every edge case or implementation detail during design phase, because some assumptions will inevitably be wrong.
+  3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
+  4. Leave non-essential details to implementation phase.
+  5. KISS and YAGNI principles apply here as well.
+
 stages:
   - id: define_scope
     description: Define inspection scope
     prompt: |-
       Goal: Establish explicit inspection scope with permitted and excluded artifacts.
 
-      Required work:
+      Actions:
       1. Determine files, changes, modules, or repository areas.
       2. Identify excluded generated code and out-of-scope artifacts.
       3. Stop and request clarification when inspection scope cannot be determined safely.
@@ -27,7 +43,7 @@ stages:
     prompt: |-
       Goal: Establish applicable inspection rules and criteria for valid findings.
 
-      Required work:
+      Actions:
       1. Load every relevant skill and project rules.
       2. Identify patterns, invariants, and exclusions that define a valid finding.
 
@@ -39,7 +55,7 @@ stages:
     prompt: |-
       Goal: Build evidence base of candidate findings with source locations.
 
-      Required work:
+      Actions:
       1. Inspect permitted scope systematically.
       2. Record evidence and source locations for candidate findings.
 
@@ -51,7 +67,7 @@ stages:
     prompt: |-
       Goal: Produce evidence-backed set of material in-scope findings.
 
-      Required work:
+      Actions:
       1. Verify each candidate against project behavior, rules, and context.
       2. Remove duplicate, speculative, insignificant, or out-of-scope findings.
 
@@ -65,7 +81,7 @@ stages:
     prompt: |-
       Goal: Deliver required report with findings, evidence, impact, and recommendations.
 
-      Required work:
+      Actions:
       1. Report only findings permitted by scope rules.
       2. Include required source locations, evidence, impact, and recommendations.
       3. Deliver result through required channel.

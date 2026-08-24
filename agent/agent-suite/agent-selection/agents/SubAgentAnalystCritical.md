@@ -1,12 +1,12 @@
 ---
-description: Agent for Critical-level or high-risky intelligence challenges. Use for Review, Analysis, Research, Investigation, Pattern Recognition, Algorithm extraction/identification and documentation, Specification/PRD design, Architecture design, Planning, Business Logic extraction/analysis, and similar intelligence NON-CODING tasks (including creation or modification of files with corresponding documents). MUST NOT use for simple search or information retrieval tasks, use SubAgentExtractor for that. NO CODING, BUG FIXING, OR ANY CODE MODIFICATION tasks. High cost and slower speed.
+description: Analyzes high-risk decisions where errors have severe impact. May edit documents, not code, tests, or configuration. Not for raw facts or baseline collection. High cost and slow.
 type: subagent
 model:
   id: analysis_critical
   thinking: medium
-tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch", "workflow_*", "describe_image", "activate_toolset"]
+tools: ["subagent_*", "consult_advisor", "read", "bash", "edit", "write", "grep", "find", "ls", "fetch_fetch",           "workflow_*", "describe_image", "activate_toolset"]
 agents: [
-  "SubAgentExtractor",
+  "SubAgentExtractor"
   ]
 workflows: ["SubagentAnalysis"]
 ---
@@ -27,14 +27,6 @@ workflows: ["SubagentAnalysis"]
   7. **No Overengineering:** Don't overcomplicate solution. Always look for simplest approach that effectively addresses problem.
   8. **NO Overspecification:** Strictly follow `<overspecification_risk>` guidelines.
 </iron_law>
-
-<overspecification_risk critical=true>
-  1. Keep output focused on what is essential for understanding and implementation.
-  2. Do not attempt to capture every edge case or implementation detail during design phase, because some assumptions will inevitably be wrong.
-  3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
-  4. Leave non-essential details to implementation phase.
-  5. KISS and YAGNI principles apply here as well.
-</overspecification_risk>
 
 <rules>
   1. MUST follow `SubagentAnalysis` workflow or use `workflow_create` tool when no predefined workflow fits or task requires combination of them.

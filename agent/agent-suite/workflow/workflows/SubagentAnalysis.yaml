@@ -2,12 +2,19 @@ description: Use for analytical or documentation tasks
 prompt: |-
   Shared workflow goal: Perform analysis and produce evidence-backed conclusions autonomously.
 
-  Shared workflow rules:
+  Shared rules:
   1. Work autonomously. No user confirmation stages.
   2. Follow KISS and YAGNI. Do not add content that does not support a conclusion, decision, or handoff.
   3. Ground every conclusion in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
   4. Stop immediately when new facts contradict plan or a blocker cannot be resolved without violating it.
   5. Escalation: when a blocker requires user input, finish feasible work and report blocker in final report. Do not wait for user.
+
+  No Overspecification:
+  1. Keep output focused on what is essential for understanding and implementation.
+  2. Do not attempt to capture every edge case or implementation detail during design phase, because some assumptions will inevitably be wrong.
+  3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
+  4. Leave non-essential details to implementation phase.
+  5. KISS and YAGNI principles apply here as well.
 
 stages:
   - id: collect_facts
@@ -21,7 +28,7 @@ stages:
       1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
       2. Use subagents to collect additional information on codebase or logically related non-primary resources.
 
-      Required work:
+      Actions:
       1. Identify relevant information sources.
       2. Gather information: use appropriate subagents when needed.
       3. Store raw facts and evidence without interpretation, conclusions, or recommendations.
@@ -33,13 +40,13 @@ stages:
   - id: understand_problem
     description: Understand problem, not solution
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Establish evidence-backed understanding of problem, audience, and scope boundaries.
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Study user request and collected facts.
       2. Understand problem, audience, and scope boundaries.
       3. Define open questions.
@@ -59,7 +66,7 @@ stages:
 
       Subagents: if needed
 
-      Required work:
+      Actions:
       1. Draft analysis plan: questions to answer, methods, evidence sources, phases, verification criteria.
       2. Ground plan in collected facts and problem understanding.
       3. Apply KISS and YAGNI. Keep plan minimal.
@@ -79,7 +86,7 @@ stages:
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Execute each planned phase yourself. Do not delegate analysis to subagents.
       2. Follow only approved plan and scope.
       3. Collect and organize evidence produced by each phase.
@@ -91,13 +98,13 @@ stages:
   - id: verify_analysis
     description: Verify analysis implementation
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Establish evidence of analysis completeness, plan conformance, and conclusion support.
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Verify every plan phase is completed.
       2. Verify each conclusion is supported by collected evidence.
       3. Check for gaps, contradictions, and unsupported assumptions.

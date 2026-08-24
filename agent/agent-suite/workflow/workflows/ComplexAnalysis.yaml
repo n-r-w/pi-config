@@ -2,21 +2,21 @@ description: Use for complex analytical tasks that require structured fact colle
 prompt: |-
   Shared workflow goal: Perform analysis and produce evidence-backed conclusions.
 
-  Shared workflow rules:
+  Shared rules:
   1. Follow KISS and YAGNI. Do not add content that does not support a conclusion, decision, or handoff.
   2. Ground every conclusion in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
   3. Stop immediately and report when new facts contradict approved plan or a blocker cannot be resolved without violating it.
   4. MUST strictly follow `<user_communication>` rules
 
   User interview protocol:
-  1. Follow <user_communication>.
-  2. Interview user relentlessly on every aspect until you reach a common understanding.
-  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, or conclusions.
+  1. Follow `<user_communication>`
+  2. Resolve questions that materially affect requested outcome until user and agent have confirmed shared understanding of problem, audience, core behavior, and scope.
+  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture or trade-offs.
   4. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
-  5. Cover these dimensions when they affect requested output: problem and audience; scope boundaries; edge cases and failures.
-  6. Start with a root round covering problem and audience. Let answers determine next branch.
-  7. Ask 1-4 related questions per round. For each question, provide 2–4 concrete mutually exclusive options. Put recommended option first and label it `(Recommended)` only when there is evidence for a recommendation.
-  8. Prefix short question in each decision question with a specific header chip no longer than 12 characters.
+  5. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
+  6. When problem, audience, or core behavior is unclear, start with a root round covering missing parts. Let answers determine next branch.
+  7. Ask 1-4 related questions per round. Format decision questions according to `<user_communication>`
+  8. Use an ASCII preview or option snippet when seeing choice makes decision easier.
 
 stages:
   - id: collect_facts
@@ -30,25 +30,28 @@ stages:
       1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
       2. Use subagents to collect additional information on codebase or logically related non-primary resources.
 
-      Required work:
+      Actions:
       1. Identify relevant information sources.
       2. Gather information: execute appropriate subagents to gather different evidence.
       3. Store raw facts and evidence without interpretation, conclusions, or recommendations.
       4. Record source for each fact so it can be verified later.
 
-      Constraints: MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      Constraints:
+      1. MUST NOT go deep into the problem.
+      2. MUST NOT discuss problems, solutions, etc.
+      3. Only collect relevant RAW facts!
     initial: true
 
   - id: understand_problem
     description: Understand problem, not solution
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Establish shared understanding of problem, audience, and scope boundaries.
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Study user request and collected facts.
       2. Understand problem, audience, and scope boundaries.
       3. Define open questions.
@@ -70,7 +73,7 @@ stages:
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Draft analysis plan: questions to answer, methods, evidence sources, phases, verification criteria.
       2. Present plan in concise plain language.
       3. Explain every material trade-off.
@@ -91,7 +94,7 @@ stages:
 
       Subagents: required
 
-      Required work:
+      Actions:
       1. Execute each planned phase using appropriate subagents.
       2. Follow only approved plan and scope.
       3. Critically evaluate subagent results. MUST NOT blindly trust them, as subagents can also make mistakes.
@@ -104,13 +107,13 @@ stages:
   - id: verify_analysis
     description: Verify analysis implementation
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Establish evidence of analysis completeness, plan conformance, and conclusion support.
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Verify every plan phase is completed.
       2. Verify each conclusion is supported by collected evidence.
       3. Check for gaps, contradictions, and unsupported assumptions.
@@ -128,7 +131,7 @@ stages:
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Present analysis results: Summary; Findings; Evidence; Conclusions; Open questions; Assumptions and how they will be verified; Risks.
       2. Wait for user feedback.
       3. Discuss results with user.

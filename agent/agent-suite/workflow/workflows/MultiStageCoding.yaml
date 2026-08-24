@@ -1,0 +1,484 @@
+description: Use for coding tasks with multi-stage implementation plans
+prompt: |-
+  Shared workflow goal: Solve user's problem through an approved multi-stage implementation plan.
+
+  Shared rules:
+  1. Follow KISS and YAGNI. Do not add backward compatibility or fallback behavior without an explicit user requirement.
+  2. Do not silently choose a local workaround over a broader structural fix because workaround is faster, more local, or appears to remain within scope.
+  3. Classify new facts with Return policy. Continue current stage for local deviations. Stop and report only when evidence materially invalidates approved goal, critical requirements, approach, or material trade-off, or blocker cannot be resolved without violating them.
+  4. MUST strictly follow `<user_communication>` rules.
+  5. Treat each approved ticket or implementation unit as independently verifiable work with explicit dependencies.
+
+  Return policy:
+  1. Treat rework as exceptional. Stay in current stage by default.
+  2. Before rework, identify exact approved output of target ancestor that became invalid or incomplete. Do not rework when no ancestor output became invalid.
+  3. Handle local errors, failed checks, implementation-detail changes, additional factual investigation, and clarifications in current stage when stage constraints permit.
+  4. Update working details in current stage when goal, critical requirements, approved behavior, architecture, scope, material trade-offs, verification policy, unit boundaries, dependencies, and role-to-instance assignments remain valid.
+  5. Rework only when evidence materially invalidates target ancestor output or current stage constraints prohibit required correction.
+  6. Return to nearest ancestor that owns invalidated output. Do not return farther for caution or convenience.
+  7. Apply target-specific Rework rules only after this gate passes.
+
+  User interview protocol:
+  1. Follow `<user_communication>`.
+  2. Resolve questions that materially affect requested outcome until user and agent have confirmed shared understanding of problem, audience, core behavior, and scope.
+  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture, or trade-offs.
+  4. Traverse design tree depth-first. Follow newly opened question branch before returning to broader dimensions.
+  5. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
+  6. When problem, audience, or core behavior is unclear, start with root round covering missing parts. Let answers determine next branch.
+  7. Ask 1-4 related questions per round. Format decision questions according to `<user_communication>`.
+  8. Use ASCII preview or option snippet when seeing choice makes decision easier.
+
+stages:
+  - id: collect_project_state
+    description: Collect Project State
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Establish project baseline for regression detection.
+
+      Subagents: required
+
+      Delegation rules: Delegate all project checks to subagents. Do not run checks yourself.
+
+      Actions: Execute appropriate subagents to collect current project state. Collect issues for entire project, not only requested scope:
+        1. Linting issues. Respect project-specific partial linting scopes such as `new-from-rev=origin/master` when configured
+        2. Testing issues
+        3. Build status
+        4. Test coverage
+
+      Constraints: MUST NOT discuss problems, solutions, etc.
+    initial: true
+
+  - id: collect_facts
+    description: Collect facts
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Build evidence base for problem and requirements alignment.
+
+      Subagents: required
+
+      Delegation rules:
+      1. MUST read primary documentation (specs, plans, tickets, etc.) yourself. Do not delegate primary documentation reading.
+      2. Delegate codebase and logically related non-primary source extraction.
+
+      Actions:
+      1. Identify relevant information sources.
+      2. Gather raw information through appropriate subagents.
+      3. Identify stated ticket boundaries and known dependencies without evaluating solutions.
+
+      Rework rules:
+      1. Return to `collect_project_state` when project baseline required for regression comparison is materially incomplete or stale and cannot be corrected in current stage.
+
+      Constraints:
+      1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      2. NO code modifications.
+      3. MUST NOT discuss problems, solutions, etc.
+
+  - id: align_problem
+    description: Align problem being solved with user's needs
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Establish shared understanding of problem and target outcome.
+
+      Subagents: forbidden
+
+      Actions:
+      1. Understand user's problem.
+      2. Study provided materials, codebase, documentation, and tickets.
+      3. Define open questions.
+      4. Resolve open questions with user. Do not leave them quietly without discussion.
+      5. Present understood task and parts of problem being solved.
+      6. Ask clarifying questions when required for alignment.
+      7. Wait for explicit user confirmation that target outcome is understood correctly.
+
+      Rework rules:
+      1. Return to `collect_facts` when evidence essential to confirm problem or target outcome is missing or stale and cannot be gathered in current stage.
+
+      Constraints: NO code modifications.
+
+  - id: align_requirements
+    description: Align requirements with user's needs
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Establish minimum critical requirements for solving problem.
+
+      Subagents: if needed
+
+      Subagent review rule: Critically evaluate subagent results. MUST NOT blindly trust them.
+
+      Actions:
+      1. Identify minimum critical requirements needed to solve problem.
+      2. Identify requirements shared by all tickets and requirements specific to each ticket.
+      3. Identify open questions.
+      4. Classify open questions as blockers or non-blockers:
+        1) Resolve blockers and convert answers into requirements
+        2) Remove non-blockers from requirements
+
+      Rework rules:
+      1. Return to `align_problem` when requirements analysis materially invalidates confirmed problem or target outcome.
+      2. Return to `collect_facts` when evidence essential to define critical requirements is missing or stale and cannot be gathered in current stage.
+
+      No Overspecification:
+      1. Keep output focused on what is essential for understanding and implementation.
+      2. Do not capture every edge case or implementation detail during design phase.
+      3. Do not turn uncertain decisions into requirements.
+      4. Leave non-essential details to implementation.
+      5. Apply KISS and YAGNI.
+
+      Constraints: NO code modifications.
+
+  - id: create_plan
+    description: Evaluate approaches and create multi-stage plan
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Produce evidence-based actionable plan split into independently verifiable implementation units.
+
+      Subagents: if needed
+
+      Subagent review rule: Critically evaluate subagent results. MUST NOT blindly trust them.
+
+      Planning rules:
+      1. Read relevant file contents before making decisions. Do not assume file contents.
+      2. Do not plan backward compatibility or fallback behavior without explicit user requirement.
+      3. Analyze dependencies and potential effects on related components.
+      4. Identify open questions and uncertainties that require user input or further research before planning.
+      5. Stop research when enough context exists to draft plan. Leave details that do not affect plan to implementation.
+
+      Rework rules:
+      1. Return to `align_requirements` when approach evaluation materially invalidates confirmed critical requirements.
+      2. Return to `align_problem` when approach evaluation materially invalidates confirmed problem or target outcome.
+      3. Return to `collect_facts` when evidence essential to choose approach or evaluate dependencies is missing or stale and cannot be gathered in current stage.
+
+      Break work into implementation units:
+      1. Map each existing ticket to one implementation unit when ticket is independently actionable and verifiable.
+      2. Split ticket only when one stage cannot complete it safely within single fresh context window.
+      3. Merge units only when separating them would create invalid or unverifiable intermediate state.
+      4. Make each unit complete, independently verifiable, and reviewable.
+      5. Record inputs, expected result, affected components, checks, completion criteria, and local commit boundary for each unit.
+      6. Record dependencies between units and derive execution order. Do not invent dependency between independent units.
+      7. Put shared prefactoring before dependent units.
+      8. Apply TDD when it provides behavioral value: RED -> GREEN -> REFACTOR.
+      9. Include final integrated verification and cleanup after all units.
+      10. Treat unit IDs, ticket IDs, stage names, phase names, slice names, and plan labels as workflow metadata only. MUST NOT use them as code terminology unless they are required domain terms or external contract terms.
+
+      Plan user verification policy:
+      1. After implementation units are defined, MUST ask user to choose verification policy. MUST NOT infer or default policy.
+      2. Require explicit choice of exactly one policy:
+        1) `final_only`: user reviews result only after all units and integrated verification
+        2) `every_unit`: user reviews and accepts every unit before next unit starts
+        3) `selected_units`: user reviews and accepts exact user-selected units before workflow continues
+      3. For `selected_units`, record exact implementation unit IDs that require user review.
+      4. For each required per-unit review, define presented changes, targeted check evidence, deviations, acceptance criteria, and post-acceptance commit boundary.
+      5. Require explicit user acceptance before advancing past per-unit review. User request for changes returns to paired implementation unit.
+      6. Keep final integrated verification and overall `user_review` for every policy.
+      7. Treat chosen policy and selected review points as approved plan content. Any later change requires renewed user approval.
+
+      Plan generated workflow subagents:
+      1. Distinguish subagent role from subagent instance:
+        1) Role is reusable capability identified by exact available-subagent ID
+        2) Instance is one session started from role for one atomic subtask
+        3) Same role MAY produce multiple independent instances. Role count does not limit instance count
+      2. Check whether subagent tools and exact available role IDs are available. Apply remaining assignment rules only when both are available.
+      3. When unavailable, do not invent roles or instances. Record `No subagents: subagent tools or role inventory unavailable` for every generated stage.
+      4. When available, inspect exact role IDs and capability descriptions. MUST NOT invent or generalize role names.
+      5. For `plan_guard`, every implementation unit, every per-unit user review required by chosen policy, `integrated_verification`, `user_review`, and `report_completion`, decompose delegable work into atomic subtasks and record dependencies between them.
+      6. For every atomic subtask, choose exact role ID and plan separate instance. Independent subtasks MUST NOT share instance even when they use same role.
+      7. Reuse instance only for refinement or continuation of same atomic subtask. Start new instance for every different subtask.
+      8. Plan parallel instance batch only for subtasks whose inputs, scope, sources, and evaluation criteria do not depend on another subtask in batch.
+      9. Record generated stage ID, atomic subtask ID, exact role ID, logical instance label, instance count or allocation rule, sequential or parallel execution, delegated work, required inputs, expected output, main-agent verification, and role-selection rationale against available alternatives. Do not invent runtime session IDs.
+      10. For every stage without subagents, record why delegation adds no value or conflicts with main-agent ownership.
+      11. Treat role selection, instance allocation, and no-subagent decisions as part of plan. Any later change requires renewed user approval.
+
+      Actions:
+      1. Draft two or three possible approaches.
+      2. Evaluate each approach's complexity, maintainability, performance, risks, and trade-offs.
+      3. Use additional independent analyst perspectives when needed.
+      4. Select best approach from evidence.
+      5. Apply KISS and YAGNI. Revise approach when it contains unnecessary complexity.
+      6. Produce ordered implementation units with stable short IDs.
+      7. Define dependency graph and explain every ordering constraint.
+      8. Analyze and document TDD decision for each unit.
+      9. Obtain explicit user choice of verification policy and exact review points. Do not continue while policy is unresolved.
+      10. Produce stage-by-stage role-to-instance assignment matrix according to subagent planning rules.
+      11. Ensure plan has at least two implementation units. Use `ComplexCoding` when one unit is sufficient.
+      12. Keep generated workflow within 64 stages and 256 transitions. Group units when generated graph would exceed either limit without hiding dependencies or verification scope.
+      13. Plan one local commit after successful verification of each implementation unit. When unit requires user review, user acceptance MUST occur before commit. MUST NOT plan any push operation.
+      14. Include workflow-artifact scan before verification and commit of every implementation unit.
+
+      Constraints: NO code modifications.
+
+  - id: resolve_open_questions
+    description: Open Question Analysis
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Reach planning state with no unresolved blocking questions.
+
+      Subagents: if needed
+
+      Actions:
+      1. Categorize open questions by focus area, implementation unit, complexity, risk, and other dimensions that affect resolution.
+      2. Rank questions by effect on final result and associated risks.
+      3. Resolve factual questions through codebase, documentation, web resources, and other available evidence.
+      4. Do not replace missing answers with assumptions.
+      5. Present unresolved questions that require user input. Do not proceed while blocking question remains unresolved.
+      6. Update unit boundaries, dependencies, and order when resolved answers affect them.
+
+      Rework rules:
+      1. Return to `create_plan` when resolved answer materially changes chosen approach, scope, unit boundaries, dependencies, verification policy, planned behavior, or material trade-offs. Apply local clarifications in current stage.
+
+      Constraints: NO code modifications.
+
+  - id: confirm_plan
+    description: Plan Confirmation
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Obtain explicitly approved multi-stage implementation plan, user-verification policy, subagent roles, and instance allocation.
+
+      Subagents: forbidden
+
+      Actions:
+      1. Present problem and plan:
+        1) Present problem approved during `align_problem` and requirements approved during `align_requirements`
+        2) Present implementation units, dependencies, execution order, and integrated verification
+        3) Use concise plain language. Keep presentation compact when possible
+        4) Explain every material trade-off and technical debt effect
+      2. Present user-verification policy:
+        1) Name explicitly chosen policy: `final_only`, `every_unit`, or `selected_units`
+        2) For `selected_units`, list exact units followed by user review
+        3) Show generated review points in execution order and state that each blocks next unit until explicit acceptance
+        4) State that final integrated verification and overall `user_review` remain mandatory
+      3. Present subagent role and instance plan:
+        1) Explain that role is reusable available-subagent ID and instance is separate session for one atomic subtask
+        2) When subagent tools and role inventory are available, present every generated stage with exact selected role IDs, atomic subtasks, logical instance labels, and instance count or allocation rule
+        3) Make repeated use of same role explicit. State that each independent subtask starts separate instance even when role ID is same
+        4) Show which instances run sequentially or in parallel and explain dependency basis
+        5) For each role, explain delegated work, expected result, main-agent verification, why role capabilities fit, and why role was chosen over available alternatives
+        6) For each `No subagents` stage, explain why delegation adds no value or conflicts with main-agent ownership
+        7) When subagent tools or role inventory are unavailable, state this explicitly and present workflow as having no subagent roles or instances
+      4. Obtain approval:
+        1) Wait for user to review plan, verification policy, review points, role selection, instance allocation, and no-subagent decisions, then explicitly authorize implementation
+        2) Do not create implementation workflow before clear explicit approval of implementation plan, verification policy, and role-to-instance assignment matrix
+        3) Approval requires unambiguous statement such as "start implementation"
+        4) Approval in initial task request does not satisfy this stage
+
+      Rework rules:
+      1. Return to `create_plan` when user requests material change to approach, scope, unit boundaries, dependencies, verification policy, or implementation plan. Handle wording, clarification, and local step changes in current stage.
+      2. Return to `resolve_open_questions` when plan review reveals blocking question whose answer can materially change approved decisions and cannot be resolved in current stage.
+
+      Constraints: NO code modifications.
+
+  - id: create_implementation_workflow
+    description: Create and activate plan-specific implementation workflow
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Activate task-specific workflow that fully represents approved multi-stage implementation plan.
+
+      Subagents: forbidden
+
+      Actions:
+      1. Convert approved plan into complete `workflow_create` definition.
+      2. Use unique workflow ID derived from task. ID must contain 6-32 characters and MUST NOT match ready-made workflow ID.
+      3. Configure generated root prompt:
+        1) Include approved problem, target outcome, requirements, plan, user-verification policy, exact review points, role-to-instance assignment matrix, shared constraints, baseline, and complete Return policy from workflow root prompt
+        2) Define role as reusable available-subagent ID and instance as separate session for one atomic subtask
+        3) Require one local commit per implementation unit after successful verification. Require explicit user acceptance before commit when unit has user review. Prohibit push under all circumstances
+        4) Treat workflow stage names, unit IDs, ticket IDs, task names, phase names, slice names, plan labels, and subagent labels as workflow metadata. Prohibit them in code unless required domain or external-contract terms
+        5) Add dynamic stage maintenance rules:
+          - When new evidence materially invalidates current, future, or re-enterable stage instructions, MUST read exact stage with `workflow_get_stage` before executing or editing it
+          - Do not edit stage for local error, failed check, implementation-detail change, clarification, or working-detail update covered by Return policy
+          - Use `workflow_edit_stage` to replace materially stale stage `description`, complete `prompt`, and `model.thinking`. Preserve unaffected instructions and choose thinking by updated stage's hardest reasoning
+          - Edit stage before entering it when possible. Editing active stage applies updated prompt and thinking on next model request
+          - MUST NOT silently change approved scope, user-verification policy, review points, role-to-instance assignments, commit policy, or no-push rule. Obtain renewed user approval first when edit affects approved decision
+          - Use stage edit only when stage IDs, order, transitions, triggers, and root prompt remain valid. Return to `plan_guard` and create replacement workflow after approval when graph or root prompt must change
+          - Do not edit completed stage only to rewrite history. Edit it only when stage can be re-entered and stale instructions affect future work
+      4. Generate stages in this order:
+        1) `plan_guard` as only initial stage
+        2) One implementation stage for each approved implementation unit
+        3) Per-unit user review stage immediately after each unit required by approved verification policy
+        4) `integrated_verification`
+        5) `user_review`
+        6) `report_completion` as final stage
+      5. Set `model.thinking` for every generated stage to lowest level that can reliably complete stage:
+        1) `low`: Mechanical extraction, predefined commands, formatting, or deterministic checks. No material interpretation, trade-offs, or design decisions
+        2) `medium`: Bounded analysis, implementation, verification, synthesis from known evidence, or routine user interaction with established criteria
+        3) `high`: Ambiguous requirements, architecture or design, multi-option planning, cross-component trade-offs, contradiction resolution, or replanning
+        4) Choose level by hardest reasoning required in stage, not file count, tool count, task duration, or output size
+        5) Use `medium` when neither `low` nor `high` clearly applies
+        6) Set `plan_guard` to `high` because rework can require requirements alignment and replanning
+        7) Set implementation stages, per-unit user reviews, `integrated_verification`, `user_review`, and `report_completion` to `medium` unless their actual hardest reasoning requires another level
+      6. Apply approved role-to-instance assignment matrix only when subagent tools and exact approved role IDs are available:
+        1) Recheck tool availability and exact role IDs before building workflow. MUST NOT invent, add, remove, or substitute roles or change instance allocation behind scenes
+        2) When approved assignment cannot be executed because tool or role is unavailable, return to `create_plan`. Do not call `workflow_create`
+        3) For each stage with approved roles, add custom `Subagents` rules naming every exact role ID and mapping each atomic subtask to separate instance
+        4) State delegated work, invocation condition, required inputs, expected output, role-selection rationale, main-agent verification, and whether instance runs sequentially or in approved parallel batch
+        5) Require separate `subagent_start` call for every planned instance. Pass approved role ID as `agentId` and keep returned session ID as instance identity
+        6) Require new instance for every independent atomic subtask. Same role ID MAY be used by any number of separate instances
+        7) Permit `subagent_steer` only for refinement or continuation of same atomic subtask in same instance. MUST NOT reuse instance for different subtask
+        8) Start approved parallel instance batch only when dependency map proves every subtask in batch independent
+        9) For each stage with approved `No subagents`, omit `Subagents` from stage prompt and preserve approved no-subagent rationale in generated root prompt
+        10) When plan was approved without subagents because tools or role inventory were unavailable, omit all generated `Subagents` sections and preserve reason in generated root prompt
+        11) Never delegate user decisions, explicit approval, transition choice, workflow replacement, or responsibility for completion criteria
+      7. Configure generated `plan_guard`:
+        1) Confirm approved plan remains executable without repeating completed planning
+        2) Advance immediately when no approved goal, requirement, approach, dependency, unit boundary, verification policy, or material trade-off became invalid
+        3) When rework returns because approved goal, requirements, approach, dependencies, unit boundaries, verification policy, or material trade-offs became invalid, gather required evidence and obtain renewed user approval
+        4) When approved update changes only current or future stage description, prompt, or thinking, use `workflow_get_stage` and `workflow_edit_stage` while preserving graph and root prompt
+        5) When approved update changes stage set, order, transitions, triggers, or root prompt, call `workflow_create` with replacement definition and stop old workflow immediately
+      8. Configure each generated implementation stage:
+        1) Goal describes verified result of exactly one approved implementation unit
+        2) Prompt includes unit inputs, scope, expected result, TDD decision, workflow-artifact scan, checks, commit boundary, and completion criteria
+        3) Apply exact approved role-to-instance assignments when available. Main agent starts separate instance per atomic subtask, orchestrates instances, and verifies results
+        4) Implement only assigned unit
+        5) Treat stage name, unit ID, ticket ID, task name, phase name, slice name, plan label, and subagent label as workflow metadata only. MUST NOT copy them into production code, test code, identifiers, comments, file names, logs, metrics, configuration keys, schema names, error messages, or test names unless term is required by domain behavior or external contract
+        6) Before verification, inspect complete stage diff for workflow metadata. Remove comments that describe plan or work sequence. Rename artifacts after domain behavior. When cleanup changes code, rerun affected checks
+        7) Run targeted checks after workflow-artifact cleanup. Main agent verifies both own work and subagent changes before advancing
+        8) When approved policy requires user review after current unit, MUST NOT stage or commit unit changes in implementation stage. Advance to paired review with verified uncommitted diff
+        9) When approved policy does not require review after current unit, main agent stages only unit changes and creates one local commit after targeted checks and main-agent verification
+        10) Exclude pre-existing and unrelated changes from commit. Record created commit hash in stage result
+        11) Use project commit conventions. Do not create empty commit when stage produced no file changes
+        12) On re-entry after rework, inspect existing work, fix required issue, run workflow-artifact scan, and verify it. Commit only at policy-defined point. Do not amend or rewrite previous unit commits without explicit user approval
+        13) Subagents MUST NOT commit or push. Main agent owns workflow-artifact scan and policy-controlled commit
+        14) MUST NOT run `git push` or any command that updates remote refs under any circumstances
+        15) Set completion criteria by policy: reviewed unit requires verified uncommitted diff and no commit; unreviewed unit requires successful local commit
+        16) Use unique single-line stage ID with at most 32 characters
+      9. Configure generated per-unit user review stages according to approved verification policy:
+        1) For `final_only`, create no per-unit user review stages
+        2) For `every_unit`, create one review stage immediately after every implementation stage
+        3) For `selected_units`, create review stage only after each exact approved unit
+        4) Goal states that user has accepted one verified implementation unit and unit changes are committed locally
+        5) Omit `Subagents`. Main agent owns user interaction, acceptance, and commit
+        6) Present verified uncommitted diff, targeted check evidence, deviations, and planned commit boundary
+        7) Wait for explicit user acceptance. MUST NOT commit or advance before acceptance
+        8) After acceptance, main agent stages only paired unit changes, excludes pre-existing and unrelated changes, creates one local commit, and records commit hash
+        9) User request for changes or renewed verification returns to paired implementation stage before commit
+        10) Feedback that invalidates goal, requirements, dependencies, unit boundaries, or plan returns to `plan_guard` before commit
+        11) Completion criteria require explicit user acceptance and successful local commit
+        12) MUST NOT run `git push` or any command that updates remote refs
+      10. Configure generated final stages:
+        1) `integrated_verification` runs full tests, linters, build, coverage, regression comparison, requirement check, residue cleanup check, and final diff scan for workflow metadata leaked into code
+        2) `user_review` presents per-unit results and integrated verification, then waits for explicit acceptance
+        3) `report_completion` provides final report and list of local commits created for implementation units
+      11. Build generated advance chain according to approved verification policy:
+        1) `plan_guard` to first implementation stage
+        2) Implementation stage with required review advances to paired per-unit review stage
+        3) Per-unit review stage advances to next implementation stage or `integrated_verification` after user acceptance and commit
+        4) Implementation stage without required review advances directly to next implementation stage or `integrated_verification` after commit
+        5) `integrated_verification` to `user_review`
+        6) `user_review` to `report_completion`
+      12. Build generated rework graph:
+        1) Every implementation stage returns to `plan_guard` only when new evidence materially invalidates approved goal, requirements, approach, dependencies, unit boundaries, verification policy, or material trade-offs. Handle local defects, failed checks, implementation-detail changes, and equivalent technical adjustments in current stage
+        2) Later implementation stage returns to affected earlier implementation stage only when confirmed defect in earlier unit blocks current unit and required correction is prohibited in current stage
+        3) Every per-unit review returns to paired implementation stage when user requests changes or renewed verification before commit
+        4) Every per-unit review returns to `plan_guard` only when feedback materially invalidates approved goal, requirements, approach, dependencies, unit boundaries, verification policy, or material trade-offs before commit
+        5) `integrated_verification` returns to responsible implementation stage only for confirmed defect requiring correction prohibited in current stage, and to `plan_guard` only when approved plan is materially invalid
+        6) `user_review` returns to `integrated_verification` only for verification work prohibited in current stage, to responsible implementation stage only for requested code changes, and to `plan_guard` only when feedback materially invalidates approved goal, requirements, approach, verification policy, or material trade-offs
+        7) `report_completion` returns to `user_review` only for missing acceptance, to `integrated_verification` only for unsupported verification conclusion requiring dedicated verification, to responsible implementation stage only for confirmed defect requiring code changes, and to `plan_guard` only when final review materially invalidates approved plan
+      13. Format every generated stage prompt as `Goal`, `Actions`, optional `Subagents` and `Rework rules`, then `Completion criteria`.
+      14. Add one explicit generated `Rework rules:` condition for every generated rework edge. Use exact generated target stage ID.
+      15. Validate complete definition before tool call:
+        1) Workflow ID has 6-32 characters and does not match ready-made workflow ID
+        2) Stage count does not exceed 64 and transition count does not exceed 256
+        3) Every stage ID is unique, single-line, and at most 32 characters
+        4) Every stage defines `model.thinking` as `low`, `medium`, or `high`
+        5) Every generated `Subagents` section uses only approved exact role IDs and matches approved stage assignment
+        6) Every approved atomic subtask maps to distinct instance allocation. Independent subtasks never share instance even when role ID is same
+        7) Every instance rule states new-instance trigger, allowed same-subtask reuse, and sequential or parallel execution
+        8) Every stage without `Subagents` has approved no-subagent decision or tool-unavailability reason in generated root prompt
+        9) Exactly one approved verification policy exists and selected review points are explicit
+        10) `final_only` creates no per-unit review stages
+        11) `every_unit` creates exactly one review stage immediately after every implementation stage
+        12) `selected_units` creates review stages only after exact approved units
+        13) Every per-unit review blocks commit and advance until explicit user acceptance, then creates paired unit commit
+        14) Exactly one initial stage and at least one final stage
+        15) Every non-final stage has outgoing advance transition
+        16) Final stage has no outgoing advance transition and has at least one outgoing rework transition
+        17) Advance graph is acyclic and reaches every stage
+        18) Every rework target is strict advance ancestor
+        19) Every stage with outgoing rework has matching explicit conditions
+        20) Every implementation unit creates one local commit after successful verification and any required user acceptance, excludes unrelated changes, records commit hash, and prohibits push for main agent and subagents
+        21) Every implementation stage and `integrated_verification` scan changed code for workflow metadata and allow matching terms only when required by domain behavior or external contract
+        22) Generated root prompt requires `workflow_get_stage` before `workflow_edit_stage` whenever current, future, or re-enterable stage instructions become stale
+        23) Stage edits preserve graph, root prompt, approved decisions, and unaffected instructions. Changes to graph or root prompt use approved replacement `workflow_create`
+      16. Call `workflow_create` exactly once with complete validated definition. Successful call activates `plan_guard` immediately.
+      17. Stop work in this workflow immediately after successful tool call. Do not report completion or attempt another transition.
+
+      Rework rules:
+      1. Return to `confirm_plan` when explicit implementation approval is missing or generated workflow would materially deviate from approved decisions. Fix formatting and local construction errors in current stage.
+      2. Return to `resolve_open_questions` when workflow construction reveals blocking question whose answer can materially change generated workflow and cannot be resolved in current stage.
+      3. Return to `create_plan` when approved implementation units, dependencies, completion criteria, verification policy, review points, role selection, or instance allocation are structurally unable to produce valid workflow and require material replanning.
+
+      Constraints:
+      1. NO code modifications.
+      2. MUST NOT call `workflow_create` before full definition passes validation.
+      3. MUST NOT define any stage after `create_implementation_workflow` in this catalog workflow.
+    final: true
+
+transitions:
+  - from: collect_project_state
+    to: collect_facts
+    type: advance
+  - from: collect_facts
+    to: align_problem
+    type: advance
+  - from: align_problem
+    to: align_requirements
+    type: advance
+  - from: align_requirements
+    to: create_plan
+    type: advance
+  - from: create_plan
+    to: resolve_open_questions
+    type: advance
+  - from: resolve_open_questions
+    to: confirm_plan
+    type: advance
+  - from: confirm_plan
+    to: create_implementation_workflow
+    type: advance
+
+  - from: collect_facts
+    to: collect_project_state
+    type: rework
+  - from: align_problem
+    to: collect_facts
+    type: rework
+  - from: align_requirements
+    to: align_problem
+    type: rework
+  - from: align_requirements
+    to: collect_facts
+    type: rework
+  - from: create_plan
+    to: align_requirements
+    type: rework
+  - from: create_plan
+    to: align_problem
+    type: rework
+  - from: create_plan
+    to: collect_facts
+    type: rework
+  - from: resolve_open_questions
+    to: create_plan
+    type: rework
+  - from: confirm_plan
+    to: create_plan
+    type: rework
+  - from: confirm_plan
+    to: resolve_open_questions
+    type: rework
+  - from: create_implementation_workflow
+    to: confirm_plan
+    type: rework
+  - from: create_implementation_workflow
+    to: resolve_open_questions
+    type: rework
+  - from: create_implementation_workflow
+    to: create_plan
+    type: rework

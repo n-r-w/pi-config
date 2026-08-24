@@ -9,6 +9,11 @@
   6. If information is missing, write "TBD" and record it in Open Questions.
   7. Prefer work items that end in a verifiable artifact or observable behavior.
   8. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
+  9. One ticket MUST contains EXACTLY ONE vertical slice:
+    1) Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests): vertical, NOT a horizontal slice of one layer
+    2) A completed slice is demoable or verifiable on its own
+    3) Each slice is sized to fit in a single fresh context window
+    4) Any prefactoring should be done first
 </ticket_guidelines>
 -->
 

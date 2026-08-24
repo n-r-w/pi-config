@@ -3,3 +3,5 @@
 /agent/agent-suite/agent-selection/state
 /agent/agent-suite/mcp-wrapper/cache.json
 /.pi
+/scripts
+/tests

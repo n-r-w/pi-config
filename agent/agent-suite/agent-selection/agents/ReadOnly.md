@@ -4,10 +4,10 @@ type: main
 model:
   id: regular_user
   thinking: medium
-tools: ["read", "bash", "grep", "find", "ls", "fetch_fetch", "describe_image",
-"subagent_*", "activate_toolset",]
+tools: ["read", "bash", "grep", "find", "ls", "fetch_fetch",     "describe_image",
+"subagent_*", "activate_toolset"]
 agents: [
-  "SubAgentExtractor",
+  "SubAgentExtractor"
 ]
 workflows: []
 ---

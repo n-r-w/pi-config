@@ -1,0 +1,511 @@
+description: Use for complex or critical coding tasks
+prompt: |-
+  Shared workflow goal: Solve user's problem by writing code.
+
+  Shared rules:
+  1. Follow KISS and YAGNI. Do not add backward compatibility or fallback behavior without an explicit user requirement.
+  2. Do not silently choose a local workaround over a broader structural fix because workaround is faster, more local, or appears to remain within scope.
+  3. Classify new facts with Return policy. Continue current stage for local deviations. Stop and report only when evidence materially invalidates approved goal, critical requirements, approach, or material trade-off, or blocker cannot be resolved without violating them.
+  4. MUST strictly follow `<user_communication>` rules
+
+  Return policy:
+  1. Treat rework as exceptional. Stay in current stage by default.
+  2. Before rework, identify exact approved output of target ancestor that became invalid or incomplete. Do not rework when no ancestor output became invalid.
+  3. Handle local errors, failed checks, implementation-detail changes, additional factual investigation, and clarifications in current stage when stage constraints permit.
+  4. Update working details in current stage when goal, critical requirements, approved behavior, architecture, scope, material trade-offs, verification policy, and role-to-instance assignments remain valid.
+  5. Rework only when evidence materially invalidates target ancestor output or current stage constraints prohibit required correction.
+  6. Return to nearest ancestor that owns invalidated output. Do not return farther for caution or convenience.
+  7. Apply target-specific Rework rules only after this gate passes.
+
+  User interview protocol:
+  1. Follow `<user_communication>`
+  2. Resolve questions that materially affect requested outcome until user and agent have confirmed shared understanding of problem, audience, core behavior, and scope.
+  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture or trade-offs.
+  4. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
+  5. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
+  6. When problem, audience, or core behavior is unclear, start with a root round covering missing parts. Let answers determine next branch.
+  7. Ask 1-4 related questions per round. Format decision questions according to `<user_communication>`
+  8. Use an ASCII preview or option snippet when seeing choice makes decision easier.
+
+stages:
+  - id: collect_project_state
+    description: Collect Project State
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Establish project baseline for regression detection.
+
+      Subagents rules:
+      1. Subagents are required
+      2. Your role delegation ONLY. ALL job MUST BE delegated to subagents.
+
+      Actions: Execute appropriate subagents to collect current project state. Collect issues for entire project, not only requested scope, to establish a baseline for detecting regressions:
+        1. Linting issues. Respect project-specific partial linting scopes such as `new-from-rev=origin/master` when configured
+        2. Testing issues
+        3. Build status
+        4. Test coverage
+
+      Constraints: MUST NOT discuss problems, solutions, etc.
+    initial: true
+
+  - id: collect_facts
+    description: Collect facts
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Build evidence base for problem and requirements alignment.
+
+      Subagents rules:
+      1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
+      2. Use subagents to collect additional information on codebase or logically related non-primary resources.
+
+      Actions:
+      1. Identify relevant information sources
+      2. Gather Information: execute appropriate subagents to gather different evidence
+
+      Rework rules:
+      1. Return to `collect_project_state` when project baseline required for regression comparison is materially incomplete or stale and cannot be corrected in current stage.
+
+      Constraints:
+      1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      2. NO code modifications.
+      3. MUST NOT discuss problems, solutions, etc.
+
+  - id: align_problem
+    description: Align problem being solved with user's needs.
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Establish shared understanding of problem and target outcome.
+
+      Subagents rules: subagents forbidden
+
+      Actions:
+      1. Understand user's problem
+      2. Study provided materials, codebase, and documentation
+      3. Define open questions
+      4. Sort out open questions with user, do not leave them quietly without discussion
+      5. Present how you understand task and which parts of problem are being solved
+      6. Ask clarifying questions when required for alignment
+      7. Wait for explicit user confirmation that target outcome is understood correctly
+
+      Rework rules:
+      1. Return to `collect_facts` when evidence essential to confirm problem or target outcome is missing or stale and cannot be gathered in current stage.
+
+      Constraints: NO code modifications.
+
+  - id: align_requirements
+    description: Align requirements with user's needs
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Establish minimum critical requirements for solving problem.
+
+      Subagents rules:
+      1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
+      2. Critically evaluate subagent's results, MUST NOT blindly trust them, as subagents can also make mistakes.
+
+      Actions:
+      1. Identify minimum set of critical requirements needed to solve problem
+      2. Identify open questions.
+      3. Classify open questions as blockers or non-blockers:
+        1) Blockers must be resolved and converted to requirements
+        2) Non-blockers must be removed from requirements
+
+      Rework rules:
+      1. Return to `align_problem` when requirements analysis materially invalidates confirmed problem or target outcome.
+      2. Return to `collect_facts` when evidence essential to define critical requirements is missing or stale and cannot be gathered in current stage.
+
+      No Overspecification:
+      1. Keep output focused on what is essential for understanding and implementation.
+      2. Do not attempt to capture every edge case or implementation detail during design phase, because some assumptions will inevitably be wrong.
+      3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
+      4. Leave non-essential details to implementation phase.
+      5. KISS and YAGNI principles apply here as well.
+
+      Constraints: NO code modifications.
+
+  - id: create_plan
+    description: Evaluate approaches and create plan
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Produce evidence-based actionable implementation plan.
+
+      Subagents rules:
+      1. Use appropriate subagents to evaluate approaches when complexity or uncertainty is high.
+      2. Critically evaluate subagent's results, MUST NOT blindly trust them, as subagents can also make mistakes.
+
+      Planning rules:
+      1. Read relevant file contents before making decisions. Do not assume file contents.
+      2. Do not plan backward compatibility or fallback behavior without an explicit user requirement.
+      3. Analyze dependencies and potential effects on related components.
+      4. Identify open questions and uncertainties that require user input or further research before planning.
+      5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
+
+      Rework rules:
+      1. Return to `align_requirements` when approach evaluation materially invalidates confirmed critical requirements.
+      2. Return to `align_problem` when approach evaluation materially invalidates confirmed problem or target outcome.
+      3. Return to `collect_facts` when evidence essential to choose approach or evaluate dependencies is missing or stale and cannot be gathered in current stage.
+
+      Break work into vertical slices:
+      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) — vertical, NOT a horizontal slice of one layer
+      2. A completed slice is demoable or verifiable on its own
+      3. Each slice is sized to fit in a single fresh context window
+      4. Any prefactoring should be done first
+      5. Follow TDD principles if possible: RED -> GREEN -> REFACTOR. Slices should preserve testability whenever practical.
+      6. Keep slices meaningful, testable, and easy to review. Avoid slices that are so small they add process overhead or so large they hide risk.
+      7. Combine setup and verification work when separating them would leave system in a hard-to-test or misleading intermediate state.
+      8. Include final cleanup step that removes temporary code, workarounds, debugging artifacts, and other implementation residue.
+      9. Critical risk: trying to make every slices testable can easily lead to inventing unnecessary logic and tests that will not provide real value when looking at task as a whole.
+
+      Plan execution-stage subagents:
+      1. Distinguish subagent role from subagent instance:
+        1) Role is reusable capability identified by exact available-subagent ID
+        2) Instance is one session started from role for one atomic subtask
+        3) Same role MAY produce multiple independent instances. Role count does not limit instance count
+      2. Check whether subagent tools and exact available role IDs are available. Apply remaining assignment rules only when both are available.
+      3. When unavailable, do not invent roles or instances. Record `No subagents: subagent tools or role inventory unavailable` for every execution stage.
+      4. When available, inspect exact role IDs and capability descriptions. MUST NOT invent or generalize role names.
+      5. For `implement_plan`, `verify_implementation`, `preliminary_user_review`, `deep_review`, and `report_completion`, decompose delegable work into atomic subtasks and record dependencies.
+      6. For every atomic subtask, choose exact role ID and plan separate instance. Independent subtasks MUST NOT share instance even when they use same role.
+      7. Reuse instance only for refinement or continuation of same atomic subtask. Start new instance for every different subtask.
+      8. Plan parallel instance batch only when every subtask in batch is independent.
+      9. Record stage ID, atomic subtask ID, exact role ID, logical instance label, instance count or allocation rule, execution order, delegated work, inputs, expected output, main-agent verification, and role-selection rationale against available alternatives. Do not invent runtime session IDs.
+      10. For every stage without subagents, record why delegation adds no value or conflicts with main-agent ownership.
+      11. Never delegate user decisions, explicit approval, transition choice, or final user communication.
+      12. Treat role selection, instance allocation, and no-subagent decisions as part of plan. Any later change requires renewed user approval.
+
+      Actions:
+      1. Draft two or three possible approaches.
+      2. Evaluate each approach's complexity, maintainability, performance, risks, and trade-offs.
+      3. Use additional independent analyst perspectives when needed.
+      4. Select best approach from evidence.
+      5. Apply KISS and YAGNI. Revise approach when it contains unnecessary complexity.
+      6. Break selected approach into actionable slices.
+      7. TDD (RED-GREEN-REFACTOR) MUST be analyzed, justified, and explicitly documented in plan, even if it not required.
+      8. Produce stage-by-stage role-to-instance assignment matrix according to subagent planning rules.
+
+      Constraints: NO code modifications
+
+  - id: resolve_open_questions
+    description: Open Question Analysis
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Reach planning state with no unresolved blocking questions.
+
+      Subagents rules: use subagents if it helps
+
+      Steps if open questions exist:
+      1. Categorize them by focus area, complexity, risk, and other dimensions that affect resolution.
+      2. Rank them by their effect on final result and associated risks.
+      3. Resolve factual questions through codebase, documentation, web resources, and other available evidence.
+      4. Do not replace missing answers with assumptions.
+      5. Present unresolved questions that require user input. Do not proceed while a blocking question remains unresolved.
+
+      Rework rules:
+      1. Return to `create_plan` when resolved answer materially changes chosen approach, scope, dependencies, planned behavior, or material trade-offs. Apply local clarifications in current stage.
+
+  - id: confirm_plan
+    description: Plan Confirmation
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Obtain explicitly approved implementation plan, subagent roles, and instance allocation.
+
+      Subagents rules: subagents forbidden
+
+      Actions:
+      1. Present problem and plan:
+        1) Present problem approved during `Align problem` stage and implementation plan
+        2) Use concise, plain language and keep presentation within one screen when possible
+        3) Explain every material trade-off. When an option introduces technical debt, state what becomes coupled, duplicated, obscured, harder to test, or harder to change later
+      2. Present subagent role and instance plan:
+        1) Explain that role is reusable available-subagent ID and instance is separate session for one atomic subtask
+        2) When subagent tools and role inventory are available, present every execution stage with exact role IDs, atomic subtasks, logical instance labels, and instance count or allocation rule
+        3) Make repeated use of same role explicit. Each independent subtask starts separate instance even when role ID is same
+        4) Show sequential and parallel instances with dependency basis
+        5) For each role, explain delegated work, expected result, main-agent verification, capability fit, and why role was chosen over available alternatives
+        6) For each `No subagents` stage, explain why delegation adds no value or conflicts with main-agent ownership
+        7) When subagent tools or role inventory are unavailable, state this explicitly and present all execution stages without subagent roles or instances
+      3. Obtain approval:
+        1) Wait for user to review implementation plan, role selection, instance allocation, and no-subagent decisions, then explicitly authorize implementation
+        2) Do not start implementation before clear explicit approval of implementation plan and role-to-instance assignment matrix
+        3) Approval requires an unambiguous statement such as "start implementation." Statements such as "we need to make it so that" or "the plan looks good" do not authorize implementation
+        4) Approval in initial task request does not satisfy this stage
+
+      Rework rules:
+      1. Return to `create_plan` when user requests material change to approach, scope, dependencies, or implementation plan. Handle wording, clarification, and local step changes in current stage.
+      2. Return to `resolve_open_questions` when plan review reveals blocking question whose answer can materially change approved decisions and cannot be resolved in current stage.
+
+      Constraints: NO code modifications
+
+  - id: implement_plan
+    description: Implement plan
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Produce implementation matching approved plan.
+
+      Subagents:
+      1. Apply approved `implement_plan` role-to-instance assignments only when subagent tools and exact approved role IDs are available.
+      2. Start every approved instance with separate `subagent_start` call. Pass approved role ID as `agentId` and keep returned session ID as instance identity.
+      3. Start new instance for every independent atomic subtask. Same role ID MAY be used by any number of separate instances.
+      4. Use `subagent_steer` only for refinement or continuation of same atomic subtask. MUST NOT reuse instance for different subtask.
+      5. Start approved parallel batch only when dependency map proves all subtasks independent.
+      6. Main agent orchestrates instances, reviews changes, and verifies evidence before transition.
+      7. When approved assignment marks atomic subtask `No subagents`, main agent performs that subtask directly.
+      8. MUST NOT invent, add, remove, substitute roles, or change instance allocation behind scenes.
+
+      Actions:
+      1. Execute approved role-to-instance assignments and planned tasks.
+      2. Execute only approved plan and scope
+      3. Do not silently accept technical debt revealed after plan approval
+      4. When approved plan contains an error or inefficient solution, stop and report it
+      5. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor
+      6. Treat task, ticket, phase, stage, slice, plan, and agent labels as workflow metadata. MUST NOT put them in code artifacts unless required domain or external-contract terms.
+      7. Before verification, inspect changed code and remove leaked workflow metadata. Name artifacts after domain behavior.
+      8. Finally, run full test suite, linters and other project checks.
+
+      Rework rules:
+      1. Return to `create_plan` when evidence materially invalidates approved approach, architecture, scope, dependencies, or material trade-offs, or approved role or instance allocation cannot be executed and replacement requires replanning. Handle implementation defects and equivalent technical adjustments in current stage.
+      2. Return to `confirm_plan` when a material plan or role-allocation amendment is complete and implementation can continue only after renewed user approval, without further replanning.
+
+  - id: verify_implementation
+    description: Verify implementation
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Establish evidence that implementation matches user request and approved plan without regressions or residue.
+
+      Subagents:
+      1. Apply approved `verify_implementation` role-to-instance assignments only when subagent tools and exact approved role IDs are available.
+      2. Start every approved instance with separate `subagent_start` call. Independent subtasks MUST NOT share instance even when role ID is same.
+      3. Use `subagent_steer` only for continuation of same atomic verification subtask.
+      4. Main agent runs project checks, reconciles subagent evidence, and owns final verification conclusion.
+      5. When approved assignment marks verification `No subagents`, main agent performs verification directly.
+      6. MUST NOT invent, substitute, or silently change approved roles or instance allocation.
+
+      Actions:
+      1. Run full test suite, linters and other project checks, if their weren't run in `implement_plan`.
+      2. Confirm that implementation meets user request and approved plan.
+      3. Record issues caused by implementation and return to `implement_plan` when changes are required.
+      4. Identify temporary code, workarounds, debugging artifacts, and code slop introduced during implementation.
+      5. Confirm changed code contains no workflow metadata unless required by domain behavior or external contract.
+
+      Rework rules:
+      1. Return to `implement_plan` when confirmed implementation defect or required cleanup needs code changes prohibited in current stage. Rerun checks and investigate environment failures in current stage.
+      2. Return to `create_plan` when approved verification role or instance allocation cannot be executed and compliant replacement requires material plan change.
+
+      Constraints: MUST NOT fix issues during this step, VERIFICATION ONLY.
+
+  - id: preliminary_user_review
+    description: Acceptance of result by user
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: User has reviewed implementation result and provided preliminary feedback before deep review
+
+      Subagents rules: subagents forbidden
+
+      Actions:
+      1. Stop and present implementation results to user:
+          1) Full test suite, linters and other project checks results
+          2) Key changes you made
+          3) Any deviations from approved plan
+          4) Any decisions outside of approved plan
+      2. Wait for user feedback.
+      3. Complete stage when user reports visible issues or confirms result is ready for deep review.
+
+      Rework rules:
+      1. Return to `verify_implementation` when user requests verification work prohibited in current stage and approved problem, requirements, and plan remain valid. Handle explanations and evidence clarification in current stage.
+      2. Return to `implement_plan` when user requests code changes and approved problem, requirements, and plan remain valid.
+      3. Return to `resolve_open_questions` when feedback reveals blocking question that can materially affect acceptance and cannot be resolved in current stage while approved problem, requirements, and plan remain valid.
+      4. Return to `create_plan` when feedback materially invalidates approved implementation approach or plan but approved problem and requirements remain valid.
+      5. Return to `align_requirements` when feedback materially invalidates approved critical requirements but approved problem and target outcome remain valid.
+      6. Return to `align_problem` when feedback materially invalidates approved problem or target outcome.
+      7. Return to `collect_facts` when repository or domain evidence essential for renewed alignment is missing or stale and cannot be gathered in current stage.
+      8. Return to `collect_project_state` when regression conclusion depends on materially incomplete or stale project baseline that must be rebuilt.
+
+      Constraints: NO code modifications.
+
+  - id: deep_review
+    description: Deeply review implementation results
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Establish independent evidence of implementation correctness, completeness, quality, and regression safety.
+
+      Subagents:
+      1. Apply approved `deep_review` role-to-instance assignments only when subagent tools and exact approved role IDs are available.
+      2. Start every approved independent review instance with separate `subagent_start` call. Same review role MAY produce multiple instances.
+      3. Use `subagent_steer` only for continuation of same atomic review subtask.
+      4. Start approved independent review instances in parallel. Preserve planned dependencies for dependent reviews.
+      5. Main agent reconciles findings, rejects unsupported findings, and owns review conclusion.
+      6. When approved assignment marks review `No subagents`, main agent performs review directly and reports lack of independent review evidence.
+      7. MUST NOT invent, substitute, or silently change approved roles or instance allocation.
+
+      Review dimensions:
+        1) User requirements and goals
+        2) Edge cases and overengineering
+        3) Safe simplification opportunities
+        4) Removable code slop
+        5) New linting, testing, build, or coverage regressions
+
+      Rework rules:
+      1. Return to `preliminary_user_review` when independent review materially changes result or verification information already presented to user and renewed acceptance is required.
+      2. Return to `implement_plan` when independent review confirms implementation defect or required cleanup that needs code changes.
+      3. Return to `create_plan` when approved review role or instance allocation cannot be executed and compliant replacement requires material plan change.
+
+      Constraints: NO code modifications.
+
+  - id: report_completion
+    description: Provide Final Report
+    triggers:
+      - type: local_knowledge_accumulation
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Provide complete final record of delivered result.
+
+      Subagents rules: subagents forbidden
+
+      Provide final feedback in format:
+      1. Summary: brief overview of work done and results achieved
+      2. Design decisions: choices you made where spec was ambiguous
+      3. Deviations: places where you intentionally departed from spec, and why
+      4. Tradeoffs:  alternatives you considered and why you picked what you did
+      5. Open questions: anything you'd want me to confirm or revise
+      6. TODOs, FIXMEs, or technical debt introduced
+      7. Deprecations: features, functions, or components that were deprecated
+      8. Risks: any potential risks or issues that may arise
+      9. Present Commit Message to User: present commit message for your changes in conventional commit format. Choose language based on project conventions. If no conventions exist, use English.
+
+      Rework rules:
+      1. Return to `deep_review` when final reporting reveals that independent review conclusion is unsupported and requires dedicated review work that cannot be completed in current stage.
+      2. Return to `implement_plan` when final reporting confirms missing implementation, code defect, or user-requested code change.
+      3. Return to `collect_project_state` when final regression conclusion is invalid because project baseline is stale or incomplete and work must restart with refreshed baseline.
+
+      Constraints: NO code modifications.
+    final: true
+
+transitions:
+  - from: collect_project_state
+    to: collect_facts
+    type: advance
+  - from: collect_facts
+    to: align_problem
+    type: advance
+  - from: align_problem
+    to: align_requirements
+    type: advance
+  - from: align_requirements
+    to: create_plan
+    type: advance
+  - from: create_plan
+    to: resolve_open_questions
+    type: advance
+  - from: resolve_open_questions
+    to: confirm_plan
+    type: advance
+  - from: confirm_plan
+    to: implement_plan
+    type: advance
+  - from: implement_plan
+    to: verify_implementation
+    type: advance
+  - from: verify_implementation
+    to: preliminary_user_review
+    type: advance
+  - from: preliminary_user_review
+    to: deep_review
+    type: advance
+  - from: deep_review
+    to: report_completion
+    type: advance
+
+  - from: collect_facts
+    to: collect_project_state
+    type: rework
+  - from: align_problem
+    to: collect_facts
+    type: rework
+  - from: align_requirements
+    to: align_problem
+    type: rework
+  - from: align_requirements
+    to: collect_facts
+    type: rework
+  - from: create_plan
+    to: align_requirements
+    type: rework
+  - from: create_plan
+    to: align_problem
+    type: rework
+  - from: create_plan
+    to: collect_facts
+    type: rework
+  - from: resolve_open_questions
+    to: create_plan
+    type: rework
+  - from: confirm_plan
+    to: resolve_open_questions
+    type: rework
+  - from: implement_plan
+    to: confirm_plan
+    type: rework
+  - from: verify_implementation
+    to: implement_plan
+    type: rework
+  - from: verify_implementation
+    to: create_plan
+    type: rework
+  - from: preliminary_user_review
+    to: verify_implementation
+    type: rework
+  - from: preliminary_user_review
+    to: resolve_open_questions
+    type: rework
+  - from: preliminary_user_review
+    to: create_plan
+    type: rework
+  - from: preliminary_user_review
+    to: align_requirements
+    type: rework
+  - from: preliminary_user_review
+    to: align_problem
+    type: rework
+  - from: preliminary_user_review
+    to: collect_facts
+    type: rework
+  - from: preliminary_user_review
+    to: collect_project_state
+    type: rework
+  - from: deep_review
+    to: preliminary_user_review
+    type: rework
+  - from: report_completion
+    to: deep_review
+    type: rework
+  - from: confirm_plan
+    to: create_plan
+    type: rework
+  - from: implement_plan
+    to: create_plan
+    type: rework
+  - from: preliminary_user_review
+    to: implement_plan
+    type: rework
+  - from: deep_review
+    to: implement_plan
+    type: rework
+  - from: deep_review
+    to: create_plan
+    type: rework
+  - from: report_completion
+    to: implement_plan
+    type: rework
+  - from: report_completion
+    to: collect_project_state
+    type: rework

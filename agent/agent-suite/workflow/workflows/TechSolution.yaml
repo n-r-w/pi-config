@@ -4,15 +4,14 @@ prompt: |-
   Shared workflow goal: Produce a technical solution for a problem with minimal requirements and design work.
 
   Shared rules:
-  1. Follow `brainstorming` skill and `<user_communication>` rules
-  2. Use `templates` and `anti-ambiguity` skills for artifacts.
+  1. MUST strictly follow `<user_communication>` rules
+  2. Use `templates` skill for artifacts, not for communication
   3. Follow KISS and YAGNI. Add content only when it supports a decision, review, handoff, or material risk.
   4. Ground claims in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
   5. Treat Domain Glossary as terminology source of truth. Use its definitions in every artifact; define or update a term there before using a new or changed meaning elsewhere.
   6. Complete content work before style or formatting polish.
-  7. Before completing each executed phase, apply `anti-ambiguity` skill and `No Overspecification` rules to its output and affected artifacts.
+  7. Before completing each executed phase, apply `No Overspecification` rules to its output and affected artifacts.
   8. Phase remains incomplete until its completion criteria and ambiguity review pass.
-  9. MUST strictly follow `<user_communication>` rules
 
   No Overspecification:
   1. Keep output focused on what is essential for understanding and implementation.
@@ -21,13 +20,15 @@ prompt: |-
   4. Leave non-essential details to implementation phase.
   5. KISS and YAGNI principles apply here as well.
 
-  Interview protocol:
-  1. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture, trade-offs, or skipped phases.
-  2. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
-  3. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
-  4. Start with a root round covering problem and audience plus core behavior. Let answers determine next branch.
-  5. Ask 1-4 related questions per round. For each question, provide 2–4 concrete mutually exclusive options. Put recommended option first and label it `(Recommended)` only when there is evidence for a recommendation.
-  6. Prefix short question in each decision question with a specific header chip no longer than 12 characters. Use an ASCII preview or option snippet when seeing choice makes decision easier.
+  User interview protocol:
+  1. Follow `<user_communication>`
+  2. Resolve questions that materially affect requested outcome until user and agent have confirmed shared understanding of problem, audience, core behavior, and scope.
+  3. Do not make design decisions behind scenes. Obtain explicit user approval for decisions that affect scope, behavior, architecture or trade-offs.
+  4. Traverse design tree depth-first: follow a newly opened question branch before returning to broader dimensions.
+  5. Cover these dimensions when they affect requested output: problem and audience; core behavior and happy path; scope boundaries; UX states and transitions; platforms and performance, scale, security, and accessibility constraints; edge cases and failures.
+  6. When problem, audience, or core behavior is unclear, start with a root round covering missing parts. Let answers determine next branch.
+  7. Ask 1-4 related questions per round. Format decision questions according to `<user_communication>`
+  8. Use an ASCII preview or option snippet when seeing choice makes decision easier.
 
   Output quality criteria:
   1. Keep artifacts simple, self-contained, and free of unnecessary duplication.
@@ -50,9 +51,14 @@ stages:
       1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
       2. Use subagents to collect additional information on codebase or logically related non-primary resources.
 
-      Required work:
+      Actions:
       1. Identify relevant information sources
       2. Gather Information: execute appropriate subagents to gather different evidence
+
+      Constraints:
+      1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      2. MUST NOT discuss goals, problems, solutions, etc.
+
     initial: true
 
   - id: define_problem
@@ -68,7 +74,7 @@ stages:
         1. Problem Statement and Domain Glossary.
         2. If user ask to save PRD to file, use {relevant name}_problem.md file name.
 
-      Required work:
+      Actions:
       1. Understand problem and audience.
       2. Study provided materials, codebase, and documentation.
       3. Define problem statement and domain glossary.
@@ -113,7 +119,7 @@ stages:
 
       Subagents: forbidden
 
-      Required work:
+      Actions:
       1. Identify minimum set of critical requirements needed to validate problem and solution.
       2. Identify open questions.
       3. Classify open questions as blockers or non-blockers:
@@ -166,7 +172,7 @@ stages:
         1. Technical Solution.
         2. If user ask to save Technical Solution to file, use {relevant name}_solution.md file name.
 
-      Required work:
+      Actions:
       1. Define technical solution that meets critical requirements and is consistent with approved problem statement and domain glossary.
 
       Rework rules:
@@ -206,7 +212,7 @@ stages:
       9. Leave details that do not affect plan to implementation stage.
       10. Stop research when evidence is sufficient to complete plan and evaluate implementation readiness.
 
-      Required work:
+      Actions:
       1. Map Technical Solution to existing code and project structure.
       2. Evaluate implementation approaches where unresolved choice affects plan.
       3. Build full actionable implementation plan.

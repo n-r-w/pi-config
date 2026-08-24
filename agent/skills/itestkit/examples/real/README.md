@@ -2,8 +2,8 @@
 
 This example demonstrates a structure closely resembling a real-world project:
 
-1. `service` - service code.
-2. `itests` - integration tests using `itestkit`.
+1. `/Users/rvnikulenk/dev/bronevik/itestkit/examples/real/service` - service code.
+2. `/Users/rvnikulenk/dev/bronevik/itestkit/examples/real/itests` - integration tests using `itestkit`.
 
 ## What's in `service`
 
@@ -46,8 +46,8 @@ This example demonstrates a structure closely resembling a real-world project:
 
 Cases are located in:
 
-- `itests/cases/api_returns_serving_for_standard_order.jsonc`
-- `itests/cases/api_returns_service_unknown_for_large_order.jsonc`
+- `/Users/rvnikulenk/dev/bronevik/itestkit/examples/real/itests/cases/api_returns_serving_for_standard_order.jsonc`
+- `/Users/rvnikulenk/dev/bronevik/itestkit/examples/real/itests/cases/api_returns_service_unknown_for_large_order.jsonc`
 
 Each case verifies three levels at once:
 
@@ -57,7 +57,7 @@ Each case verifies three levels at once:
 
 ## What's the "magic" in `{{steps...}}`
 
-The case `/itests/cases/api_returns_service_unknown_for_large_order.jsonc`
+The case `/Users/rvnikulenk/dev/bronevik/itestkit/examples/real/itests/cases/api_returns_service_unknown_for_large_order.jsonc`
 uses runtime substitution of values from output of previous steps.
 
 Example:
