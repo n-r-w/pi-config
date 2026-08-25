@@ -70,7 +70,7 @@ stages:
       1. Draft analysis plan: questions to answer, methods, evidence sources, phases, verification criteria.
       2. Ground plan in collected facts and problem understanding.
       3. Apply KISS and YAGNI. Keep plan minimal.
-      4. When a blocker requiring user input is found, record it and plan around it.
+      4. When a blocker requires user input, record it and propose possible resolutions without choosing one.
 
       Rework rules:
       1. Return to `understand_problem` when planning reveals misunderstood problem or scope.

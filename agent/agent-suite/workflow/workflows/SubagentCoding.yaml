@@ -90,7 +90,7 @@ stages:
       5. Apply KISS and YAGNI. Revise approach when it contains unnecessary complexity.
       6. Break selected approach into actionable slices.
       7. TDD (RED-GREEN-REFACTOR) MUST be analyzed, justified, and explicitly documented in plan, even if it not required.
-      8. When a blocker requiring user input is found, record it and plan around it.
+      8. When a blocker requiring user input is found, record it and propose possible resolutions without choosing one.
 
       Rework rules:
       1. Return to `collect_facts` when evidence essential to choose approach or evaluate dependencies is missing or stale and cannot be gathered in current stage.

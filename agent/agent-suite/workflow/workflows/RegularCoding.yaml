@@ -189,16 +189,6 @@ stages:
     prompt: |-
       Goal: Produce verified implementation matching user request and approved plan without regressions or residue.
 
-      Subagents:
-      1. Apply approved `implement_plan` role-to-instance assignments only when subagent tools and exact approved role IDs are available.
-      2. Start every approved instance with separate `subagent_start` call. Pass approved role ID as `agentId` and keep returned session ID as instance identity.
-      3. Start new instance for every independent atomic subtask. Same role ID MAY be used by any number of separate instances.
-      4. Use `subagent_steer` only for refinement or continuation of same atomic subtask. MUST NOT reuse instance for different subtask.
-      5. Start approved parallel batch only when dependency map proves all subtasks independent.
-      6. Main agent orchestrates instances, reviews changes, runs integrated verification, and owns final conclusion.
-      7. When approved assignment marks atomic subtask `No subagents`, main agent performs that subtask directly.
-      8. MUST NOT invent, add, remove, substitute roles, or change instance allocation behind scenes.
-
       Actions:
       1. Execute approved role-to-instance assignments and planned tasks.
       2. Execute only approved plan and scope.

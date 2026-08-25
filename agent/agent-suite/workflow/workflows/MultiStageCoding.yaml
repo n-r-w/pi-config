@@ -135,7 +135,7 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Produce evidence-based actionable plan split into independently verifiable implementation units.
+      Goal: Produce evidence-based actionable plan split into independently verifiable vertical implementation units.
 
       Subagents: if needed
 
@@ -153,17 +153,19 @@ stages:
       2. Return to `align_problem` when approach evaluation materially invalidates confirmed problem or target outcome.
       3. Return to `collect_facts` when evidence essential to choose approach or evaluate dependencies is missing or stale and cannot be gathered in current stage.
 
-      Break work into implementation units:
-      1. Map each existing ticket to one implementation unit when ticket is independently actionable and verifiable.
-      2. Split ticket only when one stage cannot complete it safely within single fresh context window.
-      3. Merge units only when separating them would create invalid or unverifiable intermediate state.
-      4. Make each unit complete, independently verifiable, and reviewable.
-      5. Record inputs, expected result, affected components, checks, completion criteria, and local commit boundary for each unit.
-      6. Record dependencies between units and derive execution order. Do not invent dependency between independent units.
-      7. Put shared prefactoring before dependent units.
-      8. Apply TDD when it provides behavioral value: RED -> GREEN -> REFACTOR.
-      9. Include final integrated verification and cleanup after all units.
-      10. Treat unit IDs, ticket IDs, stage names, phase names, slice names, and plan labels as workflow metadata only. MUST NOT use them as code terminology unless they are required domain terms or external contract terms.
+      Break work into vertical slices:
+      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) — vertical, NOT a horizontal slice of one layer
+      2. A completed slice is demoable or verifiable on its own
+      3. Each slice is sized to fit in a single fresh context window
+      4. Any prefactoring should be done first
+      5. Follow TDD principles if possible: RED -> GREEN -> REFACTOR. Slices should preserve testability whenever practical.
+      6. Keep slices meaningful, testable, and easy to review. Avoid slices that are so small they add process overhead or so large they hide risk.
+      7. Combine setup and verification work when separating them would leave system in a hard-to-test or misleading intermediate state.
+      8. Include final cleanup step that removes temporary code, workarounds, debugging artifacts, and other implementation residue.
+      9. Critical risk: trying to make every slices testable can easily lead to inventing unnecessary logic and tests that will not provide real value when looking at task as a whole.
+      10. Map each existing ticket to one slice only when it is independently actionable and verifiable. Split or merge tickets only when needed for slice size or a valid intermediate state. Every resulting slice MUST satisfy the rules above.
+      11. Record inputs, expected result, affected components, checks, completion criteria, local commit boundary, dependencies, and execution order for each slice. Do not invent dependencies between independent slices.
+      12. Treat unit IDs, ticket IDs, stage names, phase names, slice names, and plan labels as workflow metadata only. MUST NOT use them as code terminology unless they are required domain terms or external contract terms.
 
       Plan user verification policy:
       1. After implementation units are defined, MUST ask user to choose verification policy. MUST NOT infer or default policy.
@@ -199,14 +201,14 @@ stages:
       3. Use additional independent analyst perspectives when needed.
       4. Select best approach from evidence.
       5. Apply KISS and YAGNI. Revise approach when it contains unnecessary complexity.
-      6. Produce ordered implementation units with stable short IDs.
+      6. Produce ordered vertical implementation units with stable short IDs.
       7. Define dependency graph and explain every ordering constraint.
       8. Analyze and document TDD decision for each unit.
       9. Obtain explicit user choice of verification policy and exact review points. Do not continue while policy is unresolved.
       10. Produce stage-by-stage role-to-instance assignment matrix according to subagent planning rules.
       11. Ensure plan has at least two implementation units. Use `ComplexCoding` when one unit is sufficient.
       12. Keep generated workflow within 64 stages and 256 transitions. Group units when generated graph would exceed either limit without hiding dependencies or verification scope.
-      13. Plan one local commit after successful verification of each implementation unit. When unit requires user review, user acceptance MUST occur before commit. MUST NOT plan any push operation.
+      13. Plan one initial local commit after successful verification of each implementation unit. When unit requires user review, user acceptance MUST occur before commit. Plan corrective commits for rework that changes completed units. MUST NOT plan any push operation.
       14. Include workflow-artifact scan before verification and commit of every implementation unit.
 
       Constraints: NO code modifications.
@@ -282,13 +284,15 @@ stages:
 
       Subagents: forbidden
 
+      Vertical-slice rules: use `create_plan`'s `Break work into vertical slices` section as the authoritative source. Do not duplicate or reinterpret those rules in this stage.
+
       Actions:
-      1. Convert approved plan into complete `workflow_create` definition.
+      1. Confirm every approved implementation unit still satisfies the vertical-slice rules from `create_plan`, then convert the approved plan into a complete `workflow_create` definition. If any unit does not satisfy them, return to `create_plan`; do not change approved unit boundaries in this stage.
       2. Use unique workflow ID derived from task. ID must contain 6-32 characters and MUST NOT match ready-made workflow ID.
       3. Configure generated root prompt:
         1) Include approved problem, target outcome, requirements, plan, user-verification policy, exact review points, role-to-instance assignment matrix, shared constraints, baseline, and complete Return policy from workflow root prompt
         2) Define role as reusable available-subagent ID and instance as separate session for one atomic subtask
-        3) Require one local commit per implementation unit after successful verification. Require explicit user acceptance before commit when unit has user review. Prohibit push under all circumstances
+        3) Require one initial local commit per implementation unit after successful verification. Require a separate corrective commit when rework changes a previously committed unit. Do not create a commit when re-entry produces no file changes. Require explicit user acceptance before each commit when unit has user review. Prohibit push under all circumstances
         4) Treat workflow stage names, unit IDs, ticket IDs, task names, phase names, slice names, plan labels, and subagent labels as workflow metadata. Prohibit them in code unless required domain or external-contract terms
         5) Add dynamic stage maintenance rules:
           - When new evidence materially invalidates current, future, or re-enterable stage instructions, MUST read exact stage with `workflow_get_stage` before executing or editing it
@@ -300,7 +304,7 @@ stages:
           - Do not edit completed stage only to rewrite history. Edit it only when stage can be re-entered and stale instructions affect future work
       4. Generate stages in this order:
         1) `plan_guard` as only initial stage
-        2) One implementation stage for each approved implementation unit
+        2) One implementation stage for each approved vertical implementation unit
         3) Per-unit user review stage immediately after each unit required by approved verification policy
         4) `integrated_verification`
         5) `user_review`
@@ -332,21 +336,21 @@ stages:
         4) When approved update changes only current or future stage description, prompt, or thinking, use `workflow_get_stage` and `workflow_edit_stage` while preserving graph and root prompt
         5) When approved update changes stage set, order, transitions, triggers, or root prompt, call `workflow_create` with replacement definition and stop old workflow immediately
       8. Configure each generated implementation stage:
-        1) Goal describes verified result of exactly one approved implementation unit
-        2) Prompt includes unit inputs, scope, expected result, TDD decision, workflow-artifact scan, checks, commit boundary, and completion criteria
+        1) Goal describes verified result of exactly one approved vertical implementation unit
+        2) Prompt includes unit inputs, scope, expected result, TDD decision, workflow-artifact scan, checks, commit boundary, completion criteria, and a reference to the approved vertical-slice boundaries defined under `create_plan` rules
         3) Apply exact approved role-to-instance assignments when available. Main agent starts separate instance per atomic subtask, orchestrates instances, and verifies results
         4) Implement only assigned unit
         5) Treat stage name, unit ID, ticket ID, task name, phase name, slice name, plan label, and subagent label as workflow metadata only. MUST NOT copy them into production code, test code, identifiers, comments, file names, logs, metrics, configuration keys, schema names, error messages, or test names unless term is required by domain behavior or external contract
-        6) Before verification, inspect complete stage diff for workflow metadata. Remove comments that describe plan or work sequence. Rename artifacts after domain behavior. When cleanup changes code, rerun affected checks
-        7) Run targeted checks after workflow-artifact cleanup. Main agent verifies both own work and subagent changes before advancing
+        6) Before verification, inspect complete stage diff for workflow metadata and implementation residue. Remove comments that describe plan or work sequence, temporary code, workarounds, and debugging artifacts. Rename artifacts after domain behavior. When cleanup changes code, rerun affected checks
+        7) Run targeted checks after cleanup. Main agent verifies both own work and subagent changes before advancing
         8) When approved policy requires user review after current unit, MUST NOT stage or commit unit changes in implementation stage. Advance to paired review with verified uncommitted diff
-        9) When approved policy does not require review after current unit, main agent stages only unit changes and creates one local commit after targeted checks and main-agent verification
-        10) Exclude pre-existing and unrelated changes from commit. Record created commit hash in stage result
-        11) Use project commit conventions. Do not create empty commit when stage produced no file changes
-        12) On re-entry after rework, inspect existing work, fix required issue, run workflow-artifact scan, and verify it. Commit only at policy-defined point. Do not amend or rewrite previous unit commits without explicit user approval
+        9) On initial completion without required user review, main agent stages only unit changes and creates one local commit after targeted checks and main-agent verification
+        10) Exclude pre-existing and unrelated changes from commit. Record every created commit hash in stage result
+        11) Use project commit conventions. Do not create empty commits
+        12) On re-entry after rework, inspect existing work, fix the required issue, run the workflow-artifact scan, and verify the slice. When the correction changes files, follow the same review policy and create a separate corrective commit at the policy-defined point. When the slice has no file changes, advance after verification using its recorded acceptance and commit; request renewed user acceptance only when observable behavior or review evidence materially changed. Do not amend or rewrite previous unit commits without explicit user approval
         13) Subagents MUST NOT commit or push. Main agent owns workflow-artifact scan and policy-controlled commit
         14) MUST NOT run `git push` or any command that updates remote refs under any circumstances
-        15) Set completion criteria by policy: reviewed unit requires verified uncommitted diff and no commit; unreviewed unit requires successful local commit
+        15) Set completion criteria by policy and entry state: initial reviewed unit requires verified uncommitted diff and no commit; initial unreviewed unit requires a successful local commit; changed re-entry follows the same policy and requires a corrective commit at its commit point; unchanged re-entry requires successful verification and its recorded commit
         16) Use unique single-line stage ID with at most 32 characters
       9. Configure generated per-unit user review stages according to approved verification policy:
         1) For `final_only`, create no per-unit user review stages
@@ -356,15 +360,16 @@ stages:
         5) Omit `Subagents`. Main agent owns user interaction, acceptance, and commit
         6) Present verified uncommitted diff, targeted check evidence, deviations, and planned commit boundary
         7) Wait for explicit user acceptance. MUST NOT commit or advance before acceptance
-        8) After acceptance, main agent stages only paired unit changes, excludes pre-existing and unrelated changes, creates one local commit, and records commit hash
-        9) User request for changes or renewed verification returns to paired implementation stage before commit
-        10) Feedback that invalidates goal, requirements, dependencies, unit boundaries, or plan returns to `plan_guard` before commit
-        11) Completion criteria require explicit user acceptance and successful local commit
-        12) MUST NOT run `git push` or any command that updates remote refs
+        8) After acceptance, main agent stages only paired unit changes, excludes pre-existing and unrelated changes, creates the initial or corrective local commit, and records commit hash
+        9) On re-entry with no paired unit file changes, present refreshed verification evidence and advance without a new commit. When observable behavior or review evidence materially changed, wait for renewed explicit acceptance. Otherwise preserve prior acceptance
+        10) User request for changes or renewed verification returns to paired implementation stage before commit
+        11) Feedback that invalidates goal, requirements, dependencies, unit boundaries, or plan returns to `plan_guard` before commit
+        12) Completion criteria require explicit user acceptance and a successful local commit for initial or changed completion; unchanged re-entry requires refreshed verification evidence, the recorded commit, and prior or renewed acceptance according to rule 9
+        13) MUST NOT run `git push` or any command that updates remote refs
       10. Configure generated final stages:
-        1) `integrated_verification` runs full tests, linters, build, coverage, regression comparison, requirement check, residue cleanup check, and final diff scan for workflow metadata leaked into code
-        2) `user_review` presents per-unit results and integrated verification, then waits for explicit acceptance
-        3) `report_completion` provides final report and list of local commits created for implementation units
+        1) `integrated_verification` checks that final cleanup removed temporary code, workarounds, debugging artifacts, other implementation residue, and workflow metadata leaked into code. When residue remains, return to the responsible implementation stage for removal. When the diff is clean, run full tests, linters, build, coverage, regression comparison, and requirement check
+        2) `user_review` presents per-unit results, final cleanup evidence, and integrated verification, then waits for explicit acceptance
+        3) `report_completion` provides final report and list of all local implementation and corrective commits
       11. Build generated advance chain according to approved verification policy:
         1) `plan_guard` to first implementation stage
         2) Implementation stage with required review advances to paired per-unit review stage
@@ -395,29 +400,31 @@ stages:
         10) `final_only` creates no per-unit review stages
         11) `every_unit` creates exactly one review stage immediately after every implementation stage
         12) `selected_units` creates review stages only after exact approved units
-        13) Every per-unit review blocks commit and advance until explicit user acceptance, then creates paired unit commit
+        13) Every initial or changed per-unit review blocks commit and advance until explicit user acceptance, then creates the paired initial or corrective commit. Unchanged re-entry creates no commit; it reuses prior acceptance when behavior and evidence remain valid, or blocks advance until renewed explicit acceptance when either materially changed
         14) Exactly one initial stage and at least one final stage
         15) Every non-final stage has outgoing advance transition
         16) Final stage has no outgoing advance transition and has at least one outgoing rework transition
         17) Advance graph is acyclic and reaches every stage
         18) Every rework target is strict advance ancestor
         19) Every stage with outgoing rework has matching explicit conditions
-        20) Every implementation unit creates one local commit after successful verification and any required user acceptance, excludes unrelated changes, records commit hash, and prohibits push for main agent and subagents
-        21) Every implementation stage and `integrated_verification` scan changed code for workflow metadata and allow matching terms only when required by domain behavior or external contract
+        20) Every implementation unit creates one initial local commit after successful verification and any required user acceptance. Rework that changes a committed unit creates a separate corrective commit; unchanged re-entry creates no commit. Every commit excludes unrelated changes, records its hash, and prohibits push for main agent and subagents
+        21) Every implementation stage removes its own temporary code, workarounds, debugging artifacts, other implementation residue, and workflow metadata before verification. `integrated_verification` performs the final cleanup check and returns residue to the responsible implementation stage before running all checks. Matching workflow terms are allowed only when required by domain behavior or external contract
         22) Generated root prompt requires `workflow_get_stage` before `workflow_edit_stage` whenever current, future, or re-enterable stage instructions become stale
         23) Stage edits preserve graph, root prompt, approved decisions, and unaffected instructions. Changes to graph or root prompt use approved replacement `workflow_create`
       16. Call `workflow_create` exactly once with complete validated definition. Successful call activates `plan_guard` immediately.
       17. Stop work in this workflow immediately after successful tool call. Do not report completion or attempt another transition.
+      18. Don't over-inflate prompts - choose bare minimum. If there are external artifacts, reference them instead of duplicating information.
 
       Rework rules:
       1. Return to `confirm_plan` when explicit implementation approval is missing or generated workflow would materially deviate from approved decisions. Fix formatting and local construction errors in current stage.
       2. Return to `resolve_open_questions` when workflow construction reveals blocking question whose answer can materially change generated workflow and cannot be resolved in current stage.
-      3. Return to `create_plan` when approved implementation units, dependencies, completion criteria, verification policy, review points, role selection, or instance allocation are structurally unable to produce valid workflow and require material replanning.
+      3. Return to `create_plan` when any approved implementation unit is not a vertical slice, or when approved dependencies, completion criteria, verification policy, review points, role selection, or instance allocation are structurally unable to produce a valid workflow and require material replanning.
 
       Constraints:
       1. NO code modifications.
       2. MUST NOT call `workflow_create` before full definition passes validation.
       3. MUST NOT define any stage after `create_implementation_workflow` in this catalog workflow.
+      4. Vertical slices break down is MANDATORY.
     final: true
 
 transitions:
