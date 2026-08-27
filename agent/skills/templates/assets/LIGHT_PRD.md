@@ -8,6 +8,7 @@
   6. `<id_guidelines>` MUST NOT be used.
   7. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
   8. This is not a full specification, but only a light version for quick idea evaluation.
+  9. Requirements without a brief justification are not accepted.
 </light_prd_guidelines>
 -->
 
@@ -33,6 +34,10 @@
 <!--
 Key requirements for the change. Each requirement should be atomic, concrete, and unambiguous.
 Do not try to capture ALL details. Focus on the minimally necessary set of requirements.
+MUST provide a BRIEF justification for each requirement.
+Recommended format:
+  - [Requirement]
+    Justification: [Brief explanation of why this requirement is necessary]
 -->
 
 ## Open Questions

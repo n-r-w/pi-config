@@ -12,6 +12,7 @@ prompt: |-
   6. Complete content work before style or formatting polish.
   7. Before completing each executed phase, apply `No Overspecification` rules to its output and affected artifacts.
   8. Phase remains incomplete until its completion criteria and ambiguity review pass.
+  9. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
   No Overspecification:
   1. Keep output focused on what is essential for understanding and implementation.
@@ -56,7 +57,7 @@ stages:
       2. Gather Information: execute appropriate subagents to gather different evidence
 
       Constraints:
-      1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      1. MUST NOT go deep into problem. Only collect relevant RAW facts!
       2. MUST NOT discuss goals, problems, solutions, etc.
 
     initial: true
@@ -64,11 +65,11 @@ stages:
   - id: define_problem
     description: Create Problem Statement and Domain Glossary
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Obtain approved Problem Statement and Domain Glossary with no unresolved blockers.
 
-      Subagents: forbidden
+      Subagents: ONLY with explicit user permission
 
       Output:
         1. Problem Statement and Domain Glossary.
@@ -87,7 +88,7 @@ stages:
       Complete phase only when:
       1. Problem statement and domain glossary are defined
       2. No blocker remains
-      3. All open questions are discussed with the user.
+      3. All open questions are discussed with user.
       4. Shared quality checks pass,
       5. Problem statement and domain glossary have been presented, then explicitly approved by user in a separate decision question.
 
@@ -100,7 +101,7 @@ stages:
     prompt: |-
       Goal: Problem Statement and Domain Glossary remain approved and ready for requirements design.
 
-      Subagents: forbidden
+      Subagents: ONLY with explicit user permission
 
       Rework rules:
       1. Return to `define_problem` when user asks to rework Problem Statement or Domain Glossary.
@@ -117,12 +118,13 @@ stages:
         1. Light Product Requirements Document (Light PRD)
         2. If user ask to save PRD to file, use {relevant name}_prd.md file name.
 
-      Subagents: forbidden
+      Subagents: ONLY with explicit user permission
 
       Actions:
       1. Identify minimum set of critical requirements needed to validate problem and solution.
-      2. Identify open questions.
-      3. Classify open questions as blockers or non-blockers:
+      2. Define brief justification for each requirement.
+      3. Identify open questions.
+      4. Classify open questions as blockers or non-blockers:
         1) Blockers must be resolved and converted to requirements
         2) Non-blockers must be removed from Light PRD
 
@@ -135,7 +137,8 @@ stages:
       1. Critical requirements are defined
       2. No blocker remains
       3. Shared quality checks pass
-      4. Light PRD has been presented, then explicitly approved by user in a separate decision question
+      4. EACH requirement has an explicitly stated brief justification.
+      5. Light PRD has been presented, then explicitly approved by user in a separate decision question
 
       Rework rules:
       1. Return to `collect_facts` when missing evidence blocks requirement definition.
@@ -152,7 +155,7 @@ stages:
     prompt: |-
       Goal: Light PRD remains approved and ready for technical design.
 
-      Subagents: forbidden
+      Subagents: ONLY with explicit user permission
 
       Rework rules:
       1. Return to `define_PRD` when user asks to rework Light PRD.
@@ -166,7 +169,7 @@ stages:
     prompt: |-
       Goal: Obtain approved Technical Solution that meets critical requirements and solves problem.
 
-      Subagents: forbidden
+      Subagents: ONLY with explicit user permission
 
       Output:
         1. Technical Solution.
@@ -198,7 +201,18 @@ stages:
       Output:
       1. When no blocker is found, report only that requirements and Technical Solution are ready for implementation.
       2. When blocker is found, return automatically to appropriate rework stage.
-      3. Do not present implementation plan to user.
+      3. Do not present implementation plan contents to user, only file path.
+
+      Break work into vertical slices:
+      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) - vertical, NOT a horizontal slice of one layer
+      2. A completed slice is demoable or verifiable on its own
+      3. Each slice is sized to fit in a single fresh context window
+      4. Any prefactoring should be done first
+      5. Follow TDD principles if possible: RED -> GREEN -> REFACTOR. Slices should preserve testability whenever practical.
+      6. Keep slices meaningful, testable, and easy to review. Avoid slices that are so small they add process overhead or so large they hide risk.
+      7. Combine setup and verification work when separating them would leave system in a hard-to-test or misleading intermediate state.
+      8. Include final cleanup step that removes temporary code, workarounds, debugging artifacts, and other implementation residue.
+      9. Critical risk: trying to make every slices testable can easily lead to inventing unnecessary logic and tests that will not provide real value when looking at task as a whole.
 
       Planning rules:
       1. Read relevant file contents before making decisions. Do not assume file contents.
@@ -211,6 +225,7 @@ stages:
       8. Do not convert implementation fact or constraint into critical requirement when it follows from approved artifacts, existing code, or project conventions.
       9. Leave details that do not affect plan to implementation stage.
       10. Stop research when evidence is sufficient to complete plan and evaluate implementation readiness.
+      11. REMEMBER: dry run plan is a TEMPORARY internal artifact. If it contains significant information for main documentation, it should be transferred to main documentation.
 
       Actions:
       1. Map Technical Solution to existing code and project structure.
@@ -218,7 +233,9 @@ stages:
       3. Build full actionable implementation plan.
       4. Identify blockers that require artifact revision or user decision.
       5. Revise plan after autonomously resolving factual questions and local implementation choices.
-      6. Use implementation plan only as internal validation artifact.
+      6. Save plan as a file in system temporary directory.
+      7. Present absolute path to created plan file to user, but do not show file contents.
+      8. Use implementation plan only as internal workflow validation artifact. MUST NOT use this plan outside of this workflow.
 
       Rework rules:
       1. Return to `collect_facts` when missing or stale evidence prevents completion of implementation plan.
@@ -246,7 +263,7 @@ stages:
     prompt: |-
       Goal: Technical Solution remains approved and ready for implementation handoff.
 
-      Subagents: forbidden
+      Subagents: ONLY with explicit user permission
 
       Rework rules:
       1. Return to `define_technical_solution` when user asks to rework Technical Solution.

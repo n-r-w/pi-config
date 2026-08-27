@@ -41,7 +41,8 @@ workflows: [
   "MultiStageCoding",
   "GitMerge",
   "InformationExtraction",
-  "TechSolution"
+  "TechSolution",
+  "StructuralRefactoring"
 ]
 ---
 

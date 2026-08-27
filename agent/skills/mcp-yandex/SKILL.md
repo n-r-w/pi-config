@@ -1,6 +1,6 @@
 ---
 name: mcp-yandex
-description: Guidelines for using Yandex Wiki (documentation) & Yandex Tracker (tasks, bugs, issues) via MCP. MUST be followed when working with Yandex documents and tasks.
+description: Guidelines for using Yandex Wiki and Yandex Tracker via MCP. CAN be read and followed ONLY when Yandex MCP tools are available in current session. MUST NOT be read or applied otherwise.
 metadata:
   uri: https://github.com/n-r-w/yandex-mcp
 ---
@@ -11,15 +11,15 @@ metadata:
   </critical_notice>
   <document_analysis>
     1. After receiving any document or task:
-      1) Analyze all links in the text.
-      2) Select the links that are necessary for solving the current task.
-      3) For the selected links:
+      1) Analyze all links in text.
+      2) Select links that are necessary for solving current task.
+      3) For selected links:
         * If it is a link to Yandex Wiki or Tracker, use MCP for access.
         * If it is an external link, use available tools for downloading.
     2. Use redirect options if documents are not accessible directly.
   </document_analysis>
   <document_referencing>
-    🚨 NEVER shorten links to Yandex Wiki and Yandex Tracker page/slug in documentation, even if they are long. Otherwise, the link will be invalid for the user.
+    🚨 NEVER shorten links to Yandex Wiki and Yandex Tracker page/slug in documentation, even if they are long. Otherwise, link will be invalid for user.
   </document_referencing>
   <tracker_tasks>
     <statuses>
@@ -48,7 +48,7 @@ metadata:
       1. Available fields for user-based search:
         1) `assignee`: task assignee
         2) `created_by`: task author
-        3) `updated_by`: last user who updated the task
+        3) `updated_by`: last user who updated task
         4) `followers`: task followers
       2. Special values:
         1) `me()`: current authorized user

@@ -95,8 +95,8 @@ Recommendations:
    - total `expected_calls`,
    - counter for each `service` (`service -> count`).
 3. Separate verifications:
-   - `assert` — service API response,
-   - `verify` — side effects of external calls.
+   - `assert` - service API response,
+   - `verify` - side effects of external calls.
 4. Explicitly document chosen verification mode in the case:
    - `strict order` (order is mandatory),
    - `any order` (only composition/quantity matters).

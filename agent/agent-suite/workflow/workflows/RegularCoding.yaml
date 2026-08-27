@@ -7,6 +7,7 @@ prompt: |-
   2. Do not silently choose a local workaround over a broader structural fix because workaround is faster, more local, or appears to remain within scope.
   3. Classify new facts with Return policy. Continue current stage for local deviations. Stop and report only when evidence materially invalidates approved goal, critical requirements, approach, or material trade-off, or blocker cannot be resolved without violating them.
   4. MUST strictly follow `<user_communication>` rules
+  5. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
   Return policy:
   1. Treat rework as exceptional. Stay in current stage by default.
@@ -109,7 +110,7 @@ stages:
       2. Return to `preleminary_extraction` when evidence essential to choose approach or evaluate dependencies is missing or stale and cannot be gathered in current stage.
 
       Break work into vertical slices:
-      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) — vertical, NOT a horizontal slice of one layer
+      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) - vertical, NOT a horizontal slice of one layer
       2. A completed slice is demoable or verifiable on its own
       3. Each slice is sized to fit in a single fresh context window
       4. Any prefactoring should be done first
@@ -202,6 +203,7 @@ stages:
       10. Compare check results with baseline from `preleminary_extraction`. Identify regressions caused by implementation.
       11. Identify and remove temporary code, workarounds, debugging artifacts, and code slop introduced during implementation.
       12. Fix implementation problems within approved plan and repeat affected checks until verification passes.
+      13. MUST comment code so as not to force developers to guess about implemented logic.
 
       Rework rules:
       1. Return to `create_plan` when evidence materially invalidates approved approach, architecture, scope, dependencies, or material trade-offs, or approved role or instance allocation cannot be executed and replacement requires replanning. Handle implementation defects and equivalent technical adjustments in current stage.

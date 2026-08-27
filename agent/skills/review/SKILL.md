@@ -115,7 +115,7 @@ description: Review standards and best practices. Use EXACTLY BEFORE performing 
       1. Explaining "how" instead of "why"
       2. Outdated comments that don't reflect current code
       3. Functions and variables without comments (even if they are self-explanatory)
-      4. Lack of comments in complex code sections
+      4. Lack of comments in complex code sections. If code is regular or complex, it MUST be commented. EVEN it self-explanatory.
       5. REMEMBER: bad commenting equals bad maintainability. DON'T allow it!
     </area>
     <area name="Documentation">

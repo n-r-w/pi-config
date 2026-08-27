@@ -6,6 +6,7 @@ prompt: |-
   3. Over-specifying uncertain decisions can create inconsistencies and implementation errors.
   4. Leave non-essential details to implementation phase.
   5. KISS and YAGNI principles apply here as well.
+  6. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
 stages:
   - id: analyze_solution
@@ -13,6 +14,7 @@ stages:
     prompt: |-
       Goal: Establish evidence-backed model of proposed solution, boundaries, intended behavior, and assumptions.
 
+      Actions:
       1. Identify proposed solution, boundaries, intended behavior, and supplied evidence.
       2. Separate verified facts from assumptions and unresolved questions.
     initial: true
@@ -22,6 +24,7 @@ stages:
     prompt: |-
       Goal: Establish end goal, target outcome, and material constraints.
 
+      Actions:
       1. Determine problem being solved, end goal, and target outcome.
       2. Identify hidden assumptions or constraints that materially change evaluation.
 
@@ -33,6 +36,7 @@ stages:
     prompt: |-
       Goal: Build codebase evidence for evaluating solution fit.
 
+      Actions:
       1. Inspect relevant code, architecture, behavior, constraints, and project conventions.
       2. Identify claims or designs that lack sufficient code understanding.
       3. Verify that local changes fit global strategy.
@@ -45,6 +49,7 @@ stages:
     prompt: |-
       Goal: Produce evidence-backed set of material critique findings.
 
+      Actions:
       1. Identify errors, missing information, unnecessary complexity, premature detail, risks, and maintainability problems.
       2. Reject unsupported scenarios and temporary workarounds.
       3. Support each finding with evidence and a realistic occurrence scenario.
@@ -57,13 +62,13 @@ stages:
     prompt: |-
       Goal: Produce deduplicated findings classified into required categories.
 
-      Classify every finding into exactly one category:
-      1. Misconceptions: errors in expectations, requirements, task understanding, logic, architecture, or established facts.
-      2. Ambiguities: missing, incomplete, or materially unclear information or requirements.
-      3. Overengineering: unnecessary complexity or abstractions, including solutions for unlikely or nonexistent scenarios.
-      4. Overspecification: details that can be deferred without reducing required clarity or functionality.
-
-      Keep categories separate and remove duplicate findings.
+      Actions:
+      1. Classify every finding into exactly one category:
+         1) Misconceptions: errors in expectations, requirements, task understanding, logic, architecture, or established facts.
+         2) Ambiguities: missing, incomplete, or materially unclear information or requirements.
+         3) Overengineering: unnecessary complexity or abstractions, including solutions for unlikely or nonexistent scenarios.
+         4) Overspecification: details that can be deferred without reducing required clarity or functionality.
+      2. Keep categories separate and remove duplicate findings.
 
       Rework rules:
       1. Return to `identify_findings` when a finding cannot be assigned to exactly one category without revision.
@@ -73,10 +78,13 @@ stages:
     prompt: |-
       Goal: Establish primary-source support, realism, and independent second opinion for every finding.
 
+      Actions:
       1. Verify every finding against code or another primary source.
       2. Assess realism and likelihood of every reported scenario.
       3. Evaluate proposed solution against its end goal, global context, and verified codebase evidence.
       4. Use consult_advisor for a second opinion.
+      5. Limit each recommendation to the required outcome and smallest complete correction.
+      6. Do not design implementation or optional alternatives unless parent requests them.
 
       Rework rules:
       1. Return to `inspect_codebase` when verification identifies a material gap or error.
@@ -88,12 +96,14 @@ stages:
     prompt: |-
       Goal: Deliver structured evidence-backed critique through active collaboration channel.
 
-      Use this structure:
+      Actions:
       1. Brief summary of solution, goal, and context.
       2. Separate sections for Misconceptions, Ambiguities, Overengineering, and Overspecification.
       3. For each finding include: ID and summary; location; issue; impact; occurrence scenario; realism and probability; recommendation; verification method.
-      4. Include every category even when it has no findings.
-      5. Deliver result through active collaboration channel.
+      4. State the required outcome and smallest complete correction in each recommendation.
+      5. Do not design implementation or optional alternatives unless parent requests them.
+      6. Include every category even when it has no findings.
+      7. Deliver result through active collaboration channel.
 
       Rework rules:
       1. Return to `inspect_codebase` when parent feedback requires material changes.

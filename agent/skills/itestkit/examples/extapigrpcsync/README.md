@@ -24,14 +24,14 @@ All three cases validate **our service API** (target = `call-api`), but with dif
 2. `external_grpc_sync_plan_response_ok.jsonc`: 2 sequential external calls, final API status = `NOT_SERVING`.
 3. `external_grpc_sync_verify_response_ok.jsonc`: 3 sequential external calls, final API status = `SERVICE_UNKNOWN`.
 
-In these cases, `verify-external` does not replace API verification — it only additionally confirms outbound side effects.
+In these cases, `verify-external` does not replace API verification - it only additionally confirms outbound side effects.
 
 ## How it works
 
 The `harness` starts two `bufconn` servers:
 
-1. `apiHealthServer` — internal API of the service under test.
-2. `externalHealthServer` — external API mock.
+1. `apiHealthServer` - internal API of the service under test.
+2. `externalHealthServer` - external API mock.
 
 `apiHealthServer` receives an injected `externalClient` and performs outbound calls exactly like production code.
 
@@ -115,9 +115,9 @@ Therefore, subsequent steps can reference `calls.N.expected_service` without dup
   - expectation plan (array of calls: expected request + stub response),
   - journal of actual calls.
 4. Implement handlers:
-  - `PlanExternal...` (`prepare`) — writes the plan,
-  - `Call...` (`action`) — calls your API,
-  - `VerifyExternal...` (`verify`) — validates call journal.
+  - `PlanExternal...` (`prepare`) - writes the plan,
+  - `Call...` (`action`) - calls your API,
+  - `VerifyExternal...` (`verify`) - validates call journal.
 5. In `assert.response_from_step`, explicitly specify which step response should be compared.
 
 ## Run

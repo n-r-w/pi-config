@@ -9,6 +9,7 @@ prompt: |-
   1. MUST strictly follow `<user_communication>` rules
   2. Use `templates` skill for artifacts, not for communication
   3. Ground claims in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact
+  4. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
   User interview protocol:
   1. Follow `<user_communication>`

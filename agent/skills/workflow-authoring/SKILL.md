@@ -37,30 +37,12 @@ disable-model-invocation: true
   1. Root `prompt` is active on every stage. Put only workflow-wide rules there: universal constraints, cross-cutting domain rules, safety guards, workflow gates.
   2. Stage `prompt` is active only when that stage is active. Put stage-specific rules there: goal, actions, completion criteria, stage constraints.
   3. A single-stage rule MUST live in that stage prompt, not in the root prompt.
-  4. Cross-stage decision policy MUST live in root prompt. This includes policy that decides whether any stage stays active or uses `rework`.
-  5. Stage-specific `Rework rules:` MUST define exact target conditions. They MUST NOT restate complete shared return policy.
-  6. When workflow creates replacement workflow, copy every still-required cross-stage policy into generated root prompt. Source root prompt stops applying after replacement.
+  4. Return conditions MUST live in source stage `Rework rules:`, not in root prompt.
+  5. Stage-specific `Rework rules:` MUST define exact target conditions.
+  6. When workflow creates replacement workflow, copy every still-required root rule into generated root prompt. Source root prompt stops applying after replacement.
   7. Do not state a rule graph already enforces. Example: "do not skip stages" is meaningless because transitions prevent skipping.
   8. Do not repeat same rule in root prompt and stage prompt.
 </prompt_placement>
-
-<runtime_return_policy>
-  1. Every workflow with `rework` transitions MUST include shared return policy in root `prompt`.
-  2. Shared return policy controls runtime transition choice. It MUST NOT reduce or replace graph recovery paths.
-  3. Workflow author MUST add every realistic `rework` edge even when shared policy makes edge use exceptional.
-  4. Root `prompt` return policy MUST tell runtime model:
-    1) Stay in current stage by default.
-    2) Before return, identify exact output of target ancestor that became invalid or incomplete.
-    3) Do not return when no ancestor output became invalid and current stage permits correction.
-    4) Handle local errors, failed checks, implementation-detail changes, factual investigation, and clarifications in current stage when stage constraints permit.
-    5) Treat working-detail change as local while goal, critical requirements, behavior, architecture, scope, dependencies, and material trade-offs remain valid.
-    6) Return only when evidence materially invalidates ancestor output or current stage constraints prohibit required correction.
-    7) Return to nearest ancestor that owns invalid output or prohibited correction.
-    8) Do not return only because plan and implementation differ. Return to planning only when mismatch materially invalidates approved plan.
-    9) Investigate evidence gap in current stage first. Return to collection only when required evidence cannot be gathered or refreshed there.
-    10) Handle explanation, clarification, and allowed check rerun in current stage. Return on user feedback only when feedback invalidates ancestor output or requests prohibited change.
-  5. Generated replacement workflow MUST receive this policy in its own root `prompt`.
-</runtime_return_policy>
 
 <transition_design>
   1. `advance` moves to a later stage; `rework` returns to an earlier stage.
@@ -70,11 +52,10 @@ disable-model-invocation: true
   5. Every outgoing `rework` edge MUST have at least one matching rule in source stage prompt.
   6. Use format `Return to TARGET_ID when EXPLICIT_CONDITION.` Wrap `TARGET_ID` in backticks in workflow prompt.
   7. Condition MUST identify concrete process event, evidence gap, invalidated decision, feedback, or failure that can require return. Generic conditions such as "when rework is needed", "when issues occur", or "go back and rework" are forbidden.
-  8. Every target-specific return rule MUST have matching `rework` edge. Keep target-specific return instructions in `Rework rules:` block, not in `Actions`, constraints, or other stage sections. Keep shared runtime return policy in root prompt.
+  8. Every target-specific return rule MUST have matching `rework` edge. Keep target-specific return instructions in `Rework rules:` block, not in `Actions`, constraints, or other stage sections.
   9. Add full-restart `rework` edge from final stage to initial stage when realistic iterative cycles are expected.
   10. Add semantic skip-jump `rework` edges for every realistic return that must bypass immediate predecessor.
-  11. Runtime return policy MUST NOT justify omission of realistic immediate or skip-jump recovery edge.
-  12. Verify skip-jump `rework` targets are strict `advance` ancestors. Immediate predecessors always qualify; farther targets need manual check.
+  11. Verify skip-jump `rework` targets are strict `advance` ancestors. Immediate predecessors always qualify; farther targets need manual check.
 </transition_design>
 
 <style_rules>
@@ -104,29 +85,21 @@ disable-model-invocation: true
   1. Parse file as YAML.
   2. Check graph constraints programmatically.
   3. Check prompt placement manually: read root prompt and every stage prompt.
-  4. When graph has `rework`, check root prompt contains complete policy defined in runtime return policy section.
-  5. Check generated workflow root receives runtime return policy after source workflow replacement.
-  6. Check runtime policy did not remove realistic recovery edges. Review failures, user feedback, stale evidence, invalidated decisions, and stage-prohibited corrections.
-  7. Check every outgoing `rework` edge has matching explicit condition in source stage `Rework rules:` block.
-  8. Check every return rule names exact target stage `id` and has matching `rework` edge.
-  9. Check stage-specific return conditions work with root runtime gate without duplicating it.
-  10. Check every realistic skip-jump recovery path exists and targets strict ancestor.
-  11. Reject generic, missing, or ambiguous return conditions.
+  4. Check realistic recovery edges for failures, user feedback, stale evidence, invalidated decisions, and stage-prohibited corrections.
+  5. Check every outgoing `rework` edge has matching explicit condition in source stage `Rework rules:` block.
+  6. Check every return rule names exact target stage `id` and has matching `rework` edge.
+  7. Check every realistic skip-jump recovery path exists and targets strict ancestor.
+  8. Reject generic, missing, or ambiguous return conditions.
 </verification>
 
 <example>
 ```yaml
 description: Example workflow
 prompt: |-
-  Shared workflow goal: Solve the user's problem.
+  Shared workflow goal: Solve the user's problem
 
   Shared rules:
-  1. Ground every conclusion in evidence.
-
-  Return policy:
-  1. Stay in current stage for local errors, clarifications, and evidence available there.
-  2. Before rework, identify exact target-stage output that became materially invalid.
-  3. Return to nearest stage that owns invalid output or correction prohibited in current stage.
+  1. Ground every conclusion in evidence
 
 stages:
   - id: collect_facts
@@ -135,12 +108,12 @@ stages:
       Goal: Gather foundation for creating plan
 
       Subagents:
-      1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents.
-      2. Use subagents to collect additional information on codebase or logically related non-primary resources.
+      1. MUST read primary documentation (specs, plans, etc.) yourself, not trusting subagents
+      2. Use subagents to collect additional information on codebase or logically related non-primary resources
 
       Actions:
-      1. Identify information sources.
-      2. Gather evidence.
+      1. Identify information sources
+      2. Gather evidence
     initial: true
 
   - id: approve_plan
@@ -151,11 +124,11 @@ stages:
       Subagents: forbidden
 
       Actions:
-      1. Present plan.
-      2. Wait for explicit approval.
+      1. Present plan
+      2. Wait for explicit approval
 
       Rework rules:
-      1. Return to `collect_facts` when evidence essential for plan approval is missing or stale and cannot be gathered in current stage.
+      1. Return to `collect_facts` when evidence essential for plan approval is missing or stale and cannot be gathered in current stage
 
   - id: report
     description: Report results
@@ -164,11 +137,11 @@ stages:
 
       Subagents: forbidden
 
-      Actions: Present findings and evidence.
+      Actions: Present findings and evidence
 
       Rework rules:
-      1. Return to `approve_plan` when feedback materially invalidates approved plan but evidence base remains valid.
-      2. Return to `collect_facts` when feedback materially invalidates evidence base and required evidence cannot be refreshed in current stage.
+      1. Return to `approve_plan` when feedback materially invalidates approved plan but evidence base remains valid
+      2. Return to `collect_facts` when feedback materially invalidates evidence base and required evidence cannot be refreshed in current stage
     final: true
 
 transitions:

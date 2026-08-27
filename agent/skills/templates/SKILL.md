@@ -53,7 +53,7 @@ description: 'Documentation templates: Ticket, Change Request, Algorithm, Specif
             5) Tickets index (list of tickets with their dependencies and execution order) -> `<tickets_index_template>`: `assets/TICKETS_INDEX_TEMPLATE.md`
             6) Domain terms and definitions -> Follow simple structure: `term: definition`. MUST NOT add business logic description, etc., ONLY list of terms and their definitions. No template.
                If project contains artifacts in several languages, then term name must be specified in ALL languages of project, and definition of term must be in language in which document is written: `- term eng / term rus: definition rus`.
-            7) Light Project Requirements Document (for quick idea evaluation) -> `<light_prd_report_template>`: `assets/LIGHT_PRD.md`.  For quick idea evaluation, not a full specification.
+            7) Light Project Requirements Document (for quick idea evaluation) -> `<light_prd_report_template>`: `assets/LIGHT_PRD.md`. For quick idea evaluation, not a full specification. Use by default to capture requirements unless user explicitly specifies otherwise. Don't add "light" attribute to a file or document - it's a property, not a name.
             8) Analysis and feedback on the reviewer's comments on PR/MR -> `<review_feedback_template>`: `assets/REVIEW_FEEDBACK_TEMPLATE.md`.
          3. If document does not fit any template and user does not ask for a specific template, follow `<format_evaluation_workflow>` below.
       </mapping>

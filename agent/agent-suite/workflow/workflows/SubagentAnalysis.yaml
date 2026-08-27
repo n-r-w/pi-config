@@ -8,6 +8,7 @@ prompt: |-
   3. Ground every conclusion in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
   4. Stop immediately when new facts contradict plan or a blocker cannot be resolved without violating it.
   5. Escalation: when a blocker requires user input, finish feasible work and report blocker in final report. Do not wait for user.
+  6. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
   No Overspecification:
   1. Keep output focused on what is essential for understanding and implementation.

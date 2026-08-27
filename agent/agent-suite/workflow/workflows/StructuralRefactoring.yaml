@@ -1,0 +1,357 @@
+description: Use for refactoring code structure without changing behavior or business logic
+prompt: |-
+  Shared workflow goal: Improve code structure while preserving behavior and business logic.
+
+  Shared rules:
+  1. MUST strictly follow `<user_communication>` rules.
+  2. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
+
+stages:
+  - id: collect_project_state
+    description: Collect behavior and validation baseline
+    model:
+      thinking: low
+    prompt: |-
+      Goal: Behavior and validation baseline is recorded with pre-existing failures and relevant coverage.
+
+      Subagents: use appropriate extractors for independent project checks when available.
+
+      Actions:
+      1. Identify project instructions and validation commands.
+      2. Record current build, test, lint, type-check, and coverage status when supported by project.
+      3. Record pre-existing failures separately from failures caused later.
+      4. Identify tests and contracts that cover requested refactoring area.
+
+      Constraints:
+      1. Collect facts only.
+      2. NO file modifications.
+    initial: true
+
+  - id: define_scope
+    description: Define structural refactoring scope
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Refactoring scope, preserved behavior boundary, and exclusions are explicit.
+
+      Subagents: forbidden.
+
+      Actions:
+      1. Determine target files, packages, modules, or functions from user request and repository evidence.
+      2. Define behavior and external contracts that must remain unchanged.
+      3. Identify generated files, vendored code, migrations, snapshots, schemas, and unrelated changes that are excluded.
+      4. Identify repository changes that existed before this workflow. Do not modify or overwrite them.
+      5. Resolve scope questions with user when different boundaries materially change architecture, effort, or risk.
+
+      Rework rules:
+      1. Return to `collect_project_state` when baseline is missing or stale for selected scope.
+
+      Constraints: NO file modifications.
+
+  - id: analyze_structure
+    description: Find evidence-backed structural problems
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Structural problems and their causes are verified without proposing behavior changes.
+
+      Subagents: use independent category analysis.
+
+      Structural analysis categories:
+      1. Cohesion and responsibility:
+        1) Oversized file with independent responsibilities or change reasons.
+        2) Oversized function combining distinct stages, policies, effects, or abstraction levels.
+        3) Contracts, implementations, orchestration, helpers, constants, and transport code mixed without cohesive reason.
+        4) Low-cohesion module containing weakly related declarations.
+        5) One responsibility scattered across unrelated modules, forcing one conceptual change across distant files.
+        6) Code grouped by technical artifact kind instead of owner or change reason.
+      2. Dependency direction and ownership:
+        1) Misplaced code causing dependency inversion, layer violations, dependency cycles, or avoidable cross-module knowledge.
+        2) Shared code area removing dependency cycle or bypassing intended dependency direction while extracted declarations retain one clear layer or consumer owner. Acyclic dependencies do not compensate for incorrect ownership.
+        3) Contract or boundary type owned by provider while describing consumer need.
+        4) Conceptual bidirectional dependency hidden behind callbacks, events, registries, or dependency injection.
+        5) Application composition or dependency wiring mixed with business behavior.
+      3. Boundary leakage:
+        1) Transport, storage, framework, or external SDK types used outside owning boundary.
+        2) Internal layer model reused as system-wide model without shared ownership.
+        3) Provider implementation details exposed through consumer contracts.
+        4) Layer knowing serialization, persistence, transport, or framework rules owned by another layer.
+      4. Hidden dependencies:
+        1) Service locator, global registry, singleton, or ambient context replacing explicit dependency.
+        2) Helper obtaining dependencies through global state.
+        3) Module behavior depending on undocumented initialization or registration order.
+        4) Side effects or lifecycle requirements hidden across unrelated declarations.
+      5. Unnecessary indirection and fragmentation:
+        1) Pass-through layer forwarding calls without owning policy or translation.
+        2) File or module existing only to re-export declarations without enforcing boundary.
+        3) Wrapper chain obscuring actual behavior owner.
+        4) Cohesive responsibility split across microfiles or modules adding navigation and dependencies without independent ownership.
+        5) Decomposition increasing structural connections without creating cohesive components.
+      6. Visibility and API boundaries:
+        1) Public declaration exposed only because code is misplaced.
+        2) Public surface exposing internal types or responsibilities not required by consumers.
+        3) Visibility broadened to bypass ownership or placement problem.
+      7. Duplicate ownership:
+        1) Contract or type having near-identical definitions without distinct owners or semantics.
+        2) Multiple modules acting as source of truth for one model or responsibility.
+        3) Parallel representations requiring synchronized edits without protecting real boundary.
+        4) Shared helpers, types, constants, errors, or configuration lacking clear owner.
+      8. Production and test structure alignment:
+        1) Tests or fixtures not matching production ownership boundaries.
+        2) Global test fixture having one clear module owner.
+        3) Tests depending on neighboring layer internals because boundaries are misplaced.
+        4) Test helper bypassing production API and creating second structural path.
+
+      Actions:
+      1. Map responsibilities, declarations, dependencies, call sites, side effects, initialization order, and tests in scope.
+      2. Evaluate applicable Structural analysis categories.
+      3. For large files and functions, identify distinct responsibilities or abstraction levels. Do not report size alone. Require evidence of low cohesion, mixed responsibilities, difficult navigation, unsafe change scope, or another concrete maintenance problem. Do not apply arbitrary numeric thresholds as universal rules.
+      4. Do not report pattern by shape alone. Require evidence of incorrect ownership, unnecessary coupling, blurred responsibility, hidden dependency, or increased change cost.
+      5. Inspect references before proposing moves, splits, visibility changes, or package boundary changes.
+      6. Distinguish structural problems from naming preferences, formatting preferences, behavior defects, and speculative future needs.
+      7. Record evidence, impact, affected call sites, and behavior-preservation risks for each valid finding.
+      8. Remove weak, duplicate, or out-of-scope findings.
+
+      Rework rules:
+      1. Return to `define_scope` when inspection shows selected boundary is incomplete or includes unrelated responsibilities.
+
+      Constraints:
+      1. NO file modifications.
+      2. Do not design a solution before findings are verified.
+
+  - id: create_refactoring_plan
+    description: Create behavior-preserving structural plan
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Refactoring plan is minimal, actionable, and preserves behavior while resolving verified structural problems.
+
+      Subagents: use independent approach analysis when structural choices have material trade-offs.
+
+      Planning rules:
+      1. Read relevant code and references before selecting a target structure.
+      2. Define one responsibility and ownership rule for every target file, package, or module.
+      3. Create a move map for declarations, helpers, tests, fixtures, and call sites.
+      4. State dependency direction and public API boundaries after refactoring.
+      5. Split work into small coherent steps that keep project buildable and testable when practical.
+      6. Update internal call sites directly. Do not plan compatibility wrappers or duplicate paths.
+      7. Preserve external contracts, initialization order, error behavior, side effects, and concurrency behavior.
+      8. Use existing project organization conventions. Do not invent layers or abstractions without a verified need.
+      9. Add characterization tests only when existing tests cannot detect a material behavior regression. Tests must assert behavior, not file layout, line counts, or private implementation shape.
+      10. For every step, define targeted checks and rollback boundary.
+      11. Include final removal of empty files, dead imports, obsolete private declarations, temporary code, and partial moves created by refactoring.
+      12. Explain why TDD does or does not apply. Structural refactoring normally uses existing tests as a safety harness rather than RED-GREEN behavior development.
+
+      Actions:
+      1. Compare viable target structures when more than one materially different option exists.
+      2. Select smallest coherent structure supported by repository evidence.
+      3. Present plan, behavior-preservation strategy, material trade-offs, and risks.
+
+      Rework rules:
+      1. Return to `analyze_structure` when evidence is insufficient or a planned change does not map to a verified finding.
+      2. Return to `define_scope` when required target structure materially changes approved scope.
+
+      Constraints: NO file modifications.
+
+  - id: confirm_plan
+    description: Obtain approval for structural changes
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Target structure and refactoring plan are explicitly approved by user.
+
+      Subagents: forbidden.
+
+      Actions:
+      1. Present current structural problems, target ownership boundaries, move map, affected public APIs, checks, and risks.
+      2. State explicitly that behavior and business logic will remain unchanged.
+      3. Identify any requested change that cannot be guaranteed behavior-preserving.
+      4. Wait for explicit user approval before modifying files.
+
+      Rework rules:
+      1. Return to `create_refactoring_plan` when user requests a different target structure or plan.
+      2. Return to `analyze_structure` when user disputes a finding or requests more evidence.
+      3. Return to `define_scope` when user changes refactoring scope.
+
+      Constraints: NO file modifications.
+
+  - id: refactor_structure
+    description: Apply approved structural refactoring
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Approved target structure is implemented without behavior or business logic changes.
+
+      Subagents: use implementation subagents only according to approved plan and only when their changes cannot conflict.
+
+      Actions:
+      1. Apply one approved coherent step at a time.
+      2. Move or extract code without rewriting algorithms, conditions, data transformations, messages, defaults, side effects, or error handling.
+      3. Update imports, references, internal call sites, tests, and fixtures directly.
+      4. Preserve public APIs and external contracts.
+      5. After each step, run targeted build, test, lint, and type checks.
+      6. Compare failures with baseline. Fix only regressions caused by refactoring.
+      7. Do not mix unrelated formatting, cleanup, feature work, bug fixes, performance changes, dependency upgrades, or speculative abstractions into diff.
+      8. Do not modify generated files, vendored code, migrations, snapshots, external schemas, or other artifacts excluded by approved scope.
+      9. Do not add forwarding functions, aliases, adapters, compatibility layers, duplicate implementations, or temporary paths to preserve old internal structure.
+      10. Remove partial moves, temporary paths, dead imports, empty files, and obsolete private declarations created by refactoring.
+      11. Inspect complete diff for accidental logic changes before advancing.
+
+      Rework rules:
+      1. Return to `create_refactoring_plan` when implementation requires a material plan change within approved scope or evidence invalidates approved target structure.
+      2. Return to `define_scope` when implementation requires scope expansion or public contract change.
+      3. Return to `analyze_structure` when a new structural cause changes verified findings.
+
+  - id: verify_preservation
+    description: Verify structure and behavior preservation
+    model:
+      thinking: high
+    prompt: |-
+      Goal: Verification evidence confirms target structure is achieved and behavior is unchanged.
+
+      Subagents: use independent verification when available. Main agent owns conclusion.
+
+      Actions:
+      1. Compare final diff with approved move map and structural findings.
+      2. Verify each target file, package, and module has its approved responsibility and dependency direction.
+      3. Verify no compatibility wrappers, duplicate paths, partial moves, accidental public APIs, or unrelated cleanup remain.
+      4. Inspect changed conditions, expressions, ordering, side effects, error values, messages, defaults, synchronization, and initialization for logic drift.
+      5. Run targeted and full project checks supported by repository.
+      6. Compare results with baseline and classify every difference.
+      7. Confirm external contracts and observable behavior remain unchanged.
+
+      Rework rules:
+      1. Return to `refactor_structure` when verification finds a refactoring-caused regression, incomplete move, residue, or deviation from approved plan.
+      2. Return to `create_refactoring_plan` when approved target structure cannot satisfy behavior preservation.
+
+      Constraints: VERIFICATION ONLY. Do not modify files in this stage.
+
+  - id: user_review
+    description: Obtain user acceptance
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: User has reviewed and accepted verified structural refactoring.
+
+      Subagents: forbidden.
+
+      Actions:
+      1. Present changed ownership boundaries, moved declarations, affected files, and verification results.
+      2. Report any deviation from approved plan and any pre-existing check failures.
+      3. Wait for explicit user acceptance.
+
+      Rework rules:
+      1. Return to `refactor_structure` when user requests in-scope structural corrections.
+      2. Return to `verify_preservation` when user requests additional verification without code changes.
+      3. Return to `create_refactoring_plan` when feedback changes target structure.
+      4. Return to `define_scope` when feedback changes refactoring scope.
+
+      Constraints: NO file modifications.
+
+  - id: report_completion
+    description: Report completed structural refactoring
+    model:
+      thinking: medium
+    prompt: |-
+      Goal: Final record documents accepted structural refactoring and verification evidence.
+
+      Subagents: forbidden.
+
+      Actions:
+      1. Summarize resolved structural problems and resulting ownership boundaries.
+      2. Report build, test, lint, type-check, and coverage evidence compared with baseline.
+      3. State whether public APIs or external contracts changed.
+      4. Report deviations, remaining risks, pre-existing failures, and technical debt introduced.
+      5. Present a conventional commit message using project language conventions.
+
+      Rework rules:
+      1. Return to `user_review` when acceptance is missing or final reporting reveals an unreviewed material result.
+      2. Return to `verify_preservation` when a verification conclusion is unsupported.
+      3. Return to `refactor_structure` when final review confirms an implementation defect or residue.
+
+      Constraints: NO file modifications.
+    final: true
+
+transitions:
+  - from: collect_project_state
+    to: define_scope
+    type: advance
+  - from: define_scope
+    to: analyze_structure
+    type: advance
+  - from: analyze_structure
+    to: create_refactoring_plan
+    type: advance
+  - from: create_refactoring_plan
+    to: confirm_plan
+    type: advance
+  - from: confirm_plan
+    to: refactor_structure
+    type: advance
+  - from: refactor_structure
+    to: verify_preservation
+    type: advance
+  - from: verify_preservation
+    to: user_review
+    type: advance
+  - from: user_review
+    to: report_completion
+    type: advance
+
+  - from: define_scope
+    to: collect_project_state
+    type: rework
+  - from: analyze_structure
+    to: define_scope
+    type: rework
+  - from: create_refactoring_plan
+    to: analyze_structure
+    type: rework
+  - from: create_refactoring_plan
+    to: define_scope
+    type: rework
+  - from: confirm_plan
+    to: create_refactoring_plan
+    type: rework
+  - from: confirm_plan
+    to: analyze_structure
+    type: rework
+  - from: confirm_plan
+    to: define_scope
+    type: rework
+  - from: refactor_structure
+    to: create_refactoring_plan
+    type: rework
+  - from: refactor_structure
+    to: define_scope
+    type: rework
+  - from: refactor_structure
+    to: analyze_structure
+    type: rework
+  - from: verify_preservation
+    to: refactor_structure
+    type: rework
+  - from: verify_preservation
+    to: create_refactoring_plan
+    type: rework
+  - from: user_review
+    to: refactor_structure
+    type: rework
+  - from: user_review
+    to: verify_preservation
+    type: rework
+  - from: user_review
+    to: create_refactoring_plan
+    type: rework
+  - from: user_review
+    to: define_scope
+    type: rework
+  - from: report_completion
+    to: user_review
+    type: rework
+  - from: report_completion
+    to: verify_preservation
+    type: rework
+  - from: report_completion
+    to: refactor_structure
+    type: rework

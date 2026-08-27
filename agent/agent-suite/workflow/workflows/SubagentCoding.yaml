@@ -9,6 +9,7 @@ prompt: |-
   4. Ground decisions in evidence. Do not present an assumption as a fact.
   5. Classify new facts with Return policy. Continue current stage for local deviations. Stop only when evidence materially invalidates goal, critical requirements, approach, or material trade-off, or blocker cannot be resolved without violating them.
   6. Escalation: when a blocker requires user input, finish feasible work and report blocker in final report. Do not wait for user.
+  7. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
   Return policy:
   1. Treat rework as exceptional. Stay in current stage by default.
@@ -73,7 +74,7 @@ stages:
       5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
 
       Break work into vertical slices:
-      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) — vertical, NOT a horizontal slice of one layer
+      1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) - vertical, NOT a horizontal slice of one layer
       2. A completed slice is demoable or verifiable on its own
       3. Any prefactoring should be done first
       4. Follow TDD principles if possible: RED -> GREEN -> REFACTOR. Slices should preserve testability whenever practical.
@@ -131,11 +132,12 @@ stages:
       1. Execute each planned task yourself.
       2. Execute only approved plan and scope.
       3. Do not silently accept technical debt revealed after plan approval.
-      4. When approved plan contains an error or inefficient solution, stop and report it.
-      5. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor.
-      6. Treat task, ticket, phase, stage, slice, plan, and agent labels as workflow metadata. MUST NOT put them in code artifacts unless required domain or external-contract terms.
-      7. Before verification, inspect changed code and remove leaked workflow metadata. Name artifacts after domain behavior.
-      8. Finally, run full test suite, linters and other project checks.
+      4. MUST comment code so as not to force developers to guess about implemented logic.
+      5. When approved plan contains an error or inefficient solution, stop and report it.
+      6. For runtime behavior changes, create or update a failing test before production code, confirm expected RED failure, implement smallest passing change, confirm GREEN, then refactor.
+      7. Treat task, ticket, phase, stage, slice, plan, and agent labels as workflow metadata. MUST NOT put them in code artifacts unless required domain or external-contract terms.
+      8. Before verification, inspect changed code and remove leaked workflow metadata. Name artifacts after domain behavior.
+      9. Finally, run full test suite, linters and other project checks.
 
       Rework rules:
       1. Return to `create_plan` when evidence materially invalidates planned approach, architecture, scope, dependencies, or material trade-offs. Handle implementation defects and equivalent technical adjustments in current stage.

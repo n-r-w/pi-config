@@ -8,6 +8,7 @@ prompt: |-
   1. Do not modify inspected files.
   2. Inspect only permitted scope.
   3. Support every reported finding or recommendation with inspected evidence.
+  4. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
   User interview protocol:
   1. Follow `<user_communication>`
