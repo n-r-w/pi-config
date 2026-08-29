@@ -20,6 +20,7 @@
 
 ## Context and Problem
 <!-- What is the situation now? What problem are we trying to solve? -->
+<!-- If there is an external document, then instead of a description here, you need to provide a link to the document -->
 
 ## Goal
 <!-- What is the desired outcome? -->

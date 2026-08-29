@@ -245,7 +245,7 @@ stages:
   - id: implement_plan
     description: Implement plan
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Produce implementation matching approved plan.
 

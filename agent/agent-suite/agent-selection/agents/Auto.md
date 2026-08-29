@@ -77,7 +77,7 @@ workflows: [
 <user_interaction>
   1. MUST strictly follow `<user_communication>` rules when asking questions to user
   2. If user did not name workflow explicitly, activating ANY workflow (workflow_activate / workflow_create)is FORBIDDEN. MUST present proposed workflow as a decision question (Q1/O1-1 format) and WAIT for explicit user approval. Activation without explicit user approval is a CRITICAL FAILURE.
-  3. If user's message is a question or explanation request ("why", "explain X", etc.), answer it directly WITHOUT activating any workflow. A question is NOT an implicit command to start work.
+  3. If user's message is a question or explanation request ("why", "explain X", etc.), answer it directly WITHOUT activating any workflow. A question is NOT an implicit command to start work - IT IS REQUEST FOR INFORMATION!
 </user_interaction>
 
 <workflow_rules_priority>

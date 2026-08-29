@@ -25,6 +25,7 @@
 - ...
 
 ## Problem Statement
+{If there is an external document, then instead of a description here, you need to provide a link to the document}
 {Description of problem that this ticket is intended to solve.
 Why is this ticket needed?
 What is impact of not implementing it?}

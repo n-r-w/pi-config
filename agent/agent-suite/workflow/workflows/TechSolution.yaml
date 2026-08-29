@@ -196,7 +196,9 @@ stages:
     prompt: |-
       Goal: Critical Requirements and Technical Solution deficiencies are identified before implementation handoff.
 
-      Subagents: if needed
+      Subagents:
+      1. Use independent analyst subagent to simulate implementation (no real coding) and identify deficiencies
+      2. MUST NOT blindly trust subagent output - verify all claims.
 
       Output:
       1. When no blocker is found, report only that requirements and Technical Solution are ready for implementation.

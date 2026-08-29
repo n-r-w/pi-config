@@ -134,7 +134,7 @@ stages:
   - id: resolve_conflicts
     description: Resolve conflicts according to approved plan
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Produce conflict-resolved working tree matching approved plan.
 
@@ -159,7 +159,7 @@ stages:
   - id: validate_merge
     description: Validate merged code and distinguish new failures from existing ones
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Establish evidence that merged code preserves target business logic and introduces no new failures.
 

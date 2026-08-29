@@ -315,8 +315,8 @@ stages:
         6) `report_completion` as final stage
       5. Set `model.thinking` for every generated stage to lowest level that can reliably complete stage:
         1) `low`: Mechanical extraction, predefined commands, formatting, or deterministic checks. No material interpretation, trade-offs, or design decisions
-        2) `medium`: Bounded analysis, implementation, verification, synthesis from known evidence, or routine user interaction with established criteria
-        3) `high`: Ambiguous requirements, architecture or design, multi-option planning, cross-component trade-offs, contradiction resolution, or replanning
+        2) `medium`: Bounded analysis, implementation, synthesis from known evidence, or routine user interaction with established criteria
+        3) `high`: Ambiguous requirements, architecture or design, planning/replanning, cross-component trade-offs, contradiction resolution, verification
         4) Choose level by hardest reasoning required in stage, not file count, tool count, task duration, or output size
         5) Use `medium` when neither `low` nor `high` clearly applies
         6) Set `plan_guard` to `high` because rework can require requirements alignment and replanning
