@@ -5,6 +5,7 @@ prompt: |-
   Shared rules:
   1. MUST strictly follow `<user_communication>` rules.
   2. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
+  3. Work scope limits what you may modify, not what you may inspect. Before adding functionality, MUST check the broader codebase for equivalent or overlapping implementations. Reuse, generalize, or extract shared code instead of creating duplicates, even when the existing implementation is outside your assigned scope.
 
 stages:
   - id: collect_project_state

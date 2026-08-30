@@ -80,7 +80,7 @@ stages:
   - id: dropping_overengineering
     description: Detect overengineering and suggest simpler solutions
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Solution set excludes unjustified complexity and includes simpler viable alternatives.
 
@@ -96,7 +96,7 @@ stages:
   - id: ranking_ideas
     description: Rank the ideas
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Ideas are ordered by impact, feasibility, goal alignment, and short-term and long-term implications.
 

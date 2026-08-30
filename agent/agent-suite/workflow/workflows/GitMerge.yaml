@@ -7,6 +7,7 @@ prompt: |-
   2. Do not perform a commit, push, or merge operation without explicit user approval.
   3. Do not modify code that was unchanged by merge without explicit user approval.
   4. MUST strictly follow `<user_communication>` rules
+  5. Since it is necessary to understand ESSENCE of current and incoming changes, any restrictions on reading documentation related to changes (if any) are REMOVED.
 
 stages:
   - id: collect_facts
@@ -23,7 +24,7 @@ stages:
       2. Collect information about changes in branches, conflicts, etc.
 
       Constraints:
-      1. MUST NOT go deep into the problem.
+      1. MUST NOT go deep into problem.
       2. MUST NOT discuss problems, solutions, etc.
       3. Only collect relevant RAW facts!
     initial: true
@@ -63,7 +64,7 @@ stages:
       2. Study provided materials, codebase, and documentation.
       3. Define open questions.
       4. Sort out open questions with user, do not leave them quietly without discussion.
-      5. Present how you understand task and which parts of the problem are being solved.
+      5. Present how you understand task and which parts of problem are being solved.
       6. Ask clarifying questions when required for alignment.
       7. Wait for explicit user confirmation that target outcome is understood correctly.
 

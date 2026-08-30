@@ -10,6 +10,7 @@ prompt: |-
   5. Classify new facts with Return policy. Continue current stage for local deviations. Stop only when evidence materially invalidates goal, critical requirements, approach, or material trade-off, or blocker cannot be resolved without violating them.
   6. Escalation: when a blocker requires user input, finish feasible work and report blocker in final report. Do not wait for user.
   7. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
+  8. Work scope limits what you may modify, not what you may inspect. Before adding functionality, MUST check the broader codebase for equivalent or overlapping implementations. Reuse, generalize, or extract shared code instead of creating duplicates, even when the existing implementation is outside your assigned scope.
 
   Return policy:
   1. Treat rework as exceptional. Stay in current stage by default.

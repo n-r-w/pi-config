@@ -67,17 +67,19 @@ description: Recommended Go service architecture. Use when designing, implementi
     4. Every implementation MUST include a compile-time assertion in implementation package: `var _ consumer.Interface = (*Service)(nil)`.
     5. Interface methods MUST contain only minimum necessary for consumer to work.
     6. Consumer owns not only interface, but also all method types: commands, response aggregates, filters, payloads.
+    7. Before making a type implement an interface from another package, MUST verify that interface package does not already depend transitively on implementation package. If it does, adding required implementation-to-consumer import would create a cycle and work MUST STOP before code changes.
+    8. Cycle exposed by a required compile-time interface assertion is proof of an invalid dependency graph. MUST NOT move or remove assertion, place it in a wiring package, suppress linter, relocate interface away from its consumer, or introduce a shared contract package. MUST identify and remove dependency edge that violates intended layer direction.
   </interfaces>
 
   <layers>
     1. `internal/domain`
         1) Stores business model types: entities, value objects, aggregates, application events, and application errors.
         2) MUST NOT depend on any other layer.
-        3) MUST NOT contain command or response aggregates. Keep them near the interfaces that use them.
-        4) It is important not to confuse domain models and response aggregates. The main criteria:
+        3) MUST NOT contain command or response aggregates. Keep them near interfaces that use them.
+        4) It is important not to confuse domain models and response aggregates. main criteria:
             - Domain models describe business entities and their behavior
-            - Response aggregates describe the data needed by a specific consumer
-        5) If response aggregates are needed in several usecases, they can be moved to a separate package at the top level of usecase.
+            - Response aggregates describe data needed by a specific consumer
+        5) If response aggregates are needed in several usecases, they can be moved to a separate package at top level of usecase.
     2. `internal/usecase`
         1) Implements business scenarios and orchestration.
         2) MUST NOT depend directly on repository and infra layers. Only depend on their interfaces.

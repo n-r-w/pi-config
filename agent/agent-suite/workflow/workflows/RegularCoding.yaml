@@ -8,6 +8,7 @@ prompt: |-
   3. Classify new facts with Return policy. Continue current stage for local deviations. Stop and report only when evidence materially invalidates approved goal, critical requirements, approach, or material trade-off, or blocker cannot be resolved without violating them.
   4. MUST strictly follow `<user_communication>` rules
   5. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
+  6. Work scope limits what you may modify, not what you may inspect. Before adding functionality, MUST check the broader codebase for equivalent or overlapping implementations. Reuse, generalize, or extract shared code instead of creating duplicates, even when the existing implementation is outside your assigned scope.
 
   Return policy:
   1. Treat rework as exceptional. Stay in current stage by default.
@@ -186,7 +187,7 @@ stages:
   - id: implement_plan
     description: Implement and verify plan
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Produce verified implementation matching user request and approved plan without regressions or residue.
 

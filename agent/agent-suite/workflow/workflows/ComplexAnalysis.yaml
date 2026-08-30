@@ -89,7 +89,7 @@ stages:
   - id: implement_analysis_plan
     description: Execute analysis plan
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Produce organized evidence and findings according to approved analysis plan.
 
