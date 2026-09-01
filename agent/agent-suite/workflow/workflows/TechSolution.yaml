@@ -69,7 +69,9 @@ stages:
     prompt: |-
       Goal: Obtain approved Problem Statement and Domain Glossary with no unresolved blockers.
 
-      Subagents: ONLY with explicit user permission
+      Subagents:
+      1. Run subagents ONLY with explicit user permission
+      2. If complex analysis is required, recommend subagents to user.
 
       Output:
         1. Problem Statement and Domain Glossary.
@@ -118,7 +120,9 @@ stages:
         1. Light Product Requirements Document (Light PRD)
         2. If user ask to save PRD to file, use {relevant name}_prd.md file name.
 
-      Subagents: ONLY with explicit user permission
+      Subagents:
+      1. Run subagents ONLY with explicit user permission
+      2. If complex analysis is required, recommend subagents to user.
 
       Actions:
       1. Identify minimum set of critical requirements needed to validate problem and solution.
@@ -169,7 +173,9 @@ stages:
     prompt: |-
       Goal: Obtain approved Technical Solution that meets critical requirements and solves problem.
 
-      Subagents: ONLY with explicit user permission
+      Subagents:
+      1. Run subagents ONLY with explicit user permission
+      2. If complex analysis is required, recommend subagents to user.
 
       Output:
         1. Technical Solution.
@@ -257,6 +263,7 @@ stages:
       Constraints:
       1. MUST NOT modify code, tests, dependencies, or configuration.
       2. Strictly follow `No Overspecification` guidelines.
+      3. MUST NOT silently change requirements or specification without explicit user approval.
 
   - id: technical_solution_defined
     description: Technical Solution defined

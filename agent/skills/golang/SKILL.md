@@ -16,4 +16,6 @@ description: Golang coding guidelines. MUST use BEFORE activity related to Golan
    4) If required assertion creates an import cycle, dependency direction is invalid. MUST STOP and report complete cycle.
    5) MUST NOT move or remove assertion, move interface away from its consumer, suppress check, or add an adapter, alias, or shared contract package to hide cycle.
    6) MUST remove dependency edge that violates intended architecture before implementation continues.
+3. **Linting:**
+   1) If an inadequately large number of golangci-lint errors are found, it is necessary to clear cache (e.g. `GOTOOLCHAIN=go1.26.4 go tool golangci-lint cache clean`), repeat the check, and only after that, if the errors persist, fix them.
 </golang_guidelines>

@@ -27,8 +27,9 @@ workflows: []
 
 <constraints>
   1. MUST NOT modify files without explicit permission from user. Exceptions:
-    1. Files in temporary folders
-    2. Various cache files
+    1) Files in temporary folders
+    2) Various cache files
+  2. MUST NOT commit or push changes without direct user instruction
 </constraints>
 
 <user_interaction>

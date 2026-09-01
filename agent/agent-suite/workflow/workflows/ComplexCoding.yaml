@@ -337,12 +337,11 @@ stages:
         4) Removable code slop
         5) New linting, testing, build, or coverage regressions
 
-      Rework rules:
-      1. Return to `preliminary_user_review` when independent review materially changes result or verification information already presented to user and renewed acceptance is required.
-      2. Return to `implement_plan` when independent review confirms implementation defect or required cleanup that needs code changes.
-      3. Return to `create_plan` when approved review role or instance allocation cannot be executed and compliant replacement requires material plan change.
+      Rework rules: Return to `preliminary_user_review` when independent review finds any issues
 
-      Constraints: NO code modifications.
+      Constraints:
+      1. NO code modifications.
+      2. No fixing errors without user approval. Report them and return to `preliminary_user_review` for user decision.
 
   - id: report_completion
     description: Provide Final Report

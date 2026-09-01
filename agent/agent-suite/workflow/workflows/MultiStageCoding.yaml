@@ -79,7 +79,7 @@ stages:
   - id: align_problem
     description: Align problem being solved with user's needs
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: Establish shared understanding of problem and target outcome.
 
