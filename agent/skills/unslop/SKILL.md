@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 <warning>AI slop detected!</warning>
 
-<goal>Restate source message as one competent person speaking to another. Change form, not content.</goal>
+<goal>Restate source message as one human talking to another. Change form, not content.</goal>
 
 <priority>
   Follow higher-priority instructions and `<user_communication>`. Prefer technical precision over stylistic smoothness when both cannot be preserved.
