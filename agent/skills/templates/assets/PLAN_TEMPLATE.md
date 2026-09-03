@@ -4,9 +4,10 @@
   1. Do not include code samples, low-level build steps, timelines, invented dates, or invented staffing. Use "TBD" for unknowns and record assumptions and dependencies explicitly.
   2. Do not assume file contents. Read relevant code, documentation, and other evidence before making decisions. Plans must be based on verified evidence from codebase, docs, web research, and other relevant sources.
   3. document must be understandable without external context. Links may support details, but must not replace explanation.
-  4. All document items must follow <id_guidelines>. Every item must have a unique ID.
-  5. Do not plan backward compatibility, fallbacks, release plan, or rollback plan unless explicitly required by user.
-  6. Phase management:
+  4. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+  5. Every assigned ID must be unique within the document.
+  6. Do not plan backward compatibility, fallbacks, release plan, or rollback plan unless explicitly required by user.
+  7. Phase management:
     1) Follow TDD principles in planning: RED -> GREEN -> REFACTOR. Phases should preserve testability whenever practical.
     2) Keep phases meaningful, testable, and easy to review. Avoid phases that are so small they add process overhead or so large they hide risk.
     3) Prefer phase boundaries that preserve a working, verifiable state after each phase.
@@ -20,8 +21,9 @@
       - A completed slice is demoable or verifiable on its own
       - Each slice is sized to fit in a single fresh context window
       - Any prefactoring should be done first
-  7. Every referenced function, class, file, and module name must link to its location in codebase, but without line numbers or other context that may change over time.
-  8. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
+  8. Every referenced function, class, file, and module name must link to its location in codebase, but without line numbers or other context that may change over time.
+  9. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
+  10. Every phase must use a stable PHS ID because downstream tasks reference their source plan phase.
 </plan_guidelines>
 -->
 
@@ -31,7 +33,7 @@
 
 ## Key definitions and abbreviations
 
-- {id}: {Definition}. {Explanation of term or abbreviation.}
+- {Definition}. {Explanation of term or abbreviation.}
 - ...
 
 ## Delivery Strategy
@@ -63,7 +65,7 @@ Take into account possibility of parallel work on phases.}
 ## Overengineering and Overspecification Considerations
 {Justification for why this technical solution does not introduce unnecessary complexity, overengineering or specify details that are not essential for understanding and implementation. KISS and YAGNI principles must be followed.}
 
-### Phase {id} - {Brief Name}
+### Phase {PHS-id} - {Brief Name}
 
 #### Goal
 {Goal of phase}
@@ -96,12 +98,12 @@ Take into account possibility of parallel work on phases.}
 {Documentation, observability, operational readiness, SLO/stability targets, etc.}
 
 ## Assumptions
-- {id}: {Justification (why); Verification (how/when)}
+- {Justification (why); Verification (how/when)}
 - ...
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}
@@ -113,6 +115,6 @@ Take into account possibility of parallel work on phases.}
 {Describe any deviations from established coding/design/testing/documentation skills/standards/rules, with reasoning and tradeoffs considered.}
 
 ## References
-- {id}: {Reference (file/URL/standard, etc.)} - {one-line description}
+- {Reference (file/URL/standard, etc.)} - {one-line description}
 - ...
 </plan_report_template>

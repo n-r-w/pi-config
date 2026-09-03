@@ -1,13 +1,16 @@
-description: Use for complex analytical tasks that require structured fact collection and evidence-backed conclusions. NOT for simple and direct tasks.
+description: Use for complex analytical tasks that require structured fact collection and evidence-backed conclusions, including tasks that create or modify analytical work products. NOT for simple and direct tasks or software implementation changes.
 prompt: |-
-  Shared workflow goal: Perform analysis and produce evidence-backed conclusions.
+  Shared workflow goal: Perform analysis, produce evidence-backed conclusions, and create or modify work products required by the requested analytical outcome.
 
   Shared rules:
-  1. Follow KISS and YAGNI. Do not add content that does not support a conclusion, decision, or handoff.
-  2. Ground every conclusion in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
-  3. Stop immediately and report when new facts contradict approved plan or a blocker cannot be resolved without violating it.
-  4. MUST strictly follow `<user_communication>` rules
-  5. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
+  1. Create or modify any work product required by the requested analytical outcome.
+  2. Determine whether modification is permitted by its purpose and effect, not by its type, name, format, or storage location.
+  3. MUST NOT make changes that implement or alter software behavior, tests, executable automation, dependencies, data schema or migrations, generated outputs, or runtime, build, and deployment configuration.
+  4. Follow KISS and YAGNI. Do not add content that does not support a conclusion, decision, or handoff.
+  5. Ground every conclusion in evidence. Record each assumption together with how it will be verified. Do not present an assumption as a fact.
+  6. Stop immediately and report when new facts contradict approved plan or a blocker cannot be resolved without violating it.
+  7. MUST strictly follow `<user_communication>` rules
+  8. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
   User interview protocol:
   1. Follow `<user_communication>`
@@ -66,16 +69,16 @@ stages:
       Constraints: MUST NOT discuss solution approaches or analysis methods. Only problem and domain understanding.
 
   - id: confirm_analysis_plan
-    description: Agree analysis plan
+    description: Agree analysis and work product change plan
     model:
       thinking: high
     prompt: |-
-      Goal: Obtain explicitly approved analysis plan.
+      Goal: Obtain an explicitly approved plan for analysis and requested work product changes.
 
       Subagents: forbidden
 
       Actions:
-      1. Draft analysis plan: questions to answer, methods, evidence sources, phases, verification criteria.
+      1. Draft work plan: questions to answer, methods, evidence sources, work products to create or modify, phases, and verification criteria.
       2. Present plan in concise plain language.
       3. Explain every material trade-off.
       4. Wait for explicit user approval before starting analysis.
@@ -84,14 +87,14 @@ stages:
       Rework rules:
       1. Return to `understand_problem` when plan reveals incorrect problem understanding.
 
-      Constraints: Plan defines HOW to analyze, not how to solve the problem. Approval requires an unambiguous statement from user.
+      Constraints: Plan defines how to analyze and produce the requested analytical outcome, not how to implement software changes. Approval requires an unambiguous statement from user.
 
   - id: implement_analysis_plan
-    description: Execute analysis plan
+    description: Execute analysis and modify work products
     model:
       thinking: high
     prompt: |-
-      Goal: Produce organized evidence and findings according to approved analysis plan.
+      Goal: Produce organized evidence, findings, and requested work product changes according to the approved plan.
 
       Subagents: required
 
@@ -100,24 +103,27 @@ stages:
       2. Follow only approved plan and scope.
       3. Critically evaluate subagent results. MUST NOT blindly trust them, as subagents can also make mistakes.
       4. Collect and organize evidence produced by each phase.
+      5. Create or modify each work product defined by the approved plan.
+      6. Base every material change on verified evidence and approved decisions.
+      7. Preserve unrelated content and stay within permitted modification scope.
 
       Rework rules:
       1. Return to `confirm_analysis_plan` when new evidence requires plan revision and renewed approval.
       2. Return to `understand_problem` when new evidence shows incorrect problem understanding.
 
   - id: verify_analysis
-    description: Verify analysis implementation
+    description: Verify analysis and modified work products
     model:
       thinking: high
     prompt: |-
-      Goal: Establish evidence of analysis completeness, plan conformance, and conclusion support.
+      Goal: Establish evidence of analysis completeness, work product correctness, plan conformance, and conclusion support.
 
       Subagents: forbidden
 
       Actions:
-      1. Verify every plan phase is completed.
-      2. Verify each conclusion is supported by collected evidence.
-      3. Check for gaps, contradictions, and unsupported assumptions.
+      1. Verify every plan phase and requested work product change is completed.
+      2. Verify each conclusion and material work product change is supported by collected evidence and approved decisions.
+      3. Inspect completed changes for gaps, contradictions, unsupported assumptions, unrelated edits, and prohibited implementation changes.
 
       Rework rules:
       1. Return to `implement_analysis_plan` when execution has unresolved issues.
@@ -128,18 +134,18 @@ stages:
     model:
       thinking: high
     prompt: |-
-      Goal: Obtain user acceptance of analysis results.
+      Goal: Obtain user acceptance of analysis results and completed work product changes.
 
       Subagents: forbidden
 
       Actions:
-      1. Present analysis results: Summary; Findings; Evidence; Conclusions; Open questions; Assumptions and how they will be verified; Risks.
+      1. Present analysis results and changed work product locations: Summary; Findings; Evidence; Conclusions; Open questions; Assumptions and how they will be verified; Risks.
       2. Wait for user feedback.
       3. Discuss results with user.
       4. When user accepts results, complete.
 
       Rework rules:
-      1. Return to `implement_analysis_plan` when user requests analysis changes.
+      1. Return to `implement_analysis_plan` when user requests analysis or work product changes.
       2. Return to `verify_analysis` when feedback requires renewed validation without additional analysis execution.
       3. Return to `collect_facts` when feedback reveals missing source evidence.
     final: true

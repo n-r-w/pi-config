@@ -9,8 +9,8 @@
   6. Do not include code dumps. If necessary, include at most 10 lines, but prefer referencing locations (file/section/PR/link).
   7. Ensure conclusions follow from evidence; if uncertain, say so and propose how to validate.
   8. Document MUST be fully self-contained and understandable without external context. Use links for details, not as a substitute for explanation.
-  9. MUST follow <id_guidelines> for all items in the document.
-  10. All items have unique IDs.
+  9. Use IDs only when required by `<id_guidelines>`. Do not infer this need from the item type or template section.
+  10. Every assigned ID must be unique within the document.
   11. MUST NOT mix different languages in the same document (e.g. English and Russian). Translate section names if using a non-English language.
   12. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
 </analysis_guidelines>
@@ -25,54 +25,54 @@
 
 ## Key definitions and abbreviations
 
-- {id}: {Definition}. {Explanation of the term or abbreviation.}
+- {Definition}. {Explanation of the term or abbreviation.}
 - ...
 
 ## Executive Summary
-{question/problem statement; conclusion; impact; recommended next step}
+{Question/problem statement; conclusion; impact; recommended next step}
 
 ## Background and Context
-{brief history; relevant technical/product context; why this question is important}
+{Brief history; relevant technical/product context; why this question is important}
 
 
 ## Method and Data Sources
-{what you examined and how; methods; data sources with links/locations; limitations of data}
+{What you examined and how; methods; data sources with links/locations; limitations of data}
 
 ## Observations
 
-- {id}: {fact; what was observed; what data was examined}
+- {Fact; what was observed; what data was examined}
 - ...
 
 ## Analysis and Interpretations
 
-- {id}: {interpretation of the observation; what it might mean; how it relates to the question}
+- {Interpretation of the observation; what it might mean; how it relates to the question}
 - ...
 
 ## Hypotheses and Tests <!--If not fully confirmed-->
 
-- {id}: {testable claim; what it means if true; what it means if false; how to test; expected signal; falsification signal; effort/cost}
+- {Testable claim; what it means if true; what it means if false; how to test; expected signal; falsification signal; effort/cost}
 - ...
 
 ## Options and Trade-offs
 
-- {id}: {pros; cons; risks; cost/effort; when to choose}
+- {Pros; Cons; Risks; Cost/effort; When to choose}
 - ...
 
 ## Recommendation
-{recommended options; rationale; preconditions; release/rollback/exit strategy if applicable and explicitly requested by the user; next steps}
+{Recommended options; rationale; preconditions; release/rollback/exit strategy if applicable and explicitly requested by the user; next steps}
 
 ## Action Plan <!--Prioritized-->
 
-- {id}: {priority; action; success criteria; links to tickets/PRs/docs}
+- {Priority; action; success criteria; links to tickets/PRs/docs}
 - ...
 
 ## Assumptions
-- {id}: {justification (why); verification (how/when)}
+- {Justification (why); verification (how/when)}
 - ...
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}
@@ -81,6 +81,6 @@
 ### ...
 
 ## References
-- {id}: {reference (file/URL/standard, etc.)} - {one-line description}
+- {reference (file/URL/standard, etc.)} - {one-line description}
 - ...
 </analysis_report_template>

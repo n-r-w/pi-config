@@ -18,7 +18,17 @@ tools: [
   "activate_toolset"
 ]
 agents: [
-  "SubAgentExtractor"
+  "SubAgentCoderCritical",
+  "SubAgentCoderComplex",
+  "SubAgentCoderRegular",
+  "SubAgentCoderSimple",
+  "SubAgentAnalystRegular",
+  "SubAgentAnalystComplex",
+  "SubAgentAnalystCritical",
+  "SubAgentCritic",
+  "SubAgentExtractor",
+  "SubAgentCodeSimplificationFinder",
+  "SubAgentCodeSlopFinder"
 ]
 workflows: []
 ---
@@ -30,6 +40,7 @@ workflows: []
     1) Files in temporary folders
     2) Various cache files
   2. MUST NOT commit or push changes without direct user instruction
+  3. MUST NOT run subagents without user permission. If you think a subagent is useful, suggest it to the user and explain why.
 </constraints>
 
 <user_interaction>

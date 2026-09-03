@@ -4,12 +4,16 @@
   1. Based on EARS (Easy Approach to Requirements Syntax):
   `WHILE {optional pre-condition}, WHEN {optional trigger}, THE {actor} SHALL {required behavior}`
   2. `Scenario` section MUST contain business logic, not specific test data.
+  3. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+  4. Every assigned ID must be unique within the document.
+  5. Assign a SCN ID or reuse the source requirement ID only when traceability or independent scenario execution requires a stable reference.
   </guidelines>
 -->
 
 # Test scenarios for {project/task/etc.}
 
-## {ID}: {Business rule name}
+## {Business rule name}
+<!-- When a stable reference is required, use `## {SCN-id or source requirement ID}: {Business rule name}`. -->
 
 {Brief business rule description}
 

@@ -1,14 +1,18 @@
-description: Use for regular analysis of code and technical artifacts
+description: Use for regular analysis of code and technical artifacts, including tasks that create or modify analytical work products. NOT for software implementation changes.
+model:
+  thinking: high
 prompt: |-
-  Shared workflow goal: Perform analysis and produce evidence-backed conclusions.
+  Shared workflow goal: Perform analysis, produce evidence-backed conclusions, and create or modify work products required by the requested analytical outcome.
 
   Subagents: allowed ONLY by direct user request
 
   Shared rules:
-  1. Do not modify inspected files.
-  2. Inspect only permitted scope.
-  3. Support every reported finding or recommendation with inspected evidence.
-  4. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
+  1. Create or modify any work product required by the requested analytical outcome.
+  2. Determine whether modification is permitted by its purpose and effect, not by its type, name, format, or storage location.
+  3. MUST NOT make changes that implement or alter software behavior, tests, executable automation, dependencies, data schema or migrations, generated outputs, or runtime, build, and deployment configuration.
+  4. Inspect only permitted scope.
+  5. Support every reported finding or recommendation with inspected evidence.
+  6. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
 
   User interview protocol:
   1. Follow `<user_communication>`
@@ -29,24 +33,24 @@ prompt: |-
 
 stages:
   - id: define_scope
-    description: Define inspection scope
+    description: Define analysis and modification scope
     prompt: |-
-      Goal: Establish explicit inspection scope with permitted and excluded artifacts.
+      Goal: Establish explicit inspection and modification scope with permitted and excluded sources and work products.
 
       Actions:
-      1. Determine files, changes, modules, or repository areas.
-      2. Identify excluded generated code and out-of-scope artifacts.
-      3. Stop and request clarification when inspection scope cannot be determined safely.
+      1. Determine sources to inspect and work products to create or modify.
+      2. Identify permitted modifications, excluded implementation changes, and out-of-scope sources or work products.
+      3. Stop and request clarification when inspection or modification scope cannot be determined safely.
     initial: true
 
   - id: load_rules
     description: Load inspection rules
     prompt: |-
-      Goal: Establish applicable inspection rules and criteria for valid findings.
+      Goal: Establish applicable rules and criteria for valid findings and work product changes.
 
       Actions:
       1. Load every relevant skill and project rules.
-      2. Identify patterns, invariants, and exclusions that define a valid finding.
+      2. Identify patterns, invariants, and exclusions that define a valid finding or modification.
 
       Rework rules:
       1. Return to `define_scope` when loaded rules show inspection scope is invalid or incomplete.
@@ -75,22 +79,41 @@ stages:
       Rework rules:
       1. Return to `inspect_artifacts` when evidence is incomplete.
 
+  - id: produce_requested_outcome
+    description: Produce requested analytical outcome
+    prompt: |-
+      Goal: Produce the requested analytical outcome from verified findings and evidence.
+
+      Actions:
+      1. Determine whether the requested outcome requires work product changes.
+      2. When changes are required, create or modify the required work products.
+      3. When changes are not required, keep work products unchanged and continue.
+      4. Base every material change on verified findings, evidence, and approved decisions.
+      5. Preserve unrelated content and stay within permitted modification scope.
+      6. Inspect completed changes and correct unsupported, incomplete, or out-of-scope content.
+
+      Rework rules:
+      1. Return to `inspect_artifacts` when a required change lacks evidence.
+      2. Return to `verify_findings` when a required change relies on an unverified finding.
+      3. Return to `define_scope` when the required modification is outside permitted scope.
+
   - id: report_findings
-    description: Deliver findings using required format
+    description: Deliver findings and completed work products
     triggers:
       - type: local_knowledge_accumulation
     prompt: |-
-      Goal: Deliver required report with findings, evidence, impact, and recommendations.
+      Goal: Deliver requested outcome with findings, evidence, completed modifications, and remaining decisions.
 
       Actions:
-      1. Report only findings permitted by scope rules.
-      2. Include required source locations, evidence, impact, and recommendations.
+      1. Report only findings and modifications permitted by scope rules.
+      2. Include required source locations, evidence, impact, recommendations, and changed work product locations.
       3. Deliver result through required channel.
 
       Rework rules:
-      1. Return to `inspect_artifacts` when parent feedback requires additional analysis.
-      2. Return to `verify_findings` when feedback requires revalidation without additional inspection.
-      3. Return to `define_scope` when feedback changes permitted inspection scope.
+      1. Return to `produce_requested_outcome` when feedback requires in-scope work product changes.
+      2. Return to `inspect_artifacts` when parent feedback requires additional analysis.
+      3. Return to `verify_findings` when feedback requires revalidation without additional inspection.
+      4. Return to `define_scope` when feedback changes permitted inspection or modification scope.
     final: true
 
 transitions:
@@ -110,10 +133,25 @@ transitions:
     to: load_rules
     type: rework
   - from: verify_findings
-    to: report_findings
+    to: produce_requested_outcome
     type: advance
   - from: verify_findings
     to: inspect_artifacts
+    type: rework
+  - from: produce_requested_outcome
+    to: report_findings
+    type: advance
+  - from: produce_requested_outcome
+    to: verify_findings
+    type: rework
+  - from: produce_requested_outcome
+    to: inspect_artifacts
+    type: rework
+  - from: produce_requested_outcome
+    to: define_scope
+    type: rework
+  - from: report_findings
+    to: produce_requested_outcome
     type: rework
   - from: report_findings
     to: verify_findings

@@ -4,13 +4,15 @@
   1. Use for a detailed development task that implements one approved phase, stage, or work package from a plan.
   2. Keep task concrete and executable. Focus on exact work to be done in this task, not whole project.
   3. Task must be self-contained and understandable without opening original plan, though it may link back to it.
-  4. Follow <id_guidelines> for all items. Every item must have a unique ID.
-  5. Include only work that can be completed and verified within this task. Move unrelated or future work to Out of scope or Dependencies.
-  6. Make verification explicit. Each acceptance criterion must be checkable from task alone.
-  7. Do not include rollout, rollback, or backward compatibility requirements unless they are explicitly required.
-  8. If information is missing, write "TBD" and record it in Open Questions.
-  9. Prefer work items that end in a verifiable artifact or observable behavior.
-  10. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
+  4. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+  5. Every assigned ID must be unique within the document.
+  6. Include only work that can be completed and verified within this task. Move unrelated or future work to Out of scope or Dependencies.
+  7. Make verification explicit. Each acceptance criterion must be checkable from task alone.
+  8. Do not include rollout, rollback, or backward compatibility requirements unless they are explicitly required.
+  9. If information is missing, write "TBD" and record it in Open Questions.
+  10. Prefer work items that end in a verifiable artifact or observable behavior.
+  11. Work items, deliverables, and acceptance criteria must use stable IDs because execution and verification track them independently.
+  12. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
 </task_guidelines>
 -->
 
@@ -20,25 +22,25 @@
 
 ## Key definitions and abbreviations
 
-- {id}: {Definition}. {Explanation of term or abbreviation.}
+- {Definition}. {Explanation of term or abbreviation.}
 - ...
 
 ## Source Context
-- {id}: {source plan / phase / stage / task reference}
-- {id}: {why this task exists now}
+- {Source plan / phase / stage / task reference}
+- {Why this task exists now}
 - ...
 
 ## Scope
 In scope:
-- {id}: {what this task will implement}
+- {What this task will implement}
 - ...
 
 Out of scope:
-- {id}: {what this task will not implement}
+- {What this task will not implement}
 - ...
 
 ## Dependencies and Preconditions
-- {id}: {dependency, prerequisite, or blocker; current status}
+- {Dependency, prerequisite, or blocker; current status}
 - ...
 
 ## Overengineering and Overspecification Considerations
@@ -60,28 +62,28 @@ Otherwise, executor will not have enough data to understand what exactly needs t
 MUST follows TDD principles: has explicit RED-GREEN-REFACTOR steps or decision why not applicable.
 If sequence of steps has logical blocks, then explicitly highlight separate groups of steps with their own completion criteria.
 -->
-- {id}: {specific development task; expected result}
+- {TSK-id}: {specific development task; expected result}
 - ...
 
 ## Deliverables
-- {id}: {artifact, code path, document, config, test, or other output}
+- {DLV-id}: {artifact, code path, document, config, test, or other output}
 - ...
 
 ## Acceptance Criteria
-- {id}: {verifiable outcome}
+- {ACC-id}: {verifiable outcome}
 - ...
 
 ## Constraints and Risks
-- {id}: {constraint or risk; impact}
+- {Constraint or risk; impact}
 - ...
 
 ## Assumptions
-- {id}: {justification (why); verification (how/when)}
+- {Justification (why); verification (how/when)}
 - ...
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}
@@ -90,6 +92,6 @@ If sequence of steps has logical blocks, then explicitly highlight separate grou
 ### ...
 
 ## References
-- {id}: {reference (file/URL/standard, etc.)} - {one-line description}
+- {Reference (file/URL/standard, etc.)} - {one-line description}
 - ...
 </task_template>

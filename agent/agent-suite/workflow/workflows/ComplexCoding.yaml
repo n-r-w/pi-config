@@ -2,6 +2,10 @@ description: Use for complex or critical coding tasks
 prompt: |-
   Shared workflow goal: Solve user's problem by writing code.
 
+  Focus:
+  1. Focus on goal and solving specified problem.
+  2. If plans diverge from goals, it is a reason to reconsider them and propose adjustments.
+
   Shared rules:
   1. Follow KISS and YAGNI. Do not add backward compatibility or fallback behavior without an explicit user requirement.
   2. Do not silently choose a local workaround over a broader structural fix because workaround is faster, more local, or appears to remain within scope.
@@ -145,6 +149,10 @@ stages:
       4. Identify open questions and uncertainties that require user input or further research before planning.
       5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
 
+      If user provides a ready-made plan:
+      1. Critically evaluate its alignment with goals and problem being solved.
+      2. If discrepancies arise, explicitly point them out to user and suggest possible adjustments.
+
       Rework rules:
       1. Return to `align_requirements` when approach evaluation materially invalidates confirmed critical requirements.
       2. Return to `align_problem` when approach evaluation materially invalidates confirmed problem or target outcome.
@@ -169,7 +177,7 @@ stages:
       2. Check whether subagent tools and exact available role IDs are available. Apply remaining assignment rules only when both are available.
       3. When unavailable, do not invent roles or instances. Record `No subagents: subagent tools or role inventory unavailable` for every execution stage.
       4. When available, inspect exact role IDs and capability descriptions. MUST NOT invent or generalize role names.
-      5. For `implement_plan`, `verify_implementation`, `preliminary_user_review`, `deep_review`, and `report_completion`, decompose delegable work into atomic subtasks and record dependencies.
+      5. For `implement_plan`, `verify_implementation`, `preliminary_user_review`, `deep_inspection`, and `report_completion`, decompose delegable work into atomic subtasks and record dependencies.
       6. For every atomic subtask, choose exact role ID and plan separate instance. Independent subtasks MUST NOT share instance even when they use same role.
       7. Reuse instance only for refinement or continuation of same atomic subtask. Start new instance for every different subtask.
       8. Plan parallel instance batch only when every subtask in batch is independent.
@@ -216,7 +224,7 @@ stages:
     prompt: |-
       Goal: Obtain explicitly approved implementation plan, subagent roles, and instance allocation.
 
-      Subagents rules: subagents forbidden
+      Subagents rules: use subagents if it helps
 
       Actions:
       1. Present problem and plan:
@@ -249,6 +257,8 @@ stages:
       thinking: high
     prompt: |-
       Goal: Produce implementation matching approved plan.
+
+      Subagents rules: preferably delegate tasks to subagents, and personally review their work.
 
       Actions:
       1. Execute approved role-to-instance assignments and planned tasks.
@@ -296,11 +306,11 @@ stages:
   - id: preliminary_user_review
     description: Acceptance of result by user
     model:
-      thinking: medium
+      thinking: high
     prompt: |-
       Goal: User has reviewed implementation result and provided preliminary feedback before deep review
 
-      Subagents rules: subagents forbidden
+      Subagents rules: use subagents if it helps
 
       Actions:
       1. Stop and present implementation results to user:
@@ -323,8 +333,8 @@ stages:
 
       Constraints: NO code modifications.
 
-  - id: deep_review
-    description: Deeply review implementation results
+  - id: deep_inspection
+    description: Deeply inspect implementation results
     model:
       thinking: high
     prompt: |-
@@ -352,7 +362,7 @@ stages:
     prompt: |-
       Goal: Provide complete final record of delivered result.
 
-      Subagents rules: subagents forbidden
+      Subagents rules: use subagents if it helps
 
       Provide final feedback in format:
       1. Summary: brief overview of work done and results achieved
@@ -366,7 +376,7 @@ stages:
       9. Present Commit Message to User: present commit message for your changes in conventional commit format. Choose language based on project conventions. If no conventions exist, use English.
 
       Rework rules:
-      1. Return to `deep_review` when final reporting reveals that independent review conclusion is unsupported and requires dedicated review work that cannot be completed in current stage.
+      1. Return to `deep_inspection` when final reporting reveals that independent review conclusion is unsupported and requires dedicated review work that cannot be completed in current stage.
       2. Return to `implement_plan` when final reporting confirms missing implementation, code defect, or user-requested code change.
       3. Return to `collect_project_state` when final regression conclusion is invalid because project baseline is stale or incomplete and work must restart with refreshed baseline.
 
@@ -402,9 +412,9 @@ transitions:
     to: preliminary_user_review
     type: advance
   - from: preliminary_user_review
-    to: deep_review
+    to: deep_inspection
     type: advance
-  - from: deep_review
+  - from: deep_inspection
     to: report_completion
     type: advance
 
@@ -465,11 +475,11 @@ transitions:
   - from: preliminary_user_review
     to: collect_project_state
     type: rework
-  - from: deep_review
+  - from: deep_inspection
     to: preliminary_user_review
     type: rework
   - from: report_completion
-    to: deep_review
+    to: deep_inspection
     type: rework
   - from: confirm_plan
     to: create_plan
@@ -480,10 +490,10 @@ transitions:
   - from: preliminary_user_review
     to: implement_plan
     type: rework
-  - from: deep_review
+  - from: deep_inspection
     to: implement_plan
     type: rework
-  - from: deep_review
+  - from: deep_inspection
     to: create_plan
     type: rework
   - from: report_completion

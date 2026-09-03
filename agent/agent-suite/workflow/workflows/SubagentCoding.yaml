@@ -2,6 +2,10 @@ description: Use for coding tasks
 prompt: |-
   Shared workflow goal: Solve user's problem by writing code autonomously.
 
+  Focus:
+  1. Focus on goal and solving specified problem.
+  2. If plans diverge from goals, it is a reason to reconsider them and propose adjustments.
+
   Shared rules:
   1. Work autonomously. No user confirmation stages.
   2. Follow KISS and YAGNI. Do not add backward compatibility or fallback behavior without an explicit user requirement.
@@ -10,7 +14,7 @@ prompt: |-
   5. Classify new facts with Return policy. Continue current stage for local deviations. Stop only when evidence materially invalidates goal, critical requirements, approach, or material trade-off, or blocker cannot be resolved without violating them.
   6. Escalation: when a blocker requires user input, finish feasible work and report blocker in final report. Do not wait for user.
   7. NO OVERENGINEERING: REMEMBER, we're not building a "spaceship". ALWAYS CRITICALLY EVALUATE need to address edge cases based on their REALISM.
-  8. Work scope limits what you may modify, not what you may inspect. Before adding functionality, MUST check the broader codebase for equivalent or overlapping implementations. Reuse, generalize, or extract shared code instead of creating duplicates, even when the existing implementation is outside your assigned scope.
+  8. Work scope limits what you may modify, not what you may inspect. Before adding functionality, MUST check broader codebase for equivalent or overlapping implementations. Reuse, generalize, or extract shared code instead of creating duplicates, even when existing implementation is outside your assigned scope.
 
   Return policy:
   1. Treat rework as exceptional. Stay in current stage by default.
@@ -55,7 +59,7 @@ stages:
       1. Return to `collect_project_state` when project baseline required for regression comparison is materially incomplete or stale and cannot be corrected in current stage.
 
       Constraints:
-      1. MUST NOT go deep into the problem. Only collect relevant RAW facts!
+      1. MUST NOT go deep into problem. Only collect relevant RAW facts!
       2. NO code modifications.
 
   - id: create_plan
@@ -73,6 +77,10 @@ stages:
       3. Analyze dependencies and potential effects on related components.
       4. Identify open questions and uncertainties that require further research before planning.
       5. Stop research when there is enough context to draft plan. Leave implementation details that do not affect plan to implementation stage.
+
+      If user provides a ready-made plan:
+      1. Critically evaluate its alignment with goals and problem being solved.
+      2. If discrepancies arise, explicitly point them out to user and suggest possible adjustments.
 
       Break work into vertical slices:
       1. Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests) - vertical, NOT a horizontal slice of one layer
@@ -184,7 +192,6 @@ stages:
       7. Deprecations: features, functions, or components that were deprecated
       8. Risks: any potential risks or issues that may arise
       9. Blockers: issues that require user input or decisions. Escalate clearly.
-      10. Present Commit Message: present commit message for your changes in conventional commit format. Choose language based on project conventions. If no conventions exist, use English.
 
       Rework rules:
       1. Return to `verify_implementation` when final review invalidates verification conclusion and requires dedicated verification work that cannot be completed in current stage.

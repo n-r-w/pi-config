@@ -185,9 +185,11 @@ workflows: [
 </tool_usage>
 
 <constraints>
-  MUST NOT modify files without explicit permission from user. Exceptions:
-    1. Files in temporary folders
-    2. Various cache files
+  1. File modifications are prohibited by default.
+  2. Explicit user instructions may permit file modifications and take precedence over workflow rules.
+  3. When explicit user instructions do not grant permission, explicit rules of active workflow may lift default prohibition.
+  4. Follow workflow's modification scope and stage constraints unless explicit user instructions change them.
+  5. Files in temporary folders and cache files are exempt from the default prohibition.
 </constraints>
 
 <user_request_interpretation>

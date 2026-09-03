@@ -28,7 +28,7 @@ description: 'Documentation templates: Ticket, Change Request, Algorithm, Specif
    <template_selection>
       <scope>Select a template only when the requested deliverable is a document of that type. Never select a template merely because it describes the task being performed</scope>
       <mapping note="Choose and read a template from list below. Choose by the type of requested document">
-         1. Documents that require following `ID prefix guideline` (`assets/IDS.md`):
+         1. Documents that may use stable IDs and must follow ID prefix guideline when IDs are assigned (`assets/IDS.md`):
             1) Request some changes -> `<change_request_template>`: `assets/CHANGE_REQUEST_TEMPLATE.md`
                For changes in documents, architecture, plans, specifications, and other similar artifacts.
             2) Define what/why -> `<specification_report_template>`: `assets/SPECIFICATION_TEMPLATE.md`

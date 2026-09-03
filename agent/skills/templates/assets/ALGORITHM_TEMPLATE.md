@@ -10,7 +10,9 @@
   7. Verify that all referenced files and functions are current.
   8. Path references must be relative to the current directory of the documentation file. Do not include line numbers in path references.
   9. Do not add sections beyond the required document structure.
-  10. All items must follow <id_guidelines> and have unique IDs.
+  10. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+  11. Every assigned ID must be unique within the document.
+  12. Assign a stable STP ID to each algorithm step because the same step appears in Key Steps and Operation Description. Use the same ID in both sections.
 </algorithm_guidelines>
 -->
 
@@ -18,7 +20,7 @@
 
 ## Key definitions and abbreviations
 
-- {id}: {Definition}. {Explanation of the term or abbreviation.}
+- {Definition}. {Explanation of the term or abbreviation.}
 - ...
 
 ## Overview
@@ -26,7 +28,7 @@
 {Description of the algorithm and its purpose.}
 
 ## Key Steps
-- {id}: Step Name. Brief description of this step's role.
+- {STP-id}: Step Name. Brief description of this step's role.
 ...
 
 ## Main Components
@@ -49,7 +51,7 @@ A component can be: a part of a system (a module, an external service, logically
 
 ## Operation Description
 
-### {id}: {Step Name}
+### {STP-id}: {Step Name}
 
 #### Business Context
 {Business-level explanation of this step for non-technical readers (analysts, product managers). State what the step means in domain terms and why it works this way. MUST NOT contain code references, function names, or internal identifiers. MUST NOT duplicate content from "Role in the algorithm" or "Detailed Description". Be brief and concise.}

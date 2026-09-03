@@ -2,8 +2,9 @@
 <!--
 <extraction_guidelines>
    1. If the topic is broad, prioritize: problem framing → evidence → conclusion → next steps.
-   2. MUST follow <id_guidelines> for all items in the document.
-   3. All relevant information must be extracted with minimal interpretation, ensuring a comprehensive and unbiased report.
+   2. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+   3. Every assigned ID must be unique within the document.
+   4. All relevant information must be extracted with minimal interpretation, ensuring a comprehensive and unbiased report.
 </extraction_guidelines>
 -->
 
@@ -14,7 +15,7 @@
 {Provide a concise summary of the key findings from the information extraction process (2-3 sentences)}
 
 ## Findings
-- {id}: {Finding name}
+- {Finding name}
    - Location: {file path and line numbers; URL; etc.}
    - Description: {A brief description of the finding, including any relevant details that were extracted.}
    - Dependencies: {List any dependencies or related findings that are relevant to this finding.}
@@ -22,12 +23,12 @@
    - Confidence Level: {Provide a confidence level in percentage based on the completeness and reliability of the extracted information.}
 
 ## Assumptions
-- {id}: {justification (why); verification (how/when)}
+- {Justification (why); verification (how/when)}
 - ...
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}

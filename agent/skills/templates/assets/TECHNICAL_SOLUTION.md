@@ -8,8 +8,9 @@
 3. Prefer bullets over long paragraphs; keep each bullet to 1–2 sentences.
 4. Document must be self-contained and understandable without external context. Links may provide extra detail, but must not replace essential explanation.
 5. Be specific. Avoid vague placeholders such as "if", "may", "optional", "not confirmed", or "mandatory model", unless item is an explicit open question with its own ID.
-6. Follow <id_guidelines> for all items, and ensure every item has a unique ID.
-7. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
+6. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+7. Every assigned ID must be unique within the document.
+8. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
 </technical_solution_guidelines>
 -->
 
@@ -19,7 +20,7 @@
 ## Problem Statement
 {If there is an external document, then instead of a description here, you need to provide a link to document}
 {A concise statement of problem being solved, including any relevant context or constraints.}
-- {id}: {Definition of problem or challenge}
+- {Definition of problem or challenge}
 - ...
 
 ## Proposed Solution
@@ -30,7 +31,7 @@
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}
@@ -39,6 +40,6 @@
 ### ...
 
 ## References <!-- if any -->
-- {id}: {reference (file/URL/standard, etc.)} - {one-line description}
+- {Reference (file/URL/standard, etc.)} - {one-line description}
 - ...
 </technical_solution_template>

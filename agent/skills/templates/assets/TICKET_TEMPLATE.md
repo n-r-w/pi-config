@@ -3,13 +3,15 @@
 <ticket_guidelines>
   1. Used to describe requirements for implementing a specific task. Unlike a task template, a ticket does not describe in detail how to implement task, but only what needs to be done.
   2. ticket must be self-contained and understandable without opening related documents.
-  3. Follow <id_guidelines> for all items, and ensure every item has a unique ID.
-  4. Make verification explicit. Each acceptance criterion must be checkable from ticket alone.
-  5. Do not include rollout, rollback, or backward compatibility requirements unless they are explicitly required.
-  6. If information is missing, write "TBD" and record it in Open Questions.
-  7. Prefer work items that end in a verifiable artifact or observable behavior.
-  8. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
-  9. One ticket MUST contains EXACTLY ONE vertical slice:
+  3. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+  4. Every assigned ID must be unique within the document.
+  5. Make verification explicit. Each acceptance criterion must be checkable from ticket alone.
+  6. Do not include rollout, rollback, or backward compatibility requirements unless they are explicitly required.
+  7. If information is missing, write "TBD" and record it in Open Questions.
+  8. Prefer work items that end in a verifiable artifact or observable behavior.
+  9. Scenarios, goals, and requirements must use stable IDs because implementation and verification reference them.
+  10. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
+  11. One ticket MUST contains EXACTLY ONE vertical slice:
     1) Each slice cuts a narrow but COMPLETE path through every layer (schema, API, UI, tests): vertical, NOT a horizontal slice of one layer
     2) A completed slice is demoable or verifiable on its own
     3) Each slice is sized to fit in a single fresh context window
@@ -21,7 +23,7 @@
 {Brief description of ticket}
 
 ## Key definitions and abbreviations
-- {id}: {Definition}. {Explanation of term or abbreviation.}
+- {Definition}. {Explanation of term or abbreviation.}
 - ...
 
 ## Problem Statement
@@ -36,7 +38,7 @@ What will be different after ticket is implemented?}
 
 ## Scenarios
 
-### {id}: {Definition}
+### {SCN-id}: {Definition}
   - Actor: {who is involved in this scenario}
   - Pre-condition: {conditions that must be met before this scenario can occur}
   - Trigger: {event that initiates the scenario}
@@ -47,45 +49,45 @@ What will be different after ticket is implemented?}
 
 ## Scope
 In scope:
-- {id}: {what this ticket will implement}
+- {What this ticket will implement}
 - ...
 
 Out of scope:
-- {id}: {what this ticket will not implement}
+- {What this ticket will not implement}
 - ...
 
 ## Dependencies and Preconditions
-- {id}: {dependency, prerequisite, or blocker; current status}
+- {Dependency, prerequisite, or blocker; current status}
 - ...
 
 ## Requirements <!-- remember that we specify requirements, not how to implement them -->
 
 ### Goals
-- {id}: {goal to achieve; rationale}
+- {GOL-id}: {goal to achieve; rationale}
 - ...
 
 ### Functional Requirements
-- {id}: {requirement; rationale}
+- {FRQ-id}: {requirement; rationale}
 - ...
 
 ### Non-Functional Requirements
-- {id}: {requirement; rationale}
+- {NFQ-id}: {requirement; rationale}
 - ...
 
 ## Overengineering and Overspecification Considerations
 {Justification for why this technical solution does not introduce unnecessary complexity, overengineering or specify details that are not essential for understanding and implementation. KISS and YAGNI principles must be followed.}
 
 ## Constraints and Risks
-- {id}: {constraint or risk; impact}
+- {Constraint or risk; impact}
 - ...
 
 ## Assumptions
-- {id}: {justification (why); verification (how/when)}
+- {Justification (why); verification (how/when)}
 - ...
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}
@@ -105,6 +107,6 @@ IMPORTANT:
 -->
 
 ## References
-- {id}: {reference (file/URL/standard, etc.)} - {one-line description}
+- {Reference (file/URL/standard, etc.)} - {one-line description}
 - ...
 </ticket_template>

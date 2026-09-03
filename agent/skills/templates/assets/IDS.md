@@ -1,5 +1,5 @@
 <id_guideline>
-MUST use following ID prefixes for all findings, interpretations, hypotheses, open questions, recommendations, etc.:
+When an item needs a stable ID, use one of  following prefixes:
     1. Context: CTX
     2. Problem Statement: PRB
     3. Trigger / Why Now: TRG
@@ -57,6 +57,13 @@ Rules:
     2. If there is no suitable prefix, create a custom one.
     3. IDs MUST be unique across document.
     4. If when editing document it is necessary to change order of items, you MUST keep their IDs. New items MUST receive IDs with an additional suffix so as not to break existing numbering. E.g.: there are `ID-1`, `ID-2`; you need to add new item between them -> new item receives an ID with an additional suffix `ID-1.1`
+    5. Do not assign IDs by default.
+    6. Assign an ID only when item must be referenced unambiguously outside its immediate context or tracked independently across document updates.
+    7. Item type, section, importance, or formatting alone MUST NOT cause an ID to be assigned.
+    8. If item is clear from its heading, table position, or surrounding text, do not assign an ID.
+    9. If unsure, do not assign an ID
+    10. Headings, explanatory bullets, definitions, evidence entries, and references do not need IDs unless one of these conditions applies.
 
-MUST NOT blindly assign IDs to every list item. IDs are ONLY needed for significant elements.
+CRITICAL: Decision to assign an ID should be made NOT ONLY BASED ON CONTENT of document but also considering its FUTURE USE. For example, when formulating a requirement, it is necessary to understand that it will be referenced in plans and other documents, etc.
+
 </id_guideline>

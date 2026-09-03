@@ -1,0 +1,74 @@
+{{define "users-page"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>People directory</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="masthead">
+      <a class="brand" href="/users" aria-label="HTMX directory home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-copy">
+          <span class="brand-name">HTMX Directory</span>
+          <span class="brand-context">Server-rendered demo</span>
+        </span>
+      </a>
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <a class="nav-link" href="/users" aria-current="page">Directory</a>
+        <a class="nav-link" href="/contacts/new">New contact</a>
+      </nav>
+    </header>
+
+    <section class="page-intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">People directory</p>
+        <h1 class="page-title" id="page-title">Find the right person.</h1>
+      </div>
+      <p class="page-description">Search server-rendered profiles. Results update in place while the page remains usable without JavaScript.</p>
+    </section>
+
+    <section class="surface" aria-labelledby="results-title">
+      <form class="search-panel" action="/users" method="get" role="search">
+        <div class="field-header">
+          <label class="field-label" for="search">Search by name</label>
+          <span class="field-hint">Results update as you type</span>
+        </div>
+        <div class="search-row">
+          <input class="text-input" id="search" name="q" type="search" value="{{.Query}}"
+            placeholder="Try Ada or Grace" autocomplete="off" spellcheck="false"
+            hx-get="/users"
+            hx-trigger="keyup changed delay:300ms, search"
+            hx-target="#users-list"
+            hx-swap="outerHTML"
+            hx-sync="this:replace">
+          <button class="primary-button" type="submit"><span class="button-label">Search directory</span></button>
+        </div>
+      </form>
+
+      <div class="results-header">
+        <div>
+          <p class="section-label">Directory</p>
+          <h2 class="results-title" id="results-title">People</h2>
+        </div>
+        <span class="live-status">Live results</span>
+      </div>
+      {{template "users-list" .}}
+    </section>
+  </main>
+</body>
+</html>{{end}}
+
+{{define "users-list"}}<ul class="people-list" id="users-list" aria-live="polite">
+  {{range .Users}}<li class="person-row">
+    <span class="profile-mark" aria-hidden="true"></span>
+    <span>
+      <span class="person-name">{{.}}</span>
+      <span class="person-meta">Directory profile</span>
+    </span>
+    <span class="row-action" aria-hidden="true">›</span>
+  </li>{{else}}<li class="empty-state">No profiles match this search.</li>{{end}}
+</ul>{{end}}

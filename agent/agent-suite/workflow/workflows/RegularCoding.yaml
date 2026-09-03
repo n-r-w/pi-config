@@ -2,6 +2,10 @@ description: Use for regular coding tasks
 prompt: |-
   Shared workflow goal: Solve user's problem by writing code.
 
+  Focus:
+  1. Focus on goal and solving specified problem.
+  2. If plans diverge from goals, it is a reason to reconsider them and propose adjustments.
+
   Shared rules:
   1. Follow KISS and YAGNI. Do not add backward compatibility or fallback behavior without an explicit user requirement.
   2. Do not silently choose a local workaround over a broader structural fix because workaround is faster, more local, or appears to remain within scope.
@@ -105,6 +109,10 @@ stages:
       9. Present unresolved questions that require user input. Do not proceed while blocking question remains unresolved.
       10. Update approach and plan when resolved answers change them.
       11. Stop research when enough context exists to finalize plan. Leave implementation details that do not affect plan to implementation stage.
+
+      If user provides a ready-made plan:
+      1. Critically evaluate its alignment with goals and problem being solved.
+      2. If discrepancies arise, explicitly point them out to user and suggest possible adjustments.
 
       Rework rules:
       1. Return to `align_goal` when approach evaluation materially invalidates confirmed goal, scope, or critical requirements.

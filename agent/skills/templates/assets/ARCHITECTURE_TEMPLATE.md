@@ -4,14 +4,15 @@
   2. Focus on what and why, not how. Do not include step-by-step implementation plans, work breakdowns, timelines, or code.
   3. Do not invent components or integrations. If something is unknown, mark it as "TBD" and capture it in Risks or Open Questions.
   4. The document must be self-contained and understandable without external context. Links may provide additional detail, but must not replace essential explanation.
-  5. Follow <id_guidelines> for all items, and ensure every item has a unique ID.
-  6. Be specific. Avoid vague wording such as "if", "may", "optional", "not confirmed", or "mandatory model", unless the item is an explicit Open Question with its own ID.
-  7. Keep the architecture realistic and implementable, grounded in available evidence such as documentation, code, web resources, and other relevant sources.
-  8. Design components according to clean architecture principles.
-  9. Design interfaces and contracts according to SOLID principles.
-  10. A component must not be both provider and consumer of the same programming interface or contract.
-  11. Define programming interfaces at the point of use, not at the point of implementation.
-  12. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
+  5. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+  6. Every assigned ID must be unique within the document.
+  7. Be specific. Avoid vague wording such as "if", "may", "optional", "not confirmed", or "mandatory model", unless the item is an explicit Open Question with its own ID.
+  8. Keep the architecture realistic and implementable, grounded in available evidence such as documentation, code, web resources, and other relevant sources.
+  9. Design components according to clean architecture principles.
+  10. Design interfaces and contracts according to SOLID principles.
+  11. A component must not be both provider and consumer of the same programming interface or contract.
+  12. Define programming interfaces at the point of use, not at the point of implementation.
+  13. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
 </architecture_guidelines>
 -->
 
@@ -19,24 +20,24 @@
 # Architecture: {Name}
 
 ## Architectural Goals and Constraints
-- {id}: {description; success metric; constraints}
+- {Description; success metric; constraints}
 - ...
 
 ## Key definitions and abbreviations
 
-- {id}: {Definition}. {Explanation of the term or abbreviation.}
+- {Definition}. {Explanation of the term or abbreviation.}
 - ...
 
 ## System Context
-- {id}: {system/domain; external consumers; neighbor systems; responsibility boundaries}
+- {System/domain; external consumers; neighbor systems; responsibility boundaries}
 - ...
 
 ## Solution Overview
-- {id}: {core idea; primary data flow; failure modes}
+- {Core idea; primary data flow; failure modes}
 - ...
 
 ## Components
-- {id}: {purpose; interfaces (consumed/produced); contracts; data; dependencies; SLOs; risks}
+- {Component name}: {purpose; interfaces (consumed/produced); contracts; data; dependencies; SLOs; risks}
 - ...
 
 ## Component diagram
@@ -60,19 +61,19 @@ For each folder, specify:
 ```
 
 ## Data Models
-- {id}: {key fields with types and descriptions; relationships; storage location; ownership}
+- {Model name}: {key fields with types and descriptions; relationships; storage location; ownership}
 - ...
 
 ## Programming Interfaces
-- {id}: {location; consumers; provider}
+- {Interface name}: {location; consumers; provider}
 - ...
 
 ## Contracts
-- {id}: {type (API/resource/event); key fields with types and descriptions; location}
+- {Contract name}: {type (API/resource/event); key fields with types and descriptions; location}
 - ...
 
 ## Key Behavior
-- {id}: {idempotency, ordering, deduplication, graceful degradation, other behavior decisions; rationale}
+- {Idempotency, ordering, deduplication, graceful degradation, other behavior decisions; rationale}
 - ...
 
 ## Configuration
@@ -82,24 +83,24 @@ For each folder, specify:
 {reliability; scaling; performance; security; observability}
 
 ## Architectural Decisions
-- {id}: {what; why; alternatives and rationale}
+- {What; why; alternatives and rationale}
 - ...
 
 ## Architecture Risks
-- {id}: {impact; mitigation}
+- {Impact; mitigation}
 - ...
 
 ## Trade-off/technical debt
-- {id}: {pros; cons; mitigation}
+- {Pros; cons; mitigation}
 - ...
 
 ## Assumptions
-- {id}: {justification; verification}
+- {Justification; verification}
 - ...
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}
@@ -111,6 +112,6 @@ For each folder, specify:
 {Describe any deviations from established coding/design/testing/documentation skills/standards/rules, with reasoning and tradeoffs considered.}
 
 ## References
-- {id}: {reference (file/URL/standard, etc.)}
+- {Reference (file/URL/standard, etc.)}
 - ...
 </architecture_report_template>

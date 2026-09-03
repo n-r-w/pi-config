@@ -1,0 +1,87 @@
+{{define "contact-page"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>New contact</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    {{template "app-header" "new-contact"}}
+
+    <section class="page-intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Directory management</p>
+        <h1 class="page-title" id="page-title">Add a contact.</h1>
+      </div>
+      <p class="page-description">Create a directory entry through a secure server-rendered form.</p>
+    </section>
+
+    <section class="surface form-card" aria-label="New contact form">
+      {{template "contact-form" .}}
+    </section>
+  </main>
+</body>
+</html>{{end}}
+
+{{define "contacts-page"}}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact created</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    {{template "app-header" ""}}
+
+    <section class="surface success-card" aria-labelledby="success-title">
+      <span class="success-mark" aria-hidden="true">✓</span>
+      <p class="eyebrow">Directory updated</p>
+      <h1 class="success-title" id="success-title">Contact created.</h1>
+      <p class="success-copy">The request completed successfully. Continue to the directory or add another contact.</p>
+      <div class="form-actions">
+        <a class="primary-button" href="/users">Open directory</a>
+        <a class="secondary-button" href="/contacts/new">Add another contact</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>{{end}}
+
+{{define "app-header"}}<header class="masthead">
+  <a class="brand" href="/users" aria-label="HTMX directory home">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-copy">
+      <span class="brand-name">HTMX Directory</span>
+      <span class="brand-context">Server-rendered demo</span>
+    </span>
+  </a>
+  <nav class="primary-nav" aria-label="Primary navigation">
+    <a class="nav-link" href="/users">Directory</a>
+    <a class="nav-link" href="/contacts/new" {{if eq . "new-contact"}}aria-current="page"{{end}}>New contact</a>
+  </nav>
+</header>{{end}}
+
+{{define "contact-form"}}<form class="form-panel" id="contact-form" action="/contacts" method="post"
+  hx-post="/contacts" hx-target="#contact-form" hx-swap="outerHTML"
+  hx-disabled-elt="find button">
+  <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+  <div class="field-stack">
+    <div class="field-header">
+      <label class="field-label" for="contact-name">Full name</label>
+      <span class="field-note">Required</span>
+    </div>
+    <input class="text-input" id="contact-name" name="name" value="{{.Name}}"
+      placeholder="Ada Lovelace" autocomplete="name" required
+      {{if .NameError}}aria-invalid="true" aria-describedby="name-error"{{end}}>
+    {{if .NameError}}<p class="error-message" id="name-error" role="alert">{{.NameError}}</p>{{end}}
+  </div>
+  <div class="form-actions">
+    <button class="primary-button" type="submit"><span class="button-label">Create contact</span></button>
+    <a class="secondary-button" href="/users">Cancel</a>
+  </div>
+</form>{{end}}

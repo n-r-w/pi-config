@@ -4,7 +4,7 @@
   1. Use these guidelines for reviewing both code and documentation.
   2. Do not invent evidence. Every finding must cite a specific artifact location (file, section, line, or link), or be explicitly marked "General" with rationale.
   3. Use only these severities: Blocker, Major, Minor, Suggestion.
-  4. All items must follow <id_guidelines> and have unique IDs.
+  4. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section. Every assigned ID must be unique within the document. Summary and Issues Overview must reuse IDs from Findings and must not assign new IDs.
   5. Recommendations must be actionable, specific, and unambiguous. Avoid vague wording such as "consider" unless concrete options are provided.
   6. If required information is missing, write "TBD" and add the corresponding question to "Open Questions".
   7. Do not include code snippets longer than 10 lines. Prefer describing the required change over pasting code. Do not include full file dumps.
@@ -23,26 +23,26 @@
 
 ## Key definitions and abbreviations
 
-- {id}: {Definition}. {Explanation of the term or abbreviation.}
+- {Definition}. {Explanation of the term or abbreviation.}
 - ...
 
 ## Summary
 Outcome: ✅ Approve | 🟠 Approve with changes | 🔄 Request changes | 🟥 Reject
 
 Overall assessment (1–3 bullets):
-- <id> {most important observation}
+- {FND-id}: {most important observation}
 - ...
 
 ## Issues Overview
 <!-- Explanation in simple and understandable language, aimed at an analyst or business user, not a programmer.
 This includes what's broken in the business logic, what logic/formulas should exist, and which are actually hardcoded, etc. -->
-- **{level indicator} {id}**: {brief description of the issue}
+- **{level indicator} {FND-id}**: {brief description of the issue}
 - ...
 
 ## Findings <!-- Actionable items; Sort by severity, then by priority -->
 
 ### Blocker
-#### ⛔ {id}
+#### ⛔ {FND-id}
   - Location: {file/section/line/link}
   - Issue: {description of the problem}
   - Impact: {description of the consequences}
@@ -52,17 +52,17 @@ This includes what's broken in the business logic, what logic/formulas should ex
   - Verification: {how to verify the fix, including any necessary steps or tests}
 
 ### Major
-#### ⚠️ {id}
+#### ⚠️ {FND-id}
   - Location: {file/section/line/link}
   - ...
 
 ### Minor
-#### ℹ️ {id}
+#### ℹ️ {FND-id}
   - Location: {file/section/line/link}
   - ...
 
 ### Suggestion
-#### 💬 {id}
+#### 💬 {FND-id}
   - Location: {file/section/line/link}
   - Issue: {description of the problem}
   - Recommendation: {specific, actionable recommendation to fix the issue}
@@ -70,12 +70,12 @@ This includes what's broken in the business logic, what logic/formulas should ex
   - Verification: {how to verify the fix, including any necessary steps or tests}
 
 ## Assumptions
-- {id}: {justification (why); verification (how/when)}
+- {Justification (why); verification (how/when)}
 - ...
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}
@@ -84,10 +84,10 @@ This includes what's broken in the business logic, what logic/formulas should ex
 ### ...
 
 ## Next Steps
-- {id}: {action linked to finding ids}
+- {Action linked to FND IDs}
 - ...
 
 ## References
-- {id}: {reference (file/URL/standard, etc.)} - {one-line description}
+- {Reference (file/URL/standard, etc.)} - {one-line description}
 - ...
 </review_report_template>

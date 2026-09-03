@@ -4,7 +4,7 @@
   2. Do not invent facts. If ambiguity cannot be resolved, write "TBD" and add an item to Open Questions.
   3. Focus on WHAT and WHY, not HOW. Do not include implementation plans, component-level architecture, or code.
   4. The document must be self-contained and understandable without external context. Links may provide extra detail, but must not replace essential explanation.
-  5. Be specific. Avoid vague placeholders such as "if", "may", "optional", "not confirmed", or "mandatory model", unless the item is an explicit open question with its own ID.
+  5. Be specific. Avoid vague placeholders such as "if", "may", "optional", "not confirmed", or "mandatory model", unless the item is an explicit open question.
   6. `<id_guidelines>` MUST NOT be used.
   7. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
   8. This is not a full specification, but only a light version for quick idea evaluation.

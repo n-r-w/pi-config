@@ -5,8 +5,10 @@
   3. Focus on WHAT and WHY, not HOW. Do not include implementation plans, component-level architecture, or code.
   4. The document must be self-contained and understandable without external context. Links may provide extra detail, but must not replace essential explanation.
   5. Be specific. Avoid vague placeholders such as "if", "may", "optional", "not confirmed", or "mandatory model", unless the item is an explicit open question with its own ID.
-  6. Follow <id_guidelines> for all items, and ensure every item has a unique ID.
-  7. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
+  6. Use IDs only when required by <id_guidelines>. Do not infer this need from the item type or template section.
+  7. Every assigned ID must be unique within the document.
+  8. Functional requirements, non-functional requirements, and decisions must use stable IDs because downstream plans, tasks, tests, and reviews reference them.
+  9. Any ambiguities must be either resolved with decisions or moved to Open Questions. No "ifs" outside of Open Questions.
 </specification_guidelines>
 -->
 
@@ -15,64 +17,64 @@
 
 ## Key definitions and abbreviations
 
-- {id}: {Definition}. {Explanation of the term or abbreviation.}
+- {Definition}. {Explanation of the term or abbreviation.}
 - ...
 
 ## Context and Problem
 Current state: {1–3 sentences}
 
 Problems:
-- {id}: {what is wrong and why it matters}
+- {What is wrong and why it matters}
 - ...
 
 Why now:
-- {id}: {trigger/opportunity/risk/debt}
+- {Trigger/opportunity/risk/debt}
 - ...
 
 ## Goal (Outcome)
 Goal: {one sentence; measurable}
 
 Success metrics:
-- {id}: {target value or direction}
+- {Target value or direction}
 - ...
 
 Non-goals:
-- {id}: {explicitly out of scope item}
+- {Explicitly out of scope item}
 - ...
 
 ## Scenarios
 Actors:
-- {id}: {who: users, systems, etc.}
+- {Who: users, systems, etc.}
 - ...
 
 Top scenarios (3–5):
-- {id}: {scenario + expected outcome}
+- {Scenario + expected outcome}
 - ...
 
 Operational/UX constraints: {if any}
-- {id}: {constraint description}
+- {Constraint description}
 - ...
 
 ## Scope of Change
 In scope:
-- {id}: {what will change / be added}
+- {What will change / be added}
 - ...
 
  Out of scope:
-- {id}: {what will NOT be done}
+- {What will NOT be done}
 - ...
 
 System/domain boundaries:
-- {id}: {which systems are affected; which are not}
+- {Which systems are affected; which are not}
 - ...
 
 ## High-Level Requirements
 Functional:
-- {id}: {requirement description; rationale}
+- {FRQ-id}: {requirement description; rationale}
 - ...
 
 Non-functional:
-- {id}: {latency/availability/security/compliance/etc}
+- {NFQ-id}: {latency/availability/security/compliance/etc}
 - ...
 
 ## Overengineering and Overspecification Considerations
@@ -80,16 +82,16 @@ Non-functional:
 
 ## Risks
 Risks:
-- {id}: {what could go wrong; how to reduce likelihood/impact}
+- {What could go wrong; how to reduce likelihood/impact}
 - ...
 
 ## Assumptions
-- {id}: {justification (why); verification (how/when)}
+- {Justification (why); verification (how/when)}
 - ...
 
 ## Open Questions
 
-### {id}: {brief description}
+### {QST-id}: {brief description}
   - {impact}
   - {what should answer look like}
   - {what has been done to find answer}
@@ -98,7 +100,7 @@ Risks:
 ### ...
 
 ## Decisions
-- {id}: {decision description; rationale; how/when it should be resolved}
+- {DEC-id}: {decision description; rationale; how/when it should be resolved}
 - ...
 
 ## Standards Deviations
@@ -116,6 +118,6 @@ IMPORTANT:
 -->
 
 ## References
-- {id}: {reference (file/URL/standard, etc.)} - {one-line description}
+- {Reference (file/URL/standard, etc.)} - {one-line description}
 - ...
 </specification_report_template>
